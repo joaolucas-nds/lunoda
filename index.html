@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Synap</title>
+<title>Lunoda</title>
+<link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -430,6 +431,180 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 .color-dot { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: .1s; flex-shrink: 0; }
 .color-dot.sel { border-color: #fff; transform: scale(1.18); }
 .color-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ════ PROPRIEDADES POR BLOCO ════ */
+/* ════ PROPRIEDADES NA ENTRADA (v11) ════ */
+.ep-props-wrap {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.ep-props-hint {
+  font-size: 10px; color: var(--text-muted); font-family: var(--mono);
+  margin-bottom: 4px; line-height: 1.5;
+}
+.ep-prop-group {
+  display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap;
+}
+.ep-prop-lbl {
+  font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: .07em;
+  padding-top: 5px; min-width: 70px; max-width: 100px; flex-shrink: 0;
+}
+.ep-prop-opts-row { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; }
+.ep-opt.auto {
+  border-color: rgba(255,255,255,.35) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.12);
+}
+.ep-opt-auto-dot {
+  display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+  background: currentColor; margin-left: 4px; opacity: .8; vertical-align: middle;
+}
+
+.block-props-bar {
+  padding: 4px 8px 5px;
+  border-top: 1px solid var(--border-soft);
+  background: rgba(0,0,0,.08);
+}
+.block-props-toggle {
+  display: flex; align-items: center; gap: 5px;
+  cursor: pointer; padding: 2px 0; user-select: none;
+}
+.block-props-toggle:hover .bpt-lbl { color: var(--text-dim); }
+.bpt-lbl {
+  font-family: var(--mono); font-size: 9px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: .07em; flex-shrink: 0;
+}
+.bpt-chips { display: flex; flex-wrap: wrap; gap: 3px; flex: 1; min-width: 0; }
+.bpt-arrow { color: var(--text-muted); transition: transform .15s; flex-shrink: 0; }
+.bpt-arrow.open { transform: rotate(180deg); }
+.bpt-arrow svg { width: 10px; height: 10px; }
+
+.block-props-body {
+  display: flex; flex-direction: column; gap: 7px;
+  padding: 6px 2px 2px;
+}
+.block-props-body.hidden { display: none; }
+
+.blk-prop-row { display: flex; flex-direction: column; gap: 4px; }
+.blk-prop-row-lbl {
+  font-family: var(--mono); font-size: 9px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: .07em;
+}
+.blk-prop-opts { display: flex; flex-wrap: wrap; gap: 3px; }
+.blk-prop-chip {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 500;
+  border: 1px solid transparent; transition: .12s; user-select: none;
+}
+.blk-prop-chip.toggleable { cursor: pointer; }
+.blk-prop-chip.toggleable:hover { filter: brightness(1.2); }
+.blk-prop-chip.on  { opacity: 1; }
+.blk-prop-chip.off { opacity: .28; text-decoration: line-through; }
+.blk-prop-chip.auto { cursor: default; }
+.blk-prop-chip.auto::after {
+  content: '●'; font-size: 7px; margin-left: 2px; opacity: .55;
+}
+
+/* ════ FILTRO POR PROPRIEDADE ════ */
+.prop-filter-row {
+  padding: 0 16px 8px; display: none;
+  align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.prop-filter-row.open { display: flex; }
+.prop-filter-sel {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--rs); color: var(--text-dim);
+  font-family: var(--sans); font-size: 12px;
+  padding: 4px 8px; outline: none; cursor: pointer; color-scheme: dark;
+}
+.prop-filter-sel:focus { border-color: var(--accent); color: var(--text); }
+.prop-filter-opts { display: flex; flex-wrap: wrap; gap: 4px; }
+.pf-chip {
+  padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 500;
+  cursor: pointer; border: 2px solid transparent; opacity: .45; transition: .12s;
+}
+.pf-chip:hover { opacity: .7; }
+.pf-chip.sel { opacity: 1; border-color: rgba(255,255,255,.3); }
+/* ════ SELEÇÃO DE BLOCOS ════ */
+.block-item.blk-sel { outline: 2px solid var(--accent); outline-offset: -1px; }
+.block-cb-wrap {
+  display: flex; align-items: center; justify-content: center;
+  width: 18px; flex-shrink: 0;
+}
+.block-cb { width: 13px; height: 13px; cursor: pointer; accent-color: var(--accent); flex-shrink: 0; }
+
+/* ════ BARRA DE AÇÕES DE BLOCOS (interna ao editor) ════ */
+.blk-mass-bar {
+  display: none; align-items: center; gap: 6px; flex-wrap: wrap;
+  padding: 6px 10px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: var(--rs);
+  margin-bottom: 6px;
+}
+.blk-mass-bar.visible { display: flex; }
+.blk-mass-cnt {
+  font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+  white-space: nowrap; margin-right: 4px;
+}
+.blk-mass-sep { width: 1px; height: 14px; background: var(--border); margin: 0 2px; }
+.blk-mass-btn {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 8px; border-radius: var(--rs); font-size: 11px; font-weight: 500;
+  font-family: var(--sans); background: var(--surface3); color: var(--text-dim);
+  border: 1px solid var(--border); cursor: pointer; transition: .1s; white-space: nowrap;
+}
+.blk-mass-btn:hover { background: var(--surface); color: var(--text); }
+.blk-mass-btn.danger:hover { color: var(--red); border-color: var(--red); }
+.blk-mass-btn svg { width: 11px; height: 11px; }
+.blk-mass-sp { flex: 1; }
+
+/* ════ BARRA DE FILTRO DE BLOCOS ════ */
+.blk-filter-bar {
+  display: none; flex-direction: column; gap: 6px;
+  padding: 8px 10px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: var(--rs);
+  margin-bottom: 6px;
+}
+.blk-filter-bar.open { display: flex; }
+.blk-filter-row1 { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.blk-filter-row2 { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.blk-filter-input {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--rs);
+  color: var(--text); font-family: var(--sans); font-size: 12px;
+  padding: 4px 8px; outline: none; transition: border-color .14s;
+}
+.blk-filter-input::placeholder { color: var(--text-muted); }
+.blk-filter-input:focus { border-color: var(--accent); }
+.blk-filter-ver {
+  width: 68px; background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--rs); color: var(--text); font-family: var(--mono);
+  font-size: 12px; padding: 4px 8px; outline: none;
+}
+.blk-filter-ver:focus { border-color: var(--accent); }
+.blk-filter-ver::-webkit-inner-spin-button { -webkit-appearance: none; }
+.blk-filter-sel {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--rs); color: var(--text-dim);
+  font-family: var(--sans); font-size: 12px;
+  padding: 4px 8px; outline: none; cursor: pointer; color-scheme: dark;
+}
+.blk-filter-sel:focus { border-color: var(--accent); color: var(--text); }
+.blk-filter-opt-chips { display: flex; flex-wrap: wrap; gap: 3px; }
+.blk-foc { /* filter opt chip */
+  padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 500;
+  cursor: pointer; border: 2px solid transparent; opacity: .45; transition: .1s;
+}
+.blk-foc:hover { opacity: .75; }
+.blk-foc.sel { opacity: 1; border-color: rgba(255,255,255,.3); }
+.blk-filter-mode { display: flex; gap: 0; border: 1px solid var(--border); border-radius: var(--rs); overflow: hidden; }
+.blk-fm-btn {
+  padding: 3px 8px; font-size: 10px; font-weight: 500;
+  font-family: var(--mono); background: none; border: none;
+  color: var(--text-muted); cursor: pointer; transition: .1s;
+}
+.blk-fm-btn.active { background: var(--accent-soft); color: var(--accent); }
+.blk-filter-lbl {
+  font-family: var(--mono); font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: .07em; white-space: nowrap;
+}
 </style>
 </head>
 <body>
@@ -439,7 +614,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
   <button class="icon-btn" id="sidebarToggleBtn" onclick="toggleSidebar()" title="Propriedades (P)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
   </button>
-  <span class="topbar-logo">◈ Synap</span>
+  <span class="topbar-logo">◈ Lunoda</span>
   <div class="topbar-sep"></div>
   <span class="topbar-count" id="topbar-count">0 entradas</span>
   <div class="topbar-sp"></div>
@@ -488,8 +663,12 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
           <input class="search-input" type="text" placeholder="Pesquisar..." id="searchInput" oninput="renderTable()">
         </div>
         <button class="btn btn-ghost btn-xs" id="dateToggleBtn" onclick="toggleDateRow()" title="Filtrar por data">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           Datas
+        </button>
+        <button class="btn btn-ghost btn-xs" id="propFilterBtn" onclick="togglePropFilterRow()" title="Filtrar por propriedade">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filtrar
         </button>
         <div style="flex:1"></div>
         <span class="filter-info" id="filterInfo"></span>
@@ -506,6 +685,16 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
         <span class="date-label">Até:</span>
         <input type="date" class="date-input" id="dateTo" onchange="renderTable()">
         <button class="btn btn-ghost btn-xs" onclick="clearDateFilter()">Limpar</button>
+      </div>
+      
+      <!-- Prop filter row -->
+      <div class="prop-filter-row" id="propFilterRow">
+        <span class="date-label">Propriedade:</span>
+        <select class="prop-filter-sel" id="propFilterSel" onchange="onPropFilterChange()">
+          <option value="">— Selecionar —</option>
+        </select>
+        <div class="prop-filter-opts" id="propFilterOpts"></div>
+        <button class="btn btn-ghost btn-xs" onclick="clearPropFilter()">Limpar</button>
       </div>
     </div>
 
@@ -542,6 +731,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
     </button>
     <button class="btn btn-ghost btn-xs" onclick="exportCurrentMD()" title="Exportar esta entrada como Markdown">MD</button>
     <button class="btn btn-ghost btn-xs" onclick="exportCurrentJSON()" title="Exportar esta entrada como JSON">JSON</button>
+    <button class="btn btn-ghost btn-xs" onclick="exportCurrentHTML()" title="Exportar como HTML (abrível no navegador, imprimível como PDF)">HTML</button>
     <div style="flex:1"></div>
     <button class="btn btn-danger btn-xs" id="epDeleteBtn" onclick="deleteCurrentEntry()" style="display:none">Excluir</button>
     <button class="icon-btn" onclick="requestCloseEditor()">
@@ -566,11 +756,69 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
     <!-- Propriedades dinâmicas -->
     <div id="epPropsArea"></div>
     <!-- Blocos -->
+    <!-- Blocos -->
     <div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <!-- Header dos blocos -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
         <div class="field-lbl" style="margin-bottom:0">Blocos de Conteúdo</div>
-        <span class="filter-info" id="blockCount"></span>
+        <div style="display:flex;align-items:center;gap:5px">
+          <span class="filter-info" id="blockCount"></span>
+          <button class="btn btn-ghost btn-xs" id="blkFilterBtn" onclick="toggleBlockFilter()" title="Filtrar blocos">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            Filtrar
+          </button>
+          <button class="btn btn-ghost btn-xs" onclick="deselectAllBlocks()" id="blkDeselectBtn" style="display:none" title="Limpar seleção">✕ Sel</button>
+        </div>
       </div>
+      <!-- Filtro de blocos -->
+      <div class="blk-filter-bar" id="blkFilterBar">
+        <div class="blk-filter-row1">
+          <span class="blk-filter-lbl">Subtítulo:</span>
+          <input type="text" class="blk-filter-input" id="blkFText" placeholder="Buscar subtítulo..." oninput="applyBlockFilter()" style="flex:1;min-width:120px">
+          <span class="blk-filter-lbl">Versão:</span>
+          <input type="number" class="blk-filter-ver" id="blkFVer" placeholder="ex: 2" min="1" oninput="applyBlockFilter()">
+        </div>
+        <div class="blk-filter-row2">
+          <span class="blk-filter-lbl">Prop:</span>
+          <select class="blk-filter-sel" id="blkFPropSel" onchange="onBlkPropFilterChange()">
+            <option value="">— todas —</option>
+          </select>
+          <div class="blk-filter-opt-chips" id="blkFOptChips"></div>
+          <div class="blk-filter-mode" title="Modo entre critérios diferentes">
+            <button class="blk-fm-btn active" id="blkFModeAnd" onclick="setBlockFilterMode('and')">E</button>
+            <button class="blk-fm-btn" id="blkFModeOr"  onclick="setBlockFilterMode('or')">OU</button>
+          </div>
+          <button class="btn btn-ghost btn-xs" onclick="clearBlockFilter()">Limpar</button>
+        </div>
+      </div>
+      <!-- Barra de ações de blocos selecionados -->
+      <div class="blk-mass-bar" id="blkMassBar">
+        <span class="blk-mass-cnt" id="blkMassCnt">0 selecionados</span>
+        <div class="blk-mass-sep"></div>
+        <button class="blk-mass-btn" onclick="moveSelectedBlocks(-1)" title="Mover selecionados para cima">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg> Subir
+        </button>
+        <button class="blk-mass-btn" onclick="moveSelectedBlocks(1)" title="Mover selecionados para baixo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg> Descer
+        </button>
+        <div class="blk-mass-sep"></div>
+        <button class="blk-mass-btn" onclick="duplicateSelectedBlocks()" title="Duplicar selecionados">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Duplicar
+        </button>
+        <button class="blk-mass-btn danger" onclick="deleteSelectedBlocks()" title="Excluir selecionados">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg> Excluir
+        </button>
+        <div class="blk-mass-sep"></div>
+        <button class="blk-mass-btn" onclick="openBlockTransferModal('move')" title="Mover para outra entrada">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Mover para
+        </button>
+        <button class="blk-mass-btn" onclick="openBlockTransferModal('copy')" title="Copiar para outra entrada">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copiar para
+        </button>
+        <div class="blk-mass-sp"></div>
+        <button class="blk-mass-btn" onclick="deselectAllBlocks()">✕</button>
+      </div>
+      <!-- Container de blocos -->
       <div class="blocks-section" id="blocksContainer"></div>
       <button class="add-block-btn" onclick="addBlock()" style="margin-top:4px">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -616,9 +864,48 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
         <div class="exp-card-name">📝 Markdown</div>
         <div class="exp-card-desc">Documento único com todos os blocos.</div>
       </div>
+      <div class="exp-card" onclick="exportAllHTML()">
+        <div class="exp-card-name">🌐 HTML / PDF</div>
+        <div class="exp-card-desc">Documento web formatado. Abra no navegador e use Ctrl+P para salvar como PDF.</div>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeModal('exportModal')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Block Transfer Modal -->
+<div class="modal-bg" id="blockTransferModal">
+  <div class="modal" style="width:460px;max-width:95vw">
+    <h3 id="btmTitle">Mover blocos para...</h3>
+    <p id="btmDesc" style="font-size:12px;color:var(--text-muted)">Selecione o destino dos <span id="btmCount">0</span> bloco(s) selecionado(s).</p>
+
+    <!-- Busca de entrada existente -->
+    <div>
+      <div class="field-lbl">Entrada existente</div>
+      <input class="fi" type="text" id="btmSearch" placeholder="Buscar pelo título..." oninput="renderBtmList()" style="font-size:12px;margin-bottom:6px">
+      <div id="btmList" style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--rs)"></div>
+    </div>
+
+    <!-- Separador -->
+    <div style="display:flex;align-items:center;gap:8px;margin:2px 0">
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted)">ou</span>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+
+    <!-- Nova entrada -->
+    <div>
+      <div class="field-lbl">Nova entrada</div>
+      <div style="display:flex;gap:6px">
+        <input class="fi" type="text" id="btmNewTitle" placeholder="Título da nova entrada..." style="font-size:12px;flex:1">
+        <button class="btn btn-outline" id="btmNewBtn" onclick="doTransferToNew()">Confirmar</button>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('blockTransferModal')">Cancelar</button>
     </div>
   </div>
 </div>
@@ -676,6 +963,23 @@ let currentId = null;          // editing entry id
 let editBlocks = [];           // working copy of blocks in editor
 let editProps = {};            // { propId: [optId, ...] }
 let dirtySnapshot = null;      // JSON snapshot to detect unsaved changes
+let editPropAutoFlags = {};  // { propId: [optId, ...] }  — opções com herança automática ativa
+let editBlockProps    = {};  // { blockId: { propId: [optId, ...] } }
+let filterPropId        = null; // propriedade selecionada no filtro da tabela
+let filterOptIds        = new Set(); // opções selecionadas no filtro da tabela
+
+// ── Seleção interna de blocos ──
+let selectedBlockIds    = new Set();
+
+// ── Filtro interno de blocos ──
+let blkFilterText       = '';
+let blkFilterVer        = null;   // number | null
+let blkFilterPropId     = null;
+let blkFilterOptIds     = new Set();
+let blkFilterMode       = 'and'; // 'and' | 'or'
+
+// ── Transferência de blocos ──
+let btmMode             = 'move'; // 'move' | 'copy'
 
 /* ──────────────────────────────
    PERSISTENCE & MIGRATION
@@ -716,9 +1020,11 @@ function loadDB() {
           ...e,
           description: e.description || '',
           propertyValues: e.propertyValues || {},
+          propertyAutoFlags: e.propertyAutoFlags || migrateOptionModes(e.propertyOptionModes),
           blocks: (e.blocks || []).map(b => ({
             id: b.id || uid(), subtitle: b.subtitle || '',
-            version: b.version || 1, content: b.content || ''
+            version: b.version || 1, content: b.content || '',
+            blockProps: b.blockProps || b.inheritProps || {}
           }))
         }));
       }
@@ -744,6 +1050,19 @@ function loadDB() {
     ],
     entries: []
   };
+}
+
+/* Migração v10→v11: converte propertyOptionModes para propertyAutoFlags */
+function migrateOptionModes(pom) {
+  if (!pom) return {};
+  const flags = {};
+  Object.entries(pom).forEach(([propId, optModes]) => {
+    const allOpts = Object.entries(optModes)
+      .filter(([, mode]) => mode === 'all')
+      .map(([optId]) => optId);
+    if (allOpts.length > 0) flags[propId] = allOpts;
+  });
+  return flags;
 }
 
 function saveDB() { localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
@@ -985,6 +1304,14 @@ function getFiltered() {
   if (df) list = list.filter(e => (e[dateField]||'') >= df);
   if (dt) list = list.filter(e => (e[dateField]||'') <= dt+'T23:59:59');
 
+  // Filtro por propriedade
+  if (filterPropId && filterOptIds.size > 0) {
+    list = list.filter(e => {
+      const entryOpts = e.propertyValues[filterPropId] || [];
+      return [...filterOptIds].some(optId => entryOpts.includes(optId));
+    });
+  }
+
   list.sort((a,b) => {
     let va = a[sortCol] || '', vb = b[sortCol] || '';
     if (sortCol === 'title') {
@@ -1104,11 +1431,27 @@ function openEditor(id = null) {
 
   editBlocks = e
     ? e.blocks.map(b => ({...b}))
-    : [{ id: uid(), subtitle: '', version: 1, content: '' }];
-  editProps  = e ? JSON.parse(JSON.stringify(e.propertyValues||{})) : {};
+    : [{ id: uid(), subtitle: '', version: 1, content: '', blockProps: {} }];
+  editProps         = e ? JSON.parse(JSON.stringify(e.propertyValues||{})) : {};
+  editPropAutoFlags = e ? JSON.parse(JSON.stringify(e.propertyAutoFlags||{})) : {};
+  editBlockProps    = {};
+  if (e) {
+    (e.blocks||[]).forEach(b => {
+      editBlockProps[b.id] = JSON.parse(JSON.stringify(b.blockProps||{}));
+    });
+  }
+
+  // Reset seleção e filtro de blocos ao abrir editor
+  selectedBlockIds.clear();
+  blkFilterText = '';
+  blkFilterVer  = null;
+  blkFilterPropId = null;
+  blkFilterOptIds.clear();
+  blkFilterMode = 'and';
 
   renderEditorProps();
   renderBlocks();
+  renderBlockFilterBar();
 
   document.getElementById('editorPanel').classList.add('open');
   document.getElementById('editorOverlay').classList.add('visible');
@@ -1120,10 +1463,11 @@ function openEditor(id = null) {
 
 function getEditorSnapshot() {
   return JSON.stringify({
-    title: document.getElementById('epTitleInput').value,
-    desc:  document.getElementById('epDesc').value,
-    props: editProps,
-    blocks: editBlocks,
+    title:     document.getElementById('epTitleInput').value,
+    desc:      document.getElementById('epDesc').value,
+    autoFlags: editPropAutoFlags,
+    blockProps:editBlockProps,
+    blocks:    editBlocks,
   });
 }
 
@@ -1156,51 +1500,162 @@ function closeUnsavedModal() { closeModal('unsavedModal'); }
 function renderEditorProps() {
   const area = document.getElementById('epPropsArea');
   area.innerHTML = '';
+  if (db.properties.length === 0) return;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'ep-prop-section';
+
+  let html = `<div class="field-lbl" style="margin-bottom:4px">Propriedades</div>`;
+  html += `<div class="ep-props-hint">● = herança ativa — ao clicar, a opção é adicionada a todos os blocos existentes e futuros. Clique novamente para desativar (não remove dos blocos).</div>`;
+  html += `<div class="ep-props-wrap">`;
 
   db.properties.forEach(prop => {
-    const div = document.createElement('div');
-    div.className = 'ep-prop-section';
+    if (prop.options.length === 0) return;
+    const autoFlags = editPropAutoFlags[prop.id] || [];
 
-    const selected = editProps[prop.id] || [];
-    let html = `<div class="field-lbl">${esc(prop.name)}</div><div class="ep-prop-opts">`;
-
-    html += `<button class="ep-opt ${selected.length===0?'sel':''}"
-      style="background:var(--surface2);color:var(--text-dim)"
-      onclick="togglePropOpt('${prop.id}','',this,true)">— Nenhum</button>`;
+    html += `<div class="ep-prop-group">
+      <span class="ep-prop-lbl">${esc(prop.name)}</span>
+      <div class="ep-prop-opts-row">`;
 
     prop.options.forEach(opt => {
-      const col = getColor(opt.colorId);
-      const isSel = selected.includes(opt.id);
-      html += `<button class="ep-opt ${isSel?'sel':''}"
+      const col    = getColor(opt.colorId);
+      const isAuto = autoFlags.includes(opt.id);
+      html += `<button class="ep-opt ${isAuto ? 'sel auto' : ''}"
         style="background:${col.bg};color:${col.text}"
-        onclick="togglePropOpt('${prop.id}','${opt.id}',this)">${esc(opt.name)}</button>`;
+        onclick="toggleEntryPropAuto('${prop.id}','${opt.id}')"
+        title="${isAuto
+          ? 'Herança ativa — clique para desativar (os blocos já marcados permanecem)'
+          : 'Clique para herdar esta opção a todos os blocos (existentes e novos)'
+        }">${esc(opt.name)}${isAuto ? '<span class="ep-opt-auto-dot"></span>' : ''}</button>`;
     });
+
+    html += `</div></div>`;
+  });
+
+  html += `</div>`;
+  wrap.innerHTML = html;
+  area.appendChild(wrap);
+}
+
+function toggleEntryPropAuto(propId, optId) {
+  if (!editPropAutoFlags[propId]) editPropAutoFlags[propId] = [];
+  const idx = editPropAutoFlags[propId].indexOf(optId);
+
+  if (idx >= 0) {
+    // Desativar — só para de adicionar automaticamente, NÃO remove dos blocos
+    editPropAutoFlags[propId].splice(idx, 1);
+  } else {
+    // Ativar — só marca para NOVOS blocos. Blocos existentes não são alterados.
+    editPropAutoFlags[propId].push(optId);
+  }
+  renderEditorProps();
+  // Não precisa renderBlocks() — blocos existentes não mudam
+}
+
+/* Props efetivas de um bloco no EDITOR — simplesmente o que o bloco tem */
+function getEditBlockEffectiveProps(bid) {
+  return editBlockProps[bid] || {};
+}
+
+/* Props efetivas de um bloco a partir dos dados SALVOS — simplesmente o que o bloco tem */
+function getBlockEffectivePropsSaved(entry, block) {
+  return block.blockProps || {};
+}
+
+/* Toggle de opção diretamente no bloco */
+function toggleBlockPropOpt(bid, propId, optId) {
+  if (!editBlockProps[bid]) editBlockProps[bid] = {};
+  if (!editBlockProps[bid][propId]) editBlockProps[bid][propId] = [];
+
+  const arr = editBlockProps[bid][propId];
+  const idx = arr.indexOf(optId);
+  if (idx >= 0) {
+    arr.splice(idx, 1);
+  } else {
+    arr.push(optId);
+    // propertyValues da entrada é calculado na hora de salvar (union dos blocos)
+    // Não precisa de sincronização explícita aqui
+  }
+  renderBlockPropBar(bid);
+  buildBlockPropBody(bid);
+}
+
+/* Clique no chip ●auto do bloco: remove do bloco E desativa autoFlag na entrada */
+function disableAutoFromBlock(bid, propId, optId) {
+  // Remove da entrada (auto flag)
+  if (editPropAutoFlags[propId]) {
+    editPropAutoFlags[propId] = editPropAutoFlags[propId].filter(id => id !== optId);
+  }
+  // Remove do bloco
+  if (editBlockProps[bid] && editBlockProps[bid][propId]) {
+    editBlockProps[bid][propId] = editBlockProps[bid][propId].filter(id => id !== optId);
+  }
+  renderEditorProps();       // atualiza o painel de entrada
+  renderBlockPropBar(bid);   // atualiza chip summary na barra do bloco
+  buildBlockPropBody(bid);   // reconstrói painel expandido
+}
+
+/* Atualiza os chips de resumo na barra do bloco */
+function renderBlockPropBar(bid, container) {
+  const chipsEl = (container || document).querySelector(`#bpchips_${bid}`);
+  if (!chipsEl) return;
+  const bOpts = editBlockProps[bid] || {};
+  let html = '';
+  db.properties.forEach(p => {
+    (bOpts[p.id] || []).forEach(optId => {
+      const opt = p.options.find(o => o.id === optId);
+      if (!opt) return;
+      const col = getColor(opt.colorId);
+      html += `<span class="blk-prop-chip on" style="background:${col.bg};color:${col.text}">${esc(opt.name)}</span>`;
+    });
+  });
+  chipsEl.innerHTML = html || `<span style="font-size:10px;color:var(--text-muted);font-family:var(--mono)">nenhuma</span>`;
+}
+
+/* Constrói (ou reconstrói) o painel expandido de props do bloco */
+function buildBlockPropBody(bid) {
+  const body = document.getElementById(`bpbody_${bid}`);
+  if (!body || body.classList.contains('hidden')) return;
+  body.innerHTML = '';
+  const blockOpts = editBlockProps[bid] || {};
+
+  db.properties.forEach(prop => {
+    if (prop.options.length === 0) return;
+    const autoFlags = editPropAutoFlags[prop.id] || [];
+    const bOpts     = blockOpts[prop.id] || [];
+
+    const row = document.createElement('div');
+    row.className = 'blk-prop-row';
+    let html = `<span class="blk-prop-row-lbl">${esc(prop.name)}</span><div class="blk-prop-opts">`;
+
+    prop.options.forEach(opt => {
+      const col    = getColor(opt.colorId);
+      const isAuto = autoFlags.includes(opt.id);
+      const isOn   = bOpts.includes(opt.id);
+      const cls    = `blk-prop-chip ${isAuto ? 'auto toggleable' : 'toggleable'} ${isOn ? 'on' : 'off'}`;
+      const click  = isAuto
+        ? `onclick="disableAutoFromBlock('${bid}','${prop.id}','${opt.id}')"`
+        : `onclick="toggleBlockPropOpt('${bid}','${prop.id}','${opt.id}')"`;
+      const title  = isAuto
+        ? `title="● Auto ativo — clique para remover deste bloco E desativar herança automática"`
+        : `title="${isOn ? 'Remover' : 'Adicionar'} ${esc(opt.name)} neste bloco"`;
+      html += `<span class="${cls}" ${click} ${title} style="background:${col.bg};color:${col.text}">${esc(opt.name)}</span>`;
+    });
+
     html += '</div>';
-    div.innerHTML = html;
-    area.appendChild(div);
+    row.innerHTML = html;
+    body.appendChild(row);
   });
 }
 
-function togglePropOpt(propId, optId, btn, clearAll = false) {
-  if (!editProps[propId]) editProps[propId] = [];
-  if (clearAll || optId === '') {
-    editProps[propId] = [];
-  } else {
-    const idx = editProps[propId].indexOf(optId);
-    if (idx >= 0) editProps[propId].splice(idx, 1);
-    else editProps[propId].push(optId);
-  }
-  // Update UI without full re-render
-  const section = btn.closest('.ep-prop-section');
-  section.querySelectorAll('.ep-opt').forEach(b => b.classList.remove('sel'));
-  if (editProps[propId].length === 0) {
-    section.querySelector('.ep-opt:first-child').classList.add('sel');
-  } else {
-    section.querySelectorAll('.ep-opt').forEach(b => {
-      const bid = b.getAttribute('onclick').match(/'([^']+)'/g)?.[1]?.replace(/'/g,'');
-      if (bid && editProps[propId].includes(bid)) b.classList.add('sel');
-    });
-  }
+function toggleBlockPropsPanel(bid) {
+  const body  = document.getElementById(`bpbody_${bid}`);
+  const arrow = document.getElementById(`bparrow_${bid}`);
+  if (!body) return;
+  const isOpen = !body.classList.contains('hidden');
+  body.classList.toggle('hidden', isOpen);
+  if (arrow) arrow.classList.toggle('open', !isOpen);
+  if (!isOpen) buildBlockPropBody(bid);
 }
 
 /* ──────────────────────────────
@@ -1209,11 +1664,21 @@ function togglePropOpt(propId, optId, btn, clearAll = false) {
 function renderBlocks() {
   const container = document.getElementById('blocksContainer');
   container.innerHTML = '';
+  const visible = getFilteredBlocks();
+  const visibleIds = new Set(visible.map(b => b.id));
+
   editBlocks.forEach((b, idx) => {
-    container.appendChild(buildBlockEl(b, idx, editBlocks.length));
+    const el = buildBlockEl(b, idx, editBlocks.length);
+    if (!visibleIds.has(b.id)) el.style.display = 'none';
+    container.appendChild(el);
   });
+
+  const n = editBlocks.length;
+  const v = visible.length;
   document.getElementById('blockCount').textContent =
-    editBlocks.length > 1 ? editBlocks.length + ' blocos' : '';
+    n > 1 ? (v < n ? `${v} de ${n} blocos` : `${n} blocos`) : '';
+
+  updateBlockMassBar();
 }
 
 function buildBlockEl(b, idx, total) {
@@ -1221,8 +1686,15 @@ function buildBlockEl(b, idx, total) {
   wrap.className = 'block-item';
   wrap.dataset.bid = b.id;
 
+  const isSel = selectedBlockIds.has(b.id);
+  if (isSel) wrap.classList.add('blk-sel');
+
   wrap.innerHTML = `
     <div class="block-head">
+      <div class="block-cb-wrap">
+        <input type="checkbox" class="block-cb" ${isSel?'checked':''}
+          onclick="toggleBlockSel('${b.id}',this)" title="Selecionar bloco">
+      </div>
       <div class="block-move">
         <button class="move-btn" ${idx===0?'disabled':''} onclick="moveBlock('${b.id}',-1)" title="Subir bloco">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
@@ -1251,6 +1723,9 @@ function buildBlockEl(b, idx, total) {
         <button class="ver-btn" onclick="adjVer('${b.id}',1)">+</button>
       </div>
       <div class="block-actions">
+        <button class="blk-btn" onclick="duplicateBlock('${b.id}')" title="Duplicar bloco">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        </button>
         <button class="blk-btn" onclick="toggleCollapse('${b.id}')" title="Expandir/Colapsar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
@@ -1259,12 +1734,24 @@ function buildBlockEl(b, idx, total) {
         </button>` : ''}
       </div>
     </div>
+    <div class="block-props-bar" id="bpbar_${b.id}">
+      <div class="block-props-toggle" onclick="toggleBlockPropsPanel('${b.id}')">
+        <span class="bpt-lbl">Props&nbsp;</span>
+        <div class="bpt-chips" id="bpchips_${b.id}"></div>
+        <span class="bpt-arrow" id="bparrow_${b.id}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
+      </div>
+      <div class="block-props-body hidden" id="bpbody_${b.id}"></div>
+    </div>
     <div class="block-body">
       <textarea class="fi fi-ta" data-bid="${b.id}"
         placeholder="Cole ou escreva aqui..."
         oninput="syncContent('${b.id}',this.value)"
       >${esc(b.content)}</textarea>
     </div>`;
+
+  renderBlockPropBar(b.id, wrap);
   return wrap;
 }
 
@@ -1294,7 +1781,15 @@ function removeBlock(bid) {
   renderBlocks();
 }
 function addBlock() {
-  const nb = { id: uid(), subtitle: '', version: 1, content: '' };
+  const nb = { id: uid(), subtitle: '', version: 1, content: '', blockProps: {} };
+  // Aplica todas as opções com herança automática ativa
+  const initialProps = {};
+  db.properties.forEach(p => {
+    const autoOpts = editPropAutoFlags[p.id] || [];
+    if (autoOpts.length > 0) initialProps[p.id] = [...autoOpts];
+  });
+  nb.blockProps = initialProps;
+  editBlockProps[nb.id] = JSON.parse(JSON.stringify(initialProps));
   editBlocks.push(nb);
   renderBlocks();
   setTimeout(() => {
@@ -1320,6 +1815,399 @@ function jumpBlockTo(bid, targetStr, total) {
   const [item] = editBlocks.splice(cur, 1);
   editBlocks.splice(target, 0, item);
   renderBlocks();
+}
+
+/* ──────────────────────────────
+   SELEÇÃO INTERNA DE BLOCOS
+────────────────────────────── */
+function toggleBlockSel(bid, cb) {
+  cb.checked ? selectedBlockIds.add(bid) : selectedBlockIds.delete(bid);
+  const wrap = document.querySelector(`.block-item[data-bid="${bid}"]`);
+  if (wrap) wrap.classList.toggle('blk-sel', cb.checked);
+  updateBlockMassBar();
+}
+
+function deselectAllBlocks() {
+  selectedBlockIds.clear();
+  renderBlocks();
+  updateBlockMassBar();
+}
+
+function updateBlockMassBar() {
+  const n = selectedBlockIds.size;
+  const bar = document.getElementById('blkMassBar');
+  const cnt = document.getElementById('blkMassCnt');
+  const desBtn = document.getElementById('blkDeselectBtn');
+  if (bar) { bar.classList.toggle('visible', n > 0); }
+  if (cnt) cnt.textContent = `${n} bloco${n!==1?'s':''} selecionado${n!==1?'s':''}`;
+  if (desBtn) desBtn.style.display = n > 0 ? '' : 'none';
+}
+
+/* Move o grupo de blocos selecionados para cima (-1) ou baixo (+1).
+   Algoritmo: percorre array na direção do movimento e troca cada
+   bloco selecionado com o vizinho não-selecionado adjacente. */
+function moveSelectedBlocks(delta) {
+  if (selectedBlockIds.size === 0) return;
+  const arr = editBlocks.slice();
+
+  if (delta === -1) {
+    // Mover para cima: percorre esquerda → direita
+    for (let i = 1; i < arr.length; i++) {
+      if (selectedBlockIds.has(arr[i].id) && !selectedBlockIds.has(arr[i-1].id)) {
+        [arr[i], arr[i-1]] = [arr[i-1], arr[i]];
+      }
+    }
+  } else {
+    // Mover para baixo: percorre direita → esquerda
+    for (let i = arr.length - 2; i >= 0; i--) {
+      if (selectedBlockIds.has(arr[i].id) && !selectedBlockIds.has(arr[i+1].id)) {
+        [arr[i], arr[i+1]] = [arr[i+1], arr[i]];
+      }
+    }
+  }
+
+  editBlocks = arr;
+  renderBlocks();
+}
+
+/* Duplica um único bloco — insere cópia logo abaixo */
+function duplicateBlock(bid) {
+  const idx = editBlocks.findIndex(b => b.id === bid);
+  if (idx < 0) return;
+  const orig = editBlocks[idx];
+  const copy = {
+    id: uid(),
+    subtitle: orig.subtitle,
+    version: orig.version,
+    content: orig.content,
+    blockProps: JSON.parse(JSON.stringify(orig.blockProps || {}))
+  };
+  editBlockProps[copy.id] = JSON.parse(JSON.stringify(editBlockProps[bid] || {}));
+  editBlocks.splice(idx + 1, 0, copy);
+  renderBlocks();
+  showToast('Bloco duplicado');
+}
+
+/* Duplica todos os blocos selecionados (em ordem) — insere cópias logo abaixo de cada um */
+function duplicateSelectedBlocks() {
+  if (selectedBlockIds.size === 0) return;
+  // Processar de trás pra frente para não deslocar índices
+  const todup = editBlocks
+    .map((b, i) => ({ b, i }))
+    .filter(({ b }) => selectedBlockIds.has(b.id))
+    .reverse();
+
+  todup.forEach(({ b, i }) => {
+    const copy = {
+      id: uid(), subtitle: b.subtitle, version: b.version,
+      content: b.content, blockProps: JSON.parse(JSON.stringify(b.blockProps || {}))
+    };
+    editBlockProps[copy.id] = JSON.parse(JSON.stringify(editBlockProps[b.id] || {}));
+    editBlocks.splice(i + 1, 0, copy);
+  });
+
+  selectedBlockIds.clear();
+  renderBlocks();
+  showToast(`${todup.length} bloco(s) duplicado(s)`);
+}
+
+function deleteSelectedBlocks() {
+  if (selectedBlockIds.size === 0) return;
+  const n = selectedBlockIds.size;
+  if (editBlocks.length - n < 1) {
+    showToast('Mantenha ao menos 1 bloco na entrada'); return;
+  }
+  if (!confirm(`Excluir ${n} bloco(s) selecionado(s)? Não pode ser desfeito.`)) return;
+  editBlocks = editBlocks.filter(b => !selectedBlockIds.has(b.id));
+  selectedBlockIds.clear();
+  renderBlocks();
+  showToast(`${n} bloco(s) excluído(s)`);
+}
+
+/* ──────────────────────────────
+   FILTRO INTERNO DE BLOCOS
+────────────────────────────── */
+
+/* Retorna os blocos visíveis com base nos filtros ativos */
+function getFilteredBlocks() {
+  const text  = blkFilterText.trim().toLowerCase();
+  const ver   = blkFilterVer;
+  const propId = blkFilterPropId;
+  const optIds = blkFilterOptIds;
+  const mode   = blkFilterMode; // 'and' | 'or'
+
+  // Se nenhum filtro ativo, retorna tudo
+  const anyActive = text || ver !== null || (propId && optIds.size > 0);
+  if (!anyActive) return editBlocks.slice();
+
+  return editBlocks.filter(b => {
+    const results = [];
+
+    if (text) {
+      results.push((b.subtitle || '').toLowerCase().includes(text));
+    }
+    if (ver !== null) {
+      results.push((b.version || 1) === ver);
+    }
+    if (propId && optIds.size > 0) {
+      const bOpts = (editBlockProps[b.id] || {})[propId] || [];
+      results.push([...optIds].some(optId => bOpts.includes(optId)));
+    }
+
+    if (results.length === 0) return true;
+    return mode === 'and' ? results.every(r => r) : results.some(r => r);
+  });
+}
+
+function toggleBlockFilter() {
+  const bar = document.getElementById('blkFilterBar');
+  const btn = document.getElementById('blkFilterBtn');
+  const open = bar.classList.toggle('open');
+  btn.style.color = open ? 'var(--accent)' : '';
+  if (open) renderBlockFilterBar();
+  else clearBlockFilter();
+}
+
+function renderBlockFilterBar() {
+  const sel = document.getElementById('blkFPropSel');
+  if (!sel) return;
+  sel.innerHTML = `<option value="">— todas —</option>`;
+  db.properties.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id; opt.textContent = p.name;
+    if (blkFilterPropId === p.id) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  renderBlkFOptChips();
+  // Restaura campos de texto/versão
+  const tEl = document.getElementById('blkFText');
+  const vEl = document.getElementById('blkFVer');
+  if (tEl) tEl.value = blkFilterText;
+  if (vEl) vEl.value = blkFilterVer !== null ? blkFilterVer : '';
+  // Modo
+  document.getElementById('blkFModeAnd')?.classList.toggle('active', blkFilterMode === 'and');
+  document.getElementById('blkFModeOr')?.classList.toggle('active',  blkFilterMode === 'or');
+}
+
+function renderBlkFOptChips() {
+  const container = document.getElementById('blkFOptChips');
+  if (!container) return;
+  container.innerHTML = '';
+  if (!blkFilterPropId) return;
+  const prop = db.properties.find(p => p.id === blkFilterPropId);
+  if (!prop) return;
+  prop.options.forEach(opt => {
+    const col = getColor(opt.colorId);
+    const chip = document.createElement('span');
+    chip.className = `blk-foc${blkFilterOptIds.has(opt.id) ? ' sel' : ''}`;
+    chip.style.background = col.bg;
+    chip.style.color = col.text;
+    chip.textContent = opt.name;
+    chip.onclick = () => {
+      blkFilterOptIds.has(opt.id) ? blkFilterOptIds.delete(opt.id) : blkFilterOptIds.add(opt.id);
+      chip.classList.toggle('sel', blkFilterOptIds.has(opt.id));
+      applyBlockFilter();
+    };
+    container.appendChild(chip);
+  });
+}
+
+function onBlkPropFilterChange() {
+  blkFilterPropId = document.getElementById('blkFPropSel').value || null;
+  blkFilterOptIds.clear();
+  renderBlkFOptChips();
+  applyBlockFilter();
+}
+
+function applyBlockFilter() {
+  const tEl = document.getElementById('blkFText');
+  const vEl = document.getElementById('blkFVer');
+  blkFilterText = tEl ? tEl.value : '';
+  const vStr = vEl ? vEl.value.trim() : '';
+  blkFilterVer  = vStr ? (parseInt(vStr) || null) : null;
+  renderBlocks();
+}
+
+function setBlockFilterMode(mode) {
+  blkFilterMode = mode;
+  document.getElementById('blkFModeAnd')?.classList.toggle('active', mode === 'and');
+  document.getElementById('blkFModeOr')?.classList.toggle('active',  mode === 'or');
+  applyBlockFilter();
+}
+
+function clearBlockFilter() {
+  blkFilterText = '';
+  blkFilterVer  = null;
+  blkFilterPropId = null;
+  blkFilterOptIds.clear();
+  blkFilterMode = 'and';
+  renderBlockFilterBar();
+  renderBlocks();
+}
+
+/* ──────────────────────────────
+   TRANSFERÊNCIA / CÓPIA DE BLOCOS
+────────────────────────────── */
+
+function openBlockTransferModal(mode) {
+  if (selectedBlockIds.size === 0) return;
+  btmMode = mode;
+  const label = mode === 'move' ? 'Mover' : 'Copiar';
+  document.getElementById('btmTitle').textContent = `${label} blocos para...`;
+  document.getElementById('btmCount').textContent = selectedBlockIds.size;
+  document.getElementById('btmSearch').value = '';
+  document.getElementById('btmNewTitle').value = '';
+  document.getElementById('btmNewBtn').textContent = `${label} para nova`;
+  renderBtmList();
+  openModal('blockTransferModal');
+}
+
+function renderBtmList() {
+  const q = (document.getElementById('btmSearch').value || '').toLowerCase().trim();
+  const list = document.getElementById('btmList');
+  if (!list) return;
+  list.innerHTML = '';
+
+  const candidates = db.entries.filter(e => {
+    if (e.id === currentId) return false; // não listar a entrada atual
+    if (!q) return true;
+    return (e.title || '').toLowerCase().includes(q);
+  });
+
+  if (candidates.length === 0) {
+    list.innerHTML = `<div style="padding:14px;font-size:12px;color:var(--text-muted);text-align:center">Nenhuma entrada encontrada</div>`;
+    return;
+  }
+
+  candidates.slice(0, 20).forEach(e => {
+    const row = document.createElement('div');
+    row.style.cssText = 'padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border-soft);transition:.09s';
+    row.textContent = e.title || '(sem título)';
+    row.onmouseover = () => row.style.background = 'var(--surface2)';
+    row.onmouseout  = () => row.style.background = '';
+    row.onclick = () => doTransferToExisting(e.id);
+    list.appendChild(row);
+  });
+}
+
+/* Realiza transferência/cópia para uma entrada EXISTENTE */
+function doTransferToExisting(targetId) {
+  const mode = btmMode;
+  const selIds = [...selectedBlockIds];
+  if (selIds.length === 0) return;
+
+  // Salva a entrada atual primeiro
+  saveEntry(true);
+
+  const target = db.entries.find(e => e.id === targetId);
+  if (!target) { showToast('Entrada destino não encontrada'); return; }
+
+  // Obtém blocos a transferir (com dados atuais do editor)
+  const blocksToTransfer = editBlocks
+    .filter(b => selIds.includes(b.id))
+    .map(b => ({
+      id: mode === 'move' ? b.id : uid(),
+      subtitle: b.subtitle, version: b.version, content: b.content,
+      blockProps: JSON.parse(JSON.stringify(editBlockProps[b.id] || {}))
+    }));
+
+  if (mode === 'move') {
+    // Remove da entrada atual
+    editBlocks = editBlocks.filter(b => !selIds.includes(b.id));
+    if (editBlocks.length === 0) {
+      editBlocks = [{ id: uid(), subtitle: '', version: 1, content: '', blockProps: {} }];
+      editBlockProps[editBlocks[0].id] = {};
+    }
+    selectedBlockIds.clear();
+    saveEntry(true); // salva sem os blocos movidos
+  }
+
+  // Adiciona ao destino
+  target.blocks = [...(target.blocks || []), ...blocksToTransfer];
+  target.propertyValues = calcPropertyValuesFor(target);
+  target.updatedAt = new Date().toISOString();
+  saveDB();
+
+  closeModal('blockTransferModal');
+  showToast(`${blocksToTransfer.length} bloco(s) ${mode === 'move' ? 'movido(s)' : 'copiado(s)'}`);
+
+  // Abre a entrada destino
+  openEditor(targetId);
+}
+
+/* Realiza transferência/cópia para uma NOVA entrada */
+function doTransferToNew() {
+  const newTitle = document.getElementById('btmNewTitle').value.trim();
+  if (!newTitle) { document.getElementById('btmNewTitle').focus(); showToast('Digite um título para a nova entrada'); return; }
+
+  const mode   = btmMode;
+  const selIds = [...selectedBlockIds];
+  if (selIds.length === 0) return;
+
+  // Salva a entrada atual
+  saveEntry(true);
+
+  const blocksForNew = editBlocks
+    .filter(b => selIds.includes(b.id))
+    .map(b => ({
+      id: mode === 'move' ? b.id : uid(),
+      subtitle: b.subtitle, version: b.version, content: b.content,
+      blockProps: JSON.parse(JSON.stringify(editBlockProps[b.id] || {}))
+    }));
+
+  if (mode === 'move') {
+    editBlocks = editBlocks.filter(b => !selIds.includes(b.id));
+    if (editBlocks.length === 0) {
+      editBlocks = [{ id: uid(), subtitle: '', version: 1, content: '', blockProps: {} }];
+      editBlockProps[editBlocks[0].id] = {};
+    }
+    selectedBlockIds.clear();
+    saveEntry(true);
+  }
+
+  const now = new Date().toISOString();
+  const newEntry = {
+    id: uid(), title: newTitle, description: '',
+    propertyValues: {}, propertyAutoFlags: {},
+    blocks: blocksForNew,
+    createdAt: now, updatedAt: now
+  };
+  // Calcula propertyValues da nova entrada
+  newEntry.propertyValues = calcPropertyValuesForBlocks(blocksForNew);
+  db.entries.unshift(newEntry);
+  saveDB();
+
+  closeModal('blockTransferModal');
+  showToast(`${blocksForNew.length} bloco(s) ${mode === 'move' ? 'movido(s)' : 'copiado(s)'} para "${newTitle}"`);
+
+  // Abre a nova entrada
+  openEditor(newEntry.id);
+}
+
+/* Calcula propertyValues para uma entrada a partir de seus blocos (usada ao transferir) */
+function calcPropertyValuesFor(entry) {
+  const result = {};
+  db.properties.forEach(p => {
+    const all = new Set();
+    (entry.blocks || []).forEach(b => {
+      ((b.blockProps || {})[p.id] || []).forEach(optId => all.add(optId));
+    });
+    result[p.id] = [...all];
+  });
+  return result;
+}
+
+/* Igual mas recebe array de blocos diretamente */
+function calcPropertyValuesForBlocks(blocks) {
+  const result = {};
+  db.properties.forEach(p => {
+    const all = new Set();
+    blocks.forEach(b => {
+      ((b.blockProps || {})[p.id] || []).forEach(optId => all.add(optId));
+    });
+    result[p.id] = [...all];
+  });
+  return result;
 }
 
 /* ──────────────────────────────
@@ -1408,6 +2296,19 @@ function updateVerHint(bid) {
   } else { hint.classList.remove('show'); }
 }
 
+/* Calcula propertyValues como union das opções de todos os blocos */
+function calcPropertyValues() {
+  const result = {};
+  db.properties.forEach(p => {
+    const allOpts = new Set();
+    editBlocks.forEach(b => {
+      ((editBlockProps[b.id] || {})[p.id] || []).forEach(optId => allOpts.add(optId));
+    });
+    result[p.id] = [...allOpts];
+  });
+  return result;
+}
+
 /* ──────────────────────────────
    SAVE / DELETE
 ────────────────────────────── */
@@ -1424,8 +2325,12 @@ function saveEntry(skipClose = false) {
     if (idx >= 0) {
       db.entries[idx] = {
         ...db.entries[idx], title, description: desc,
-        propertyValues: JSON.parse(JSON.stringify(editProps)),
-        blocks: editBlocks.map(b=>({...b})),
+        propertyValues:   calcPropertyValues(),
+        propertyAutoFlags:JSON.parse(JSON.stringify(editPropAutoFlags)),
+        blocks: editBlocks.map(b=>({
+          ...b,
+          blockProps: JSON.parse(JSON.stringify(editBlockProps[b.id]||{}))
+        })),
         updatedAt: now
       };
     }
@@ -1433,8 +2338,12 @@ function saveEntry(skipClose = false) {
   } else {
     const e = {
       id: uid(), title, description: desc,
-      propertyValues: JSON.parse(JSON.stringify(editProps)),
-      blocks: editBlocks.map(b=>({...b})),
+      propertyValues:   calcPropertyValues(),
+      propertyAutoFlags:JSON.parse(JSON.stringify(editPropAutoFlags)),
+      blocks: editBlocks.map(b=>({
+        ...b,
+        blockProps: JSON.parse(JSON.stringify(editBlockProps[b.id]||{}))
+      })),
       createdAt: now, updatedAt: now
     };
     db.entries.unshift(e);
@@ -1484,25 +2393,134 @@ function setDateField(field) {
 }
 
 /* ──────────────────────────────
+   FILTRO POR PROPRIEDADE (tabela)
+────────────────────────────── */
+function togglePropFilterRow() {
+  const row = document.getElementById('propFilterRow');
+  const btn = document.getElementById('propFilterBtn');
+  const open = row.classList.toggle('open');
+  btn.style.color = open ? 'var(--accent)' : '';
+  if (open) populatePropFilterSel();
+  else { clearPropFilter(); }
+}
+
+function populatePropFilterSel() {
+  const sel = document.getElementById('propFilterSel');
+  sel.innerHTML = `<option value="">— Selecionar —</option>`;
+  db.properties.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.name;
+    if (filterPropId === p.id) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  renderPropFilterOpts();
+}
+
+function onPropFilterChange() {
+  filterPropId = document.getElementById('propFilterSel').value || null;
+  filterOptIds.clear();
+  renderPropFilterOpts();
+  renderTable();
+}
+
+function renderPropFilterOpts() {
+  const optsEl = document.getElementById('propFilterOpts');
+  if (!optsEl) return;
+  optsEl.innerHTML = '';
+  if (!filterPropId) return;
+  const prop = db.properties.find(p => p.id === filterPropId);
+  if (!prop) return;
+  prop.options.forEach(opt => {
+    const col  = getColor(opt.colorId);
+    const chip = document.createElement('span');
+    chip.className = `pf-chip${filterOptIds.has(opt.id)?' sel':''}`;
+    chip.style.background = col.bg;
+    chip.style.color = col.text;
+    chip.textContent = opt.name;
+    chip.onclick = () => {
+      filterOptIds.has(opt.id) ? filterOptIds.delete(opt.id) : filterOptIds.add(opt.id);
+      chip.classList.toggle('sel', filterOptIds.has(opt.id));
+      renderTable();
+    };
+    optsEl.appendChild(chip);
+  });
+}
+
+function clearPropFilter() {
+  filterPropId = null;
+  filterOptIds.clear();
+  const sel = document.getElementById('propFilterSel');
+  if (sel) sel.value = '';
+  const optsEl = document.getElementById('propFilterOpts');
+  if (optsEl) optsEl.innerHTML = '';
+  renderTable();
+}
+
+/* ──────────────────────────────
    EXPORT / IMPORT
 ────────────────────────────── */
 function entryToMD(e) {
-  let md = `# ${e.title||'Sem título'}\n\n`;
-  if (e.description) md += `> ${e.description}\n\n`;
+  const DIV = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
 
+  // ── Título da entrada ──
+  let md = `# ${e.title || 'Sem título'}\n\n`;
+
+  // ── Descrição (se houver) ──
+  if (e.description) {
+    md += `> **Descrição/Resumo:** ${e.description}\n\n`;
+  }
+
+  // ── Metadados da entrada ──
+  md += `<!-- ENTRADA -->\n`;
+  md += `**ID:** \`${e.id || '—'}\`  \n`;
+  md += `**Criado em:** ${fmtDate(e.createdAt)}  \n`;
+  md += `**Modificado em:** ${fmtDate(e.updatedAt)}  \n`;
+  md += `**Total de blocos:** ${(e.blocks || []).length}  \n`;
+
+  // Propriedades da entrada (todas, com nomes das opções)
+  let hasProps = false;
   db.properties.forEach(p => {
-    const vals = (e.propertyValues[p.id]||[])
-      .map(id=>p.options.find(o=>o.id===id)?.name).filter(Boolean);
-    if (vals.length) md += `**${p.name}:** ${vals.join(', ')}  \n`;
+    const vals = (e.propertyValues[p.id] || [])
+      .map(id => p.options.find(o => o.id === id)?.name).filter(Boolean);
+    if (vals.length) {
+      if (!hasProps) { md += '\n'; hasProps = true; }
+      md += `**${p.name}:** ${vals.join(' · ')}  \n`;
+    }
   });
-  md += `**Criado:** ${fmtDate(e.createdAt)}  \n**Modificado:** ${fmtDate(e.updatedAt)}\n\n`;
 
-  (e.blocks||[]).forEach((b,i) => {
-    if (b.subtitle) md += `### ${b.subtitle} v${b.version||1}\n`;
-    else if ((e.blocks||[]).length>1) md += `### Bloco ${i+1}\n`;
-    md += `\n${b.content||''}\n\n`;
+  md += `\n${DIV}\n\n`;
+
+  // ── Blocos ──
+  (e.blocks || []).forEach((b, i) => {
+    const blkTitle = b.subtitle
+      ? `[Bloco ${i + 1}] ${b.subtitle} · v${b.version || 1}`
+      : `[Bloco ${i + 1}]`;
+
+    md += `## ${blkTitle}\n\n`;
+
+    // Metadados do bloco
+    if (b.subtitle) md += `**Subtítulo:** ${b.subtitle}  \n`;
+    md += `**Versão:** v${b.version || 1}  \n`;
+
+    // Propriedades efetivas do bloco (nomes completos, sem "herda")
+    const eff = getBlockEffectivePropsSaved(e, b);
+    let hasBlockProps = false;
+    db.properties.forEach(p => {
+      const vals = (eff[p.id] || [])
+        .map(id => p.options.find(o => o.id === id)?.name).filter(Boolean);
+      if (vals.length) {
+        if (!hasBlockProps) { md += '\n'; hasBlockProps = true; }
+        md += `**${p.name}:** ${vals.join(' · ')}  \n`;
+      }
+    });
+
+    // Conteúdo do bloco
+    md += `\n**Conteúdo:**\n\n${b.content || '*(vazio)*'}\n\n`;
+    md += `${DIV}\n\n`;
   });
-  return md + '---\n\n';
+
+  return md;
 }
 
 function exportAllJSON() {
@@ -1530,6 +2548,119 @@ function exportCurrentJSON() {
 
 function openExportModal() { openModal('exportModal'); }
 
+/* ── helpers de escape para HTML ── */
+function e2h(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ── exportação HTML de entrada única ── */
+function exportCurrentHTML() {
+  const e = db.entries.find(x=>x.id===currentId);
+  if (!e) { showToast('Salve a entrada primeiro'); return; }
+  dl(buildEntryHTML(e, true), (e.title||'nota')+'.html', 'text/html');
+  showToast('HTML exportado — abra no navegador e use Ctrl+P para PDF');
+}
+
+/* ── exportação HTML de todas as entradas ── */
+function exportAllHTML() {
+  const allBlocks = db.entries.map(e => buildEntryHTMLBody(e)).join('\n<hr>\n');
+  const html = wrapHTMLDoc('Base de Notas — '+dateSlug(), allBlocks, true);
+  dl(html, 'base_notas_'+dateSlug()+'.html', 'text/html');
+  closeModal('exportModal');
+  showToast('HTML exportado — abra no navegador e use Ctrl+P para PDF');
+}
+
+function buildEntryHTMLBody(e) {
+  const propsHtml = db.properties.map(p => {
+    const vals = (e.propertyValues[p.id]||[])
+      .map(id => p.options.find(o=>o.id===id)?.name).filter(Boolean);
+    if (!vals.length) return '';
+    return `<div class="prop-row"><strong>${e2h(p.name)}:</strong> ${
+      vals.map(v=>`<span class="tag">${e2h(v)}</span>`).join(' ')
+    }</div>`;
+  }).join('');
+
+  const blocksHtml = (e.blocks||[]).map((b, bi) => {
+    const eff = getBlockEffectivePropsSaved(e, b);
+    const blkPropsHtml = db.properties.map(p => {
+      const vals = (eff[p.id]||[])
+        .map(id => p.options.find(o=>o.id===id)?.name).filter(Boolean);
+      if (!vals.length) return '';
+      return `<span class="blk-prop-badge"><strong>${e2h(p.name)}:</strong> ${
+        vals.map(v=>`<span class="tag">${e2h(v)}</span>`).join(' ')
+      }</span>`;
+    }).filter(Boolean).join(' ');
+
+    const subHtml = b.subtitle
+      ? `<h3 class="blk-title">◈ ${e2h(b.subtitle)} <small>v${b.version||1}</small></h3>`
+      : `<h3 class="blk-title" style="color:#aaa">Bloco ${bi+1}</h3>`;
+
+    const rawContent = b.content || '';
+    const contentHtml = rawContent
+      .split(/(```[\s\S]*?```)/g)
+      .map((part, i) => {
+        if (i % 2 === 1) {
+          const code = e2h(part.replace(/^```\w*\n?/, '').replace(/```$/, ''));
+          return `<pre><code>${code}</code></pre>`;
+        }
+        return `<p>${e2h(part).replace(/\n{2,}/g,'</p><p>').replace(/\n/g,'<br>')}</p>`;
+      }).join('');
+
+    return `<div class="block">
+      ${subHtml}
+      ${blkPropsHtml ? `<div class="blk-props">${blkPropsHtml}</div>` : ''}
+      <div class="content">${contentHtml}</div>
+    </div>`;
+  }).join('');
+
+  return `<article>
+  <h2>${e2h(e.title||'Sem título')}</h2>
+  <div class="meta">Criado: ${fmtDate(e.createdAt)} &nbsp;·&nbsp; Modificado: ${fmtDate(e.updatedAt)}</div>
+  ${propsHtml}
+  ${blocksHtml}
+</article>`;
+}
+
+function buildEntryHTML(e, standalone) {
+  const body = buildEntryHTMLBody(e);
+  return wrapHTMLDoc(e.title||'Nota', body, false);
+}
+
+function wrapHTMLDoc(title, bodyContent, isMulti) {
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>${e2h(title)}</title>
+<style>
+  body { font-family: 'Segoe UI', system-ui, sans-serif; max-width: 820px; margin: 40px auto; padding: 0 24px; color: #1a1a2e; line-height: 1.65; }
+  h2   { font-size: 22px; color: #2d2d4e; margin: 32px 0 4px; }
+  h3.blk-title { font-size: 14px; color: #5a5a8a; border-left: 3px solid #7c6af7; padding-left: 10px; margin: 22px 0 8px; font-weight: 600; }
+  h3.blk-title small { font-weight: 400; color: #999; font-size: 11px; }
+  .meta { font-size: 11px; color: #999; margin-bottom: 10px; }
+  .prop-row { font-size: 12px; margin: 3px 0; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 20px; background: #eeecff; color: #5a48c0; font-size: 11px; margin: 1px; font-weight: 500; }
+  .block { border-left: 2px solid #e0dff8; padding-left: 16px; margin: 16px 0; }
+  .content { font-size: 13px; }
+  .content p { margin: 0 0 8px; }
+  pre  { background: #f6f6f9; border-radius: 6px; padding: 14px; overflow-x: auto; margin: 10px 0; border: 1px solid #e8e8f0; }
+  code { font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 12px; }
+  hr   { border: none; border-top: 1px solid #eee; margin: 36px 0; }
+  .blk-props { display: flex; flex-wrap: wrap; gap: 6px; margin: 3px 0 10px; font-size: 11px; color: #555; }
+  .blk-prop-badge { display: flex; align-items: center; gap: 3px; }
+  @media print {
+    body { margin: 15mm 20mm; max-width: 100%; }
+    .block { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+${bodyContent}
+</body>
+</html>`;
+}
+
 function openImport() { document.getElementById('importFile').click(); }
 
 function handleImport(ev) {
@@ -1547,9 +2678,14 @@ function handleImport(ev) {
       }));
       data.entries = data.entries.map(e2 => ({
         id: e2.id||uid(), title: e2.title||'', description: e2.description||'',
-        propertyValues: e2.propertyValues||{},
-        blocks: (e2.blocks||[{id:uid(),subtitle:'',version:1,content:e2.content||''}])
-                .map(b=>({id:b.id||uid(),subtitle:b.subtitle||'',version:b.version||1,content:b.content||''})),
+        propertyValues:   e2.propertyValues||{},
+        propertyAutoFlags:e2.propertyAutoFlags||migrateOptionModes(e2.propertyOptionModes),
+        blocks: (e2.blocks||[{id:uid(),subtitle:'',version:1,content:e2.content||'',blockProps:{}}])
+                .map(b=>({
+                  id: b.id||uid(), subtitle: b.subtitle||'',
+                  version: b.version||1, content: b.content||'',
+                  blockProps: b.blockProps||b.inheritProps||{}
+                })),
         createdAt: e2.createdAt, updatedAt: e2.updatedAt
       }));
 
@@ -1578,7 +2714,7 @@ function handleImport(ev) {
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-['exportModal','addPropModal','unsavedModal'].forEach(id => {
+['exportModal','addPropModal','unsavedModal','blockTransferModal'].forEach(id => {
   document.getElementById(id).addEventListener('click', e => {
     if (e.target === document.getElementById(id)) {
       if (id === 'unsavedModal') return; // Don't close on overlay for unsaved
