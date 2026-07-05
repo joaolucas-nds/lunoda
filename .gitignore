@@ -1,0 +1,39 @@
+# ── Sistema operacional ──
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# ── Editores / IDEs ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Saídas e backups locais (não versionar) ──
+outputs/
+backups/
+*.bak
+*.tmp
+
+# ── Exportações geradas pelo app (o usuário baixa; não vão pro repo) ──
+lunoda_backup_*.json
+lunoda_notas_*.md
+lunoda_notas_*.html
+lunoda_selecionados_*.json
+lunoda_selecionados_*.md
+base_backup_*.json
+base_notas_*.md
+base_notas_*.html
+base_selecionados_*.json
+base_selecionados_*.md
+
+# ── Logs de sessão do sistema de documentação ──
+# (Mantidos no Git em logs/ — descomente a linha abaixo se preferir não versioná-los)
+# logs/

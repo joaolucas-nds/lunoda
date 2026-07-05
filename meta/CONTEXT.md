@@ -1,4 +1,4 @@
-# CONTEXT.md — [Nome do Projeto]
+# CONTEXT.md — Lunoda
 
 > Arquivo **estável**. O assistente lê no início de cada sessão para se ambientar.
 > Muda pouco: só em alteração estrutural (stack, arquitetura, escopo, nova armadilha descoberta).
@@ -6,60 +6,82 @@
 
 ---
 
-## Visão Geral
-[2-4 frases: o que o projeto faz, para quem, qual problema resolve. Sem marketing.]
+## Visão
 
-## Stack Tecnológica
-- **Linguagem(ns):** [ex: Python 3.11]
-- **Framework(s):** [ex: FastAPI]
-- **Banco / persistência:** [ex: SQLite via SQLAlchemy]
-- **Front-end:** [se houver]
-- **Testes:** [ex: pytest]
-- **Deploy:** [ex: Docker + VPS]
+**Lunoda** é uma ferramenta pessoal, offline, para capturar e organizar interações (principalmente conversas com IAs) de forma rápida e visual, com **exportação de tudo num único arquivo** bem identificado (JSON, Markdown e HTML/PDF).
 
-## Estrutura do Projeto
+O problema que resolve: o Google Docs gera um arquivo único mas é trabalhoso de percorrer e exige formatação manual; o Notion é rápido de organizar (banco de dados + páginas + propriedades) mas **não exporta tudo num só arquivo**. Lunoda junta os dois lados — a organização visual estilo Notion (tabela + propriedades) com a exportação consolidada e reimportável.
+
+Público: uso próprio do autor. Sem multiusuário, sem servidor, sem nuvem.
+
+## Stack
+
+- **Arquivo único `.html`** — HTML + CSS + JavaScript vanilla, sem build, sem dependências, sem framework.
+- Persistência local via **`localStorage`** (chave `base_v4`).
+- Fonte web: IBM Plex Sans / IBM Plex Mono (Google Fonts).
+- Hospedado no **GitHub** (upload por arrastar arquivo). Favicon `favicon.png` na raiz do repositório.
+- Roda direto no navegador, offline. Não precisa de servidor.
+
+> **Por que arquivo único:** portabilidade total, zero setup, funciona offline, fácil versionar e subir no GitHub. Um framework + backend só se justificaria com colaboração em tempo real ou datasets de 10.000+ entradas — não é o caso.
+
+## Modelo de dados
+
+O `db` tem duas coleções: `properties` e `entries`.
+
 ```
-[Árvore de pastas essencial — só o que importa para navegar.
-Não cole a árvore inteira; só os diretórios e arquivos que um recém-chegado
-precisa entender. Anote a função de cada um em uma linha.]
-
-projeto/
-├── src/
-│   ├── core/          # [o que vive aqui]
-│   └── ...
-├── tests/
-└── ...
+db = {
+  properties: [
+    { id, name, options: [ { id, name, colorId } ] }
+  ],
+  entries: [
+    {
+      id, title, description,
+      propertyValues:    { propId: [optId, ...] },   // CALCULADO: union das opções de todos os blocos
+      propertyAutoFlags: { propId: [optId, ...] },   // opções com "adição automática a novos blocos" ligada
+      blocks: [
+        { id, subtitle, version, content,
+          blockProps: { propId: [optId, ...] } }      // propriedades marcadas NAQUELE bloco
+      ],
+      createdAt, updatedAt
+    }
+  ]
+}
 ```
 
-## Convenções de Código
-- **Nomes:** [arquivos, funções, variáveis — idioma e estilo. Ex: snake_case, inglês.]
-- **Comentários:** [idioma; quando comentar.]
-- **Commits:** [formato. Ex: imperativo curto em PT-BR; Conventional Commits.]
-- **Estilo:** [linter/formatter. Ex: ruff + black; eslint + prettier.]
-- **Imports/organização:** [convenção, se houver.]
+**Conceito-chave — o bloco é a fonte de verdade das propriedades:**
+- Cada bloco carrega suas próprias opções em `blockProps`.
+- As propriedades da ENTRADA (`propertyValues`) são **calculadas** como a união (sem repetição) das opções de todos os seus blocos, no momento de salvar (`calcPropertyValues`).
+- `propertyAutoFlags` não marca nada nos blocos existentes: apenas indica quais opções serão **adicionadas automaticamente a blocos NOVOS** quando criados.
 
-## Como o [componente crítico] funciona (CRÍTICO)
-> Use esta seção para o(s) mecanismo(s) central(is) que, se mal-entendidos, geram bug.
-> Ex: como o arquivo de configuração central é lido; como o pipeline de dados flui;
-> como a autenticação encadeia. Explique em prosa + exemplo mínimo.
+## Como as peças críticas funcionam
 
-[Descrição do mecanismo. O assistente vai consultar isto antes de mexer na peça.]
+- **Editor (painel lateral):** título, descrição, propriedades da entrada, lista de blocos. Cada bloco tem subtítulo, versão, conteúdo, checkbox de seleção, barra de propriedades (`Props ▼`) e ações (duplicar / colapsar / remover).
+- **Herança automática (`toggleEntryPropAuto`):** clicar numa opção no painel da entrada liga/desliga a flag `propertyAutoFlags`. Ligada = novos blocos nascem com essa opção. **Não altera blocos existentes.** Clicar no chip `●auto` dentro de um bloco (`disableAutoFromBlock`) remove a opção daquele bloco E desliga a flag na entrada.
+- **Sugestão de versão:** ao digitar subtítulo do bloco, sugere `Nome vN+1` a partir dos subtítulos já usados na entrada e de uma lista de IAs comuns (`AI_HINTS`).
+- **Seleção de blocos + ações em massa (interno ao editor):** checkbox por bloco → barra com Subir/Descer (move o grupo mantendo ordem relativa), Duplicar, Excluir, Mover para, Copiar para.
+- **Transferência de blocos:** modal com 4 ações — mover/copiar para entrada existente ou nova. Todas salvam a entrada atual, executam e abrem a entrada destino.
+- **Filtro interno de blocos:** por subtítulo, versão e propriedade+opções, com modo **E**/**OU** entre critérios. Só oculta (não remove de `editBlocks`).
+- **Filtros da tabela:** por texto, por data (Criado/Alterado, com intervalo De/Até) e por propriedade+opções. Independentes entre si.
+- **Exportação:** JSON (reimportável), Markdown (documento único, blocos e metadados bem identificados com `**ID:**`, `**Criado em:**`, `**Tags:**`, divisores `━━━`) e HTML (abrível/imprimível como PDF). Exporta tudo, seleção em massa, ou entrada única.
+- **Importação (`handleImport`):** normaliza formatos antigos, migra `inheritProps`→`blockProps` e `propertyOptionModes`→`propertyAutoFlags` (via `migrateOptionModes`). Mesclar ou substituir.
 
-## Arquitetura — pontos-chave
-[Decisões estruturais em uma linha cada, com referência ao raciocínio completo em DECISIONS.md.]
-- [Ponto] — ver DEC-00X.
-- [Ponto] — ver DEC-00Y.
+## Armadilhas conhecidas
 
-## Armadilhas Conhecidas (o que NÃO fazer)
-> A parte mais valiosa do arquivo. Cada armadilha já custou tempo uma vez.
-> Formato: o que parece certo → por que está errado → o que fazer em vez disso.
+- **`STORAGE_KEY = 'base_v4'`** — a chave do localStorage é `base_v4`, não muda com a versão do app. Alterá-la faz o app "perder" os dados salvos do usuário. `loadDB` também tenta chaves legadas (`base_notas_v3`, etc.) para migração.
+- **`editProps` legado** — a variável ainda existe no estado do editor mas **não é mais a fonte de verdade** da entrada; quem manda é `calcPropertyValues()` (union dos blocos). Não voltar a usá-la para decidir o que a entrada "tem".
+- **Nunca deixar entrada com 0 blocos** — ao mover/excluir todos os blocos, o sistema recria um bloco vazio. Manter essa invariante.
+- **CMD do Windows** — o autor usa Windows/CMD; comandos numa linha só, sem `\`, `-m` repetido no commit, mensagens de commit **sem acento** (o CMD corrompe).
+- **Prefixos de exportação** — arquivos exportados usam prefixo `base_` no nome (`base_backup_`, `base_notas_`, `base_selecionados_`) — resquício do nome antigo. Ver IDEAS (renomear para `lunoda_`).
 
-1. **[Armadilha]** — [por que morde] → [o certo].
-2. **[Armadilha]** — [por que morde] → [o certo].
+## Produto / histórico de nomes
 
-## Contexto de Produto
-> Por que o projeto existe e para onde aponta. Evita decisões tecnicamente corretas mas erradas para o produto.
-- **Usuário-alvo:** [quem usa]
-- **Dor que resolve:** [a dor concreta]
-- **O que é sucesso:** [como se mede]
-- **O que o projeto deliberadamente NÃO é:** [limites de escopo]
+O app já se chamou **Synap** (guia v10) e **base**/**Nexus** em versões ainda mais antigas — daí `STORAGE_KEY='base_v4'`, prefixos `base_` e a chave legada `nexus_db_v4`. Nome atual definitivo: **Lunoda** (desde a v10/v11). Os arquivos de trabalho seguem nomeados `base_vN.html` no histórico de uploads, mas a versão canônica no Projeto é `Lunoda_v12.html`.
+
+## Fluxo de desenvolvimento (peculiar — importante)
+
+O desenvolvimento **não** é feito por edição direta do arquivo pelo assistente. O padrão é:
+1. O autor descreve o que quer para a próxima versão.
+2. O assistente analisa as versões, projeta, e **entrega um guia `.md` passo a passo** (blocos antigos a substituir + blocos novos completos, com âncoras exatas).
+3. O autor **aplica manualmente** as mudanças e sobe a nova versão.
+
+Isso está registrado como decisão (ver DECISIONS DEC-001). Os guias já produzidos: `synap_v10_guide.md` (v9→v10, por outra IA), `lunoda_v11_guide.md` (v10→v11), `lunoda_v12_guide.md` (v11→v12).
