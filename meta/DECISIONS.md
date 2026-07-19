@@ -214,3 +214,37 @@ A v12 entregou excluir, mover e transferir blocos **em lote**, sem nenhum desfaz
 
 ### Consequências
 Fecha a F8. Adicionar cobertura a uma função nova é acrescentar um nome na lista. O embrulho depende de as funções serem declarações de topo (viram propriedades de `window`) — se alguma virar `const`, o embrulho a ignora silenciosamente, por isso há checagem de tipo e o `tests/history.mjs`. `restoreEditorSnapshot` recria um bloco vazio se o snapshot tiver zero, preservando a invariante do projeto.
+
+---
+
+## DEC-011 — Frontmatter por arquivo, não por entrada; preferência fora do `db`
+**Data:** 2026-07-19 · **Status:** aceita
+
+### Contexto
+O `.md` já era bem identificado para leitura humana, mas nenhuma ferramenta lê `**Tags:** Ideia` como dado. O padrão para isso é o frontmatter YAML. O obstáculo: **frontmatter é único por arquivo** — só o primeiro bloco `---` de um arquivo é lido como metadado.
+
+### Decisão
+- **Uma entrada por arquivo** (`exportCurrentMD`) → frontmatter **da entrada**. É o caso que serve a um vault do Obsidian.
+- **Várias entradas num arquivo** (`exportAllMD`, `massExportMD`) → frontmatter **do documento** (origem, data, contagem); cada entrada mantém seu bloco `<!-- ENTRADA -->`.
+- Valores sempre entre aspas duplas, com escape de `\`, `"` e quebra de linha — é a única forma que aceita qualquer conteúdo sem ambiguidade (dois-pontos, `#`, texto que pareça número).
+- Chaves derivadas do nome da propriedade, sem acento nem espaço; colisão com chave reservada ganha sufixo.
+- A preferência liga/desliga vive em **chave própria do `localStorage`** (`lunoda_md_frontmatter`), não no `db`.
+
+### Alternativas consideradas
+- **Frontmatter de cada entrada mesmo no arquivo múltiplo** — do segundo em diante viraria texto solto e `---` renderizaria como linha horizontal. Pior que não ter.
+- **Guardar a preferência no `db`** — mudaria o formato dos dados e entraria na importação/exportação de backup, com risco de migração, para uma escolha de interface. Chave separada é aditiva e reversível.
+- **Emitir YAML sem aspas quando "parece seguro"** — heurística que falha exatamente nos casos difíceis; YAML inválido quebra o parse do outro lado em silêncio.
+- **Um arquivo por entrada num `.zip`** — o que um vault realmente quer, mas exige biblioteca de compressão e contraria o zero-dependência (DEC-001). Registrado no IDEAS.
+
+### Consequências
+O `.md` de uma entrada passa a ser consultável por outra ferramenta. Nada muda no `entryToMD()` — o frontmatter é montado nos pontos de exportação, então a função coberta pelo smoke ficou intocada. Fica pendente a F9 parte 2 (reimportar `.md`), agora viável.
+
+---
+
+## FIX-003 — Extrator do smoke não entendia literais de regex
+**Data:** 2026-07-19 · **Corrigido em:** `tests/smoke.mjs`
+
+- **Sintoma:** ao incluir `yamlStr` na lista de funções recortadas, o teste abortava com "chaves desbalanceadas".
+- **Causa raiz:** o recortador varre chaves ignorando string e comentário, mas não conhecia **literal de regex**. Em `.replace(/"/g, ...)`, a aspa dentro da regex era lida como início de string, e a varredura desalinhava do ponto ali em diante.
+- **Solução:** reconhecer regex por heurística — depois de identificador, número ou `)`/`]`, uma `/` é divisão; nos demais casos inicia regex (com `[...]` tratado, já que `/` dentro de classe não fecha). Em paralelo, `yamlStr` foi reescrita com `split/join`, que naquele nível de escape é mais legível que a versão com regex.
+- **Lição:** ferramenta de teste é código como qualquer outro e falha como qualquer outro. O erro se manifestou como falso alarme sobre o código de produção — a segunda vez na mesma semana em que o teste apontou para o lugar errado (ver o caso da fixture de um bloco só, no log de 2026-07-19 sessão 3). Diante de falha de teste: reproduzir e entender **antes** de mexer no código.

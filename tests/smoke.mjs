@@ -38,8 +38,10 @@ function extractFunction(src, name) {
   if (open === -1) throw new Error(`corpo nao encontrado: ${name}`);
 
   let depth = 0, i = open;
-  let inS = null;      // aspa/crase corrente
+  let inS = null;                       // aspa/crase corrente
   let inLine = false, inBlock = false, esc = false;
+  let inRe = false, inClass = false;    // literal de regex, e [...] dentro dele
+  let prev = '';                        // ultimo caractere significativo
 
   for (; i < src.length; i++) {
     const c = src[i], n = src[i + 1];
@@ -50,15 +52,34 @@ function extractFunction(src, name) {
       if (c === inS) inS = null;
       continue;
     }
+    if (inRe) {
+      // Um '/' dentro de [...] nao fecha a regex.
+      if (c === '\\') { esc = true; continue; }
+      if (c === '[') inClass = true;
+      else if (c === ']') inClass = false;
+      else if (c === '/' && !inClass) inRe = false;
+      continue;
+    }
     if (inLine)  { if (c === '\n') inLine = false; continue; }
     if (inBlock) { if (c === '*' && n === '/') { inBlock = false; i++; } continue; }
 
     if (c === '/' && n === '/') { inLine = true;  i++; continue; }
     if (c === '/' && n === '*') { inBlock = true; i++; continue; }
+
+    // Regex ou divisao? Depois de identificador, numero ou fechamento de
+    // parenteses/colchete, '/' e' divisao; nos demais casos, inicia regex.
+    // Sem isto, um /"/g e' lido como abertura de string e desalinha tudo.
+    if (c === '/') {
+      const divisao = /[\w$)\]]/.test(prev);
+      if (!divisao) { inRe = true; inClass = false; continue; }
+    }
+
     if (c === '"' || c === "'" || c === '`') { inS = c; continue; }
 
     if (c === '{') depth++;
     else if (c === '}') { depth--; if (depth === 0) return src.slice(start, i + 1); }
+
+    if (!/\s/.test(c)) prev = c;
   }
   throw new Error(`chaves desbalanceadas ao recortar: ${name}`);
 }
@@ -67,18 +88,26 @@ function extractFunction(src, name) {
 
 const html = readFileSync(APP, 'utf8');
 const NEEDED = ['fmtDate', 'getBlockEffectivePropsSaved', 'entryToMD'];
-const code = NEEDED.map(n => extractFunction(html, n)).join('\n\n');
+// Funcoes da F9: ainda podem nao existir em versoes anteriores a v12.3.
+const OPCIONAIS = ['yamlKey', 'yamlStr', 'entryFrontmatter', 'docFrontmatter'];
+const presentes = OPCIONAIS.filter(n => html.includes(`function ${n}(`));
+const code = NEEDED.concat(presentes).map(n => extractFunction(html, n)).join('\n\n');
 
 const db = JSON.parse(readFileSync(join(HERE, 'fixtures', 'sample-db.json'), 'utf8'));
 
 // `db` entra como parâmetro: as funções o referenciam como global.
-const build = new Function('db', `${code}\nreturn { entryToMD, fmtDate };`);
-const { entryToMD } = build(db);
+const build = new Function('db', `${code}\nreturn { ${['entryToMD','fmtDate'].concat(presentes).join(', ')} };`);
+const api = build(db);
+const { entryToMD } = api;
 
 /* ── Asserções ──────────────────────────────────────────────── */
 
-let pass = 0, fail = 0;
+let pass = 0, fail = 0, skip = 0;
 const results = [];
+
+function skipped(name, motivo) {
+  skip++; results.push(`  PULOU ${name} (${motivo})`);
+}
 
 function check(name, cond, detail = '') {
   if (cond) { pass++; results.push(`  OK    ${name}`); }
@@ -142,11 +171,56 @@ check('export nao usa a palavra "herda"',
 // 6. Bloco vazio nao some
 check('bloco sem conteudo vira *(vazio)*', md.includes('*(vazio)*'));
 
+/* ── Frontmatter YAML (F9) ──────────────────────────────────── */
+
+if (presentes.length < OPCIONAIS.length) {
+  skipped('frontmatter YAML', 'v12.3 ainda nao aplicada');
+} else {
+  const { yamlKey, yamlStr, entryFrontmatter, docFrontmatter } = api;
+
+  // Chaves seguras
+  check('yamlKey tira acento e espaco', yamlKey('IA Utilizada') === 'ia_utilizada', yamlKey('IA Utilizada'));
+  check('yamlKey mantem "tags" (campo especial do Obsidian)', yamlKey('Tags') === 'tags');
+  check('yamlKey nao devolve string vazia', yamlKey('!!!') === 'prop', yamlKey('!!!'));
+
+  // Escape de valores
+  check('yamlStr escapa aspas', yamlStr('a"b') === '"a\\"b"', yamlStr('a"b'));
+  check('yamlStr escapa barra invertida', yamlStr('a\\b') === '"a\\\\b"', yamlStr('a\\b'));
+  check('yamlStr colapsa quebra de linha', yamlStr('a\nb') === '"a\\nb"', yamlStr('a\nb'));
+
+  // Entrada hostil
+  const hostil = db.entries[1];
+  const fm = entryFrontmatter(hostil);
+  const fmLines = fm.split('\n');
+
+  check('frontmatter abre e fecha com ---',
+    fmLines[0] === '---' && fmLines.includes('---', 1), JSON.stringify(fmLines.slice(0, 2)));
+  check('titulo com aspas e dois-pontos fica escapado',
+    fm.includes('title: "Entrada \\"hostil\\": com aspas, dois-pontos e \\\\ barra"'),
+    fmLines.find(l => l.startsWith('title:')));
+  check('propriedade "ID" nao sobrescreve o id da entrada',
+    fm.includes(`id: "${hostil.id}"`), fmLines.filter(l => l.startsWith('id')).join(' | '));
+  check('colisao de chave recebe sufixo', fm.includes('id_prop:'),
+    fmLines.filter(l => l.includes('id')).join(' | '));
+  check('valores viram lista YAML', fm.includes('tags:') && fm.includes('  - "Ideia"'));
+  check('contagem de blocos no frontmatter', fm.includes(`blocks: ${hostil.blocks.length}`));
+
+  // Nao deve haver chave duplicada — YAML duplicado e' aceito por uns e rejeitado por outros
+  const chaves = fmLines.filter(l => /^[a-z0-9_]+:/.test(l)).map(l => l.split(':')[0]);
+  check('nenhuma chave duplicada no frontmatter',
+    new Set(chaves).size === chaves.length, chaves.join(', '));
+
+  // Documento com varias entradas
+  const doc = docFrontmatter(7);
+  check('frontmatter de documento tem a contagem', doc.includes('entries: 7'));
+  check('frontmatter de documento identifica a origem', doc.includes('source: "Lunoda"'));
+}
+
 /* ── Relatório ──────────────────────────────────────────────── */
 
 console.log('\nLunoda — smoke test (entryToMD)\n');
 console.log(results.join('\n'));
-console.log(`\n  ${pass} ok, ${fail} falha(s)\n`);
+console.log(`\n  ${pass} ok, ${fail} falha(s)${skip ? `, ${skip} pulado(s)` : ''}\n`);
 
 if (fail > 0) {
   console.log('  Dica: rode com DUMP=1 para ver o Markdown gerado.\n');

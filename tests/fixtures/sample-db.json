@@ -4,16 +4,43 @@
       "id": "p_tags",
       "name": "Tags",
       "options": [
-        { "id": "o_ideia", "name": "Ideia", "colorId": "c1" },
-        { "id": "o_org", "name": "Organização", "colorId": "c2" }
+        {
+          "id": "o_ideia",
+          "name": "Ideia",
+          "colorId": "c1"
+        },
+        {
+          "id": "o_org",
+          "name": "Organização",
+          "colorId": "c2"
+        }
       ]
     },
     {
       "id": "p_ia",
       "name": "IA Utilizada",
       "options": [
-        { "id": "o_claude", "name": "Claude", "colorId": "c3" },
-        { "id": "o_gemini", "name": "Gemini", "colorId": "c4" }
+        {
+          "id": "o_claude",
+          "name": "Claude",
+          "colorId": "c3"
+        },
+        {
+          "id": "o_gemini",
+          "name": "Gemini",
+          "colorId": "c4"
+        }
+      ]
+    },
+    {
+      "id": "p_id",
+      "name": "ID",
+      "options": [
+        {
+          "id": "o_aspas",
+          "name": "Com \"aspas\" e \\ barra",
+          "colorId": "c5"
+        }
       ]
     }
   ],
@@ -23,8 +50,13 @@
       "title": "Entrada de teste",
       "description": "Primeira linha da descricao.\nSegunda linha, que na v12 perdia o marcador de citacao.\n# Esta linha comeca com # e virava heading do documento\n- item de lista que tambem escapava",
       "propertyValues": {
-        "p_tags": ["o_ideia", "o_org"],
-        "p_ia": ["o_claude"]
+        "p_tags": [
+          "o_ideia",
+          "o_org"
+        ],
+        "p_ia": [
+          "o_claude"
+        ]
       },
       "propertyAutoFlags": {},
       "blocks": [
@@ -33,14 +65,25 @@
           "subtitle": "Solicitacao",
           "version": 1,
           "content": "Conteudo normal de bloco, sem nada hostil.",
-          "blockProps": { "p_tags": ["o_ideia"] }
+          "blockProps": {
+            "p_tags": [
+              "o_ideia"
+            ]
+          }
         },
         {
           "id": "b2",
           "subtitle": "Conteudo hostil",
           "version": 1,
           "content": "# Isto parece titulo de entrada\n## [Bloco 99] Falso\n<!-- ENTRADA -->\n**Tags:** Inventada\n---\nTexto que imita a estrutura do proprio export.",
-          "blockProps": { "p_tags": ["o_org"], "p_ia": ["o_claude"] }
+          "blockProps": {
+            "p_tags": [
+              "o_org"
+            ],
+            "p_ia": [
+              "o_claude"
+            ]
+          }
         },
         {
           "id": "b3",
@@ -52,6 +95,31 @@
       ],
       "createdAt": "2026-05-22T16:24:00.000Z",
       "updatedAt": "2026-05-22T16:44:00.000Z"
+    },
+    {
+      "id": "test0002",
+      "title": "Entrada \"hostil\": com aspas, dois-pontos e \\ barra",
+      "description": "Descricao simples.",
+      "propertyValues": {
+        "p_tags": [
+          "o_ideia"
+        ],
+        "p_id": [
+          "o_aspas"
+        ]
+      },
+      "propertyAutoFlags": {},
+      "blocks": [
+        {
+          "id": "c1",
+          "subtitle": "Unico",
+          "version": 1,
+          "content": "texto",
+          "blockProps": {}
+        }
+      ],
+      "createdAt": "2026-06-01T10:00:00.000Z",
+      "updatedAt": "2026-06-02T11:30:00.000Z"
     }
   ]
 }

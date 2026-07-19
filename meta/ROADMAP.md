@@ -52,11 +52,12 @@
 - [x] Undo/redo no editor (Ctrl+Z / Ctrl+Y) sobre snapshots do estado — v12.2, ver DEC-010.
 > Fase fechada. O acervo agora está protegido contra os dois modos de perda que existiam: estouro silencioso de armazenamento e exclusão em massa sem volta.
 
-## 🔵 F9 — Interoperabilidade do export *(futuro — pré-requisito já entregue)*
+## 🟡 F9 — Interoperabilidade do export *(parte 1 entregue na v12.3)*
 **Objetivo:** o arquivo exportado deixar de ser só legível e passar a ser **importável por outras ferramentas**.
-- [ ] Markdown com **YAML frontmatter** (`title`, `id`, `created`, `updated`, `blocks`, propriedades como listas) — padrão lido por Obsidian, Hugo, Jekyll.
-- [ ] Seletor "MD simples / MD com frontmatter" na exportação, para não impor o formato.
-- [ ] (Avaliar) exportar uma entrada por arquivo, além do arquivo único — para quem quiser jogar num vault.
+- [x] Markdown com **YAML frontmatter** — v12.3, ver DEC-011.
+- [x] Seletor "MD simples / MD com frontmatter" na exportação — v12.3.
+- [ ] Exportar uma entrada por arquivo (`.zip`) — o que um vault realmente quer; esbarra no zero-dependência (ver IDEAS).
+- [ ] **Reimportar `.md` — único item grande restante da fase.**
 - [ ] Reimportar `.md` (hoje só o JSON reimporta) — viável agora que o conteúdo é delimitado (DEC-008).
 > Cumpre o objetivo fundador do projeto ("exportar bem identificado") num nível que hoje só existe para olho humano. A delimitação do conteúdo (v12.1) era o pré-requisito estrutural.
 

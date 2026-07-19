@@ -89,6 +89,8 @@ Pergunta do autor. *Sugestão do assistente:* nesse caso, **desabilitar** a edi�
 
 ## ✅ Concluídas
 
+- **Frontmatter YAML na exportação Markdown** — v12.3 / DEC-011. Fecha a parte 1 da F9.
+
 - **Undo/redo estrutural no editor** — v12.2 / DEC-010. Fecha a F8.
 
 - **Integridade do export MD (descrição citada + conteúdo delimitado)** — v12.1 / FIX-002, DEC-008. Era a raiz da queixa recorrente de "identificação" desde a v10.
@@ -153,3 +155,11 @@ Vale como lembrete de duas coisas: (1) quando um teste falha, investigar antes d
 
 ### 2026-07-19 — Embrulho de funções: registrar como padrão do projeto?
 A DEC-010 embrulhou 11 mutadores em vez de editá-los um a um. Funcionou bem e o diff ficou minúsculo. Se o padrão se repetir (ex.: para telemetria de uso, ou para marcar "sujo" no editor), vale promovê-lo a convenção no CONTEXT — com a ressalva de que depende de declaração de função no topo do script.
+
+### 2026-07-19 — Exportar um arquivo por entrada (`.zip`)
+O frontmatter da v12.3 só é lido como metadado num arquivo que contenha **uma** entrada. Para jogar o acervo inteiro num vault do Obsidian, o usuário precisaria exportar entrada por entrada. Um `.zip` com um `.md` por entrada resolveria — mas exige biblioteca de compressão, o que contraria o zero-dependência da DEC-001.
+Alternativas a avaliar: (a) escrever um zip mínimo à mão (formato *stored*, sem compressão, é simples o bastante); (b) disparar vários downloads em sequência; (c) aceitar a limitação e documentar. A opção (a) é a única que mantém o zero-dependência **e** entrega o resultado.
+
+### 2026-07-19 — Segunda vez que um teste apontou para o lugar errado
+Na sessão 3 a fixture tinha um bloco só e fingiu um bug; nesta, o extrator do smoke não entendia regex e acusou "chaves desbalanceadas" como se o código de produção estivesse quebrado (FIX-003). Nos dois casos o código estava certo e a ferramenta de teste, errada.
+Vale registrar como hábito: **falhou o teste → reproduzir e entender antes de tocar no código**. Já está no CLAUDE.md; se acontecer uma terceira vez, vale promover a princípio no CEREBRO.

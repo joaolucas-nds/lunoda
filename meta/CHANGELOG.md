@@ -5,7 +5,16 @@
 
 ---
 
-## [12.2.0] — 2026-07-19 *(entregue como ASU, pendente de aplicação)*
+## [12.3.0] — 2026-07-19 *(entregue como ASU, pendente de aplicação)*
+
+### Adicionado
+- **Frontmatter YAML opcional na exportação Markdown** (F9 parte 1). Exportar uma entrada sozinha gera um `.md` com metadados legíveis por Obsidian, Hugo e afins; exportar várias gera um frontmatter de documento (origem, data, contagem) e cada entrada mantém seu bloco `<!-- ENTRADA -->`.
+- Chaves YAML derivadas do nome da propriedade, sem acento e sem espaço ("IA Utilizada" → `ia_utilizada`; "Tags" → `tags`, campo especial do Obsidian).
+- Colisão com chave reservada recebe sufixo (uma propriedade chamada "ID" não sobrescreve o `id` da entrada).
+- Checkbox "Incluir frontmatter YAML" no modal de exportação, com preferência persistida em chave própria do `localStorage` — o formato do `db` não muda.
+- `tests/smoke.mjs` cobre o frontmatter (15 asserções novas, 28 no total) e passou a entender literais de regex ao recortar funções.
+
+## [12.2.0] — 2026-07-19 *(aplicada e verificada)*
 
 ### Adicionado
 - **Undo/redo de operações estruturais no editor** (F8 parte 2, fase concluída). Cobre adicionar, remover, mover, duplicar e transferir blocos, e marcar propriedades — não a digitação, que continua com o desfazer nativo do navegador dentro de cada campo.

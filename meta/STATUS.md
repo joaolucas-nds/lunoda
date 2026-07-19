@@ -8,7 +8,7 @@
 
 ## Versão atual
 
-**Lunoda v12.2** (v12.1 aplicada; v12.2 pendente de aplicação) — arquivo canônico `index.html` (no Projeto, ~2771 linhas, todas as funções da v12 confirmadas no disco).
+**Lunoda v12.3** (v12.1 e v12.2 aplicadas; v12.3 pendente de aplicação) — arquivo canônico `index.html` (no Projeto, ~2771 linhas, todas as funções da v12 confirmadas no disco).
 
 ## O que funciona
 
@@ -26,7 +26,7 @@
 
 ## Em progresso
 
-- **v12.2 entregue como `260719-asu0002.yaml`, aguardando aplicação.** Undo/redo estrutural no editor — fecha a fase F8. Validada em cópia: história 18/18, smoke 13/13 (sem regressão), `node --check` OK.
+- **v12.3 entregue como `260719-asu0003.yaml`, aguardando aplicação.** Frontmatter YAML na exportação Markdown (F9 parte 1). Validada em cópia: smoke 28/28, history 18/18 (sem regressão), sintaxe OK e o YAML gerado **aceito por um parser real**, incluindo título com aspas, dois-pontos e barra invertida.
 
 ## 📁 Arquivos críticos (não mexer sem contexto)
 
@@ -47,6 +47,6 @@
 
 ## Última sessão
 
-**2026-07-19 (sessão 3)** — Verificada a aplicação da v12.1 no repositório: smoke 13/13 contra o `index.html` real, sintaxe válida, sem duplicação de âncora e o `saveDB` antigo removido. Em seguida, desenvolvida a **v12.2 (undo/redo)**, entregue como `260719-asu0002.yaml` e validada em cópia.
+**2026-07-19 (sessão 4)** — Verificada a v12.2 no repositório (smoke 13/13, history 18/18, sintaxe OK, sem duplicação de âncora). Desenvolvida a **v12.3 — frontmatter YAML**. No caminho, o extrator do smoke ganhou consciência de literais de regex, sem a qual não conseguia recortar funções que contêm `/"/g`.
 
-**Próximo passo óbvio:** aplicar a v12.2, rodar os dois testes, conferir o desfazer no navegador. Depois: reexportar os `.md` antigos e decidir a F4 (exige resolver C1/C2/Q1 do IDEAS) ou a F9 (frontmatter YAML).
+**Próximo passo óbvio:** aplicar a v12.3 e conferir no Obsidian. Depois: **F9 parte 2 (reimportar `.md`)** ou **F4 (UX de propriedades**, que exige resolver C1/C2/Q1 do IDEAS).

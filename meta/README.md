@@ -1,65 +1,79 @@
-# Lunoda
+# tests — verificação do Lunoda
 
-Ferramenta pessoal, **offline** e em **arquivo único `.html`**, para capturar e organizar interações (principalmente conversas com IAs) de forma rápida e visual — e **exportar tudo num único arquivo** bem identificado (JSON, Markdown e HTML/PDF).
+O Lunoda é um `.html` único e visual, sem build e sem framework (DEC-001). Uma suíte tradicional exigiria `package.json` e `node_modules`, o que contraria o zero-setup do projeto.
 
-Junta o melhor de dois mundos: a organização visual estilo Notion (tabela + propriedades) com a exportação consolidada e reimportável que o Notion não oferece.
+A solução é um **smoke em Node puro, sem dependências**.
 
-## Como usar
-
-1. Abra `Lunoda_v12.html` no navegador (ou publique no GitHub Pages).
-2. Crie entradas com **Nova entrada**. Cada entrada tem título, descrição e **blocos de conteúdo**.
-3. Marque **propriedades** (ex.: Tags, IA Utilizada) — por bloco ou com adição automática a novos blocos.
-4. **Exporte** tudo (ou uma seleção) em JSON, Markdown ou HTML/PDF. Reimporte o JSON quando quiser.
-
-Os dados ficam no `localStorage` do navegador (chave `base_v4`). É offline: nada sai da sua máquina.
-
-## Principais recursos (v12)
-
-- Tabela de entradas com busca, ordenação, filtros por **data** e por **propriedade**.
-- Editor com blocos versionados e sugestão automática de versão.
-- **Propriedades por bloco**: o bloco é a fonte de verdade; a entrada é a união das opções dos seus blocos.
-- **Herança automática** de propriedades para blocos novos (sem afetar os existentes).
-- **Gestão de blocos**: seleção em massa, reordenar em grupo, duplicar, excluir, **mover/copiar entre entradas** (existente ou nova).
-- **Filtro interno de blocos** (subtítulo, versão, propriedade) com modo **E/OU**.
-- Exportação JSON / Markdown (identificação rica) / HTML-PDF; importação com migração de formatos antigos.
-
-## Stack
-
-HTML + CSS + JavaScript vanilla, sem build e sem dependências. Fontes IBM Plex (Google Fonts). Favicon `favicon.png` na raiz.
-
-## Estrutura do repositório
+## Rodar
 
 ```
-Lunoda_v12.html          # a aplicação (versão canônica atual)
-favicon.png              # ícone do app
-README.md                # este arquivo
-INSTRUCOES-DO-PROJETO.md # instruções lidas em toda mensagem pelo assistente
-.gitignore
-.flatdropignore          # enxuga o que sobe ao Projeto do Claude
-
-meta/                    # sistema de documentação de contexto
-├── CEREBRO.md           # comportamento do assistente de IA
-├── CONTEXT.md           # o que o projeto é (estável)
-├── STATUS.md            # o estado atual (rolante)
-├── DECISIONS.md         # decisões (DEC) e correções (FIX)
-├── CHANGELOG.md         # histórico de versões
-├── IDEAS.md             # ideias e backlog de longo prazo
-├── ROADMAP.md           # plano em fases
-├── GLOSSARY.md          # termos do projeto
-├── HISTORY.md           # conhecimento consolidado das fases antigas
-└── LOG-TEMPLATE.md      # molde do log de sessão
-
-guides/                  # guias passo a passo de cada versão
-└── lunoda_vN_guide.md
-
-logs/                    # logs de sessão
-└── AAAA-MM-DD.md
+node tests/smoke.mjs      (export / entryToMD)
+node tests/history.mjs    (undo/redo do editor)
 ```
 
-## Desenvolvimento
+Sai com código `1` se algo falhar. Para ver o Markdown gerado quando há falha:
 
-Cada versão evolui por um **guia `.md` passo a passo** (`lunoda_vN_guide.md`), aplicado manualmente ao HTML — não por edição direta. Ver `meta/DECISIONS.md` (DEC-002) e `meta/HISTORY.md` para o fluxo completo.
+```
+set DUMP=1 && node tests/smoke.mjs
+```
 
----
+## Como funciona
 
-> Nomes antigos do app: Synap / base / Nexus (daí a chave `base_v4` e prefixos legados). Nome atual: **Lunoda**.
+`smoke.mjs` lê o `index.html`, recorta funções por varredura de chaves balanceadas (ignorando chaves dentro de string, template literal e comentário) e as executa isoladas, com um `db` de fixture injetado. **Não executa o script inteiro**, que dependeria de DOM.
+
+Isso permite testar as funções **puras** sem tocar no arquivo único.
+
+## O que cobre hoje
+
+`entryToMD()` — a geração do Markdown exportado — e, desde a v12.3, o **frontmatter YAML**. Foi escolhida primeiro porque é onde o defeito é mais caro e menos visível: um export corrompido só aparece quando o usuário vai reler o arquivo, possivelmente meses depois.
+
+As asserções incluem duas **regressões** do FIX-002:
+- toda linha da descrição precisa começar com `>`;
+- todo bloco precisa ter os delimitadores `<!-- CONTEUDO:INICIO/FIM -->`.
+
+## A fixture é hostil de propósito
+
+`fixtures/sample-db.json` contém, deliberadamente:
+- descrição multilinha com uma linha iniciada por `#` e outra por `-`;
+- um bloco cujo conteúdo **imita a estrutura do próprio export** (`# titulo`, `## [Bloco 99]`, `<!-- ENTRADA -->`, `---`);
+- um bloco vazio.
+
+O FIX-002 sobreviveu a três versões porque o export parecia certo com dados bem-comportados. Testar com entrada hostil é o ponto.
+
+### Frontmatter YAML
+
+15 asserções sobre chaves, escape e colisão. A entrada nº 2 da fixture existe só para isso: título com **aspas, dois-pontos e barra invertida**, e uma propriedade chamada **"ID"**, que colide com a chave reservada do frontmatter.
+
+> YAML inválido não estoura: ele quebra o parse do **outro** lado, em silêncio. Por isso as asserções checam a forma exata do escape, e não apenas "gerou alguma coisa".
+
+### Sobre o recortador de funções
+
+O `extractFunction` varre chaves balanceadas ignorando string, comentário **e literal de regex**. A parte da regex foi acrescentada no FIX-003: sem ela, uma função contendo `/"/g` fazia a varredura ler a aspa como início de string e desalinhar. Se um dia o recorte falhar com "chaves desbalanceadas", suspeite de sintaxe que o varredor ainda não conhece — não do código de produção.
+
+## `history.mjs` — undo/redo
+
+Monta um **editor de mentira** (dublês de DOM e mutadores) e recorta o bloco de histórico do `index.html` para exercitá-lo. 18 asserções, incluindo:
+
+- ação sem efeito não suja o histórico (o caso do `confirm` cancelado);
+- ramo novo invalida o refazer;
+- **undo/redo nunca deixa a entrada com 0 blocos** — a invariante do projeto;
+- o teto de 50 entradas é respeitado;
+- abrir outra entrada zera o histórico.
+
+Rode ao mexer nos mutadores estruturais ou na lista de nomes embrulhados (DEC-010).
+
+> Uma fixture com **um único bloco** esconde bug de ordenação e finge bug onde não há — foi o que aconteceu ao escrever este teste. Use 2–3 blocos quando a asserção envolver ordem.
+
+## O que NÃO cobre
+
+Interface, `localStorage`, cores, arrastar, filtros e qualquer coisa que dependa de DOM ou de navegador. Isso continua sendo verificação manual — e quem mexe deve **declarar explicitamente** o que testou no navegador e o que não deu para testar.
+
+## Ao adicionar cobertura
+
+Boas candidatas, por ordem de risco (todas puras ou quase):
+
+1. `calcPropertyValues` — núcleo do modelo de propriedades.
+2. `migrateOptionModes` / `loadDB` — migração de formatos antigos; quebrar ali inutiliza backups.
+3. `moveSelectedBlocks` — algoritmo com caso de borda (grupos não contíguos).
+
+Basta acrescentar o nome em `NEEDED` no `smoke.mjs` e escrever as asserções com o helper `check()`.

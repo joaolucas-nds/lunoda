@@ -857,6 +857,11 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
   <div class="modal">
     <h3>Exportar todos os dados</h3>
     <p>Todas as entradas serão incluídas no arquivo exportado.</p>
+<label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-dim);cursor:pointer;margin-bottom:4px">
+    <input type="checkbox" id="expFrontmatter" checked onchange="setMdFrontmatter(this.checked)" style="accent-color:var(--accent);cursor:pointer">
+    Incluir frontmatter YAML no Markdown
+    <span style="color:var(--text-muted)">— metadados legíveis por Obsidian e afins</span>
+  </label>
     <div class="exp-grid">
       <div class="exp-card" onclick="exportAllJSON()">
         <div class="exp-card-name">📦 JSON</div>
@@ -1464,8 +1469,11 @@ function massExportJSON() {
 }
 
 function massExportMD() {
-  const sel = db.entries.filter(e=>selectedIds.has(e.id));
-  dl(sel.map(entryToMD).join(''), 'base_selecionados_'+dateSlug()+'.md', 'text/markdown');
+  const sel  = db.entries.filter(e=>selectedIds.has(e.id));
+  const corpo = sel.map(e => entryToMD(e)).join('');
+  const head  = mdFrontmatterOn() ? docFrontmatter(sel.length) : '';
+  dl(head + corpo, 'base_selecionados_'+dateSlug()+'.md', 'text/markdown');
+
 }
 
 /* ──────────────────────────────
@@ -2706,20 +2714,128 @@ function entryToMD(e) {
 
 }
 
+/* ──────────────────────────────
+   FRONTMATTER YAML (export Markdown)
+────────────────────────────── */
+
+/* O corpo do .md já é bem identificado para leitura humana, mas nenhuma
+   ferramenta lê "**Tags:** Ideia" como dado. O frontmatter YAML é o
+   padrão de fato para metadados em Markdown (Obsidian, Hugo, Jekyll):
+   com ele, o arquivo exportado deixa de ser só legível e passa a ser
+   consultável por outra ferramenta. */
+
+const FM_PREF_KEY = 'lunoda_md_frontmatter';
+
+/* Preferência do usuário; ligada por padrão. Fica em chave própria do
+   localStorage, fora do db, para não mexer no formato dos dados. */
+function mdFrontmatterOn() {
+  try { return localStorage.getItem(FM_PREF_KEY) !== '0'; }
+  catch (_) { return true; }
+}
+
+function setMdFrontmatter(on) {
+  try { localStorage.setItem(FM_PREF_KEY, on ? '1' : '0'); } catch (_) {}
+  showToast(on ? 'Frontmatter YAML ligado' : 'Markdown simples (sem frontmatter)');
+}
+
+/* Nome de propriedade -> chave YAML segura: sem acento, sem espaço.
+   "IA Utilizada" vira ia_utilizada; "Tags" vira tags, que é justamente
+   o que o Obsidian trata como campo especial. */
+function yamlKey(name) {
+  const k = String(name)
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  return k || 'prop';
+}
+
+/* Valor como string YAML entre aspas duplas.
+   Sempre entre aspas: é a única forma que aceita qualquer conteúdo sem
+   ambiguidade (dois-pontos, #, - no início, string que pareça número).
+   YAML inválido quebra o parse do outro lado em silêncio. */
+function yamlStr(v) {
+  // split/join em vez de regex: com este nível de escape, a versão com
+  // expressão regular fica ilegível e fácil de errar.
+  const s = String(v)
+    .split('\\').join('\\\\')   // barra invertida primeiro, senão duplica as seguintes
+    .split('"').join('\\"')
+    .split('\r\n').join('\\n')
+    .split('\n').join('\\n');
+  return '"' + s + '"';
+}
+
+/* Frontmatter de UMA entrada. Só faz sentido no topo de um arquivo que
+   contenha aquela entrada sozinha — YAML frontmatter é único por arquivo. */
+function entryFrontmatter(e) {
+  const out = ['---'];
+  out.push(`title: ${yamlStr(e.title || 'Sem título')}`);
+  out.push(`id: ${yamlStr(e.id || '')}`);
+  if (e.createdAt) out.push(`created: ${yamlStr(e.createdAt)}`);
+  if (e.updatedAt) out.push(`updated: ${yamlStr(e.updatedAt)}`);
+  out.push(`blocks: ${(e.blocks || []).length}`);
+
+  // Uma propriedade do usuário pode colidir com as chaves acima
+  // (ex.: uma propriedade chamada "ID"). Nesse caso ela recebe sufixo.
+  const usadas = new Set(['title', 'id', 'created', 'updated', 'blocks']);
+  db.properties.forEach(p => {
+    const vals = ((e.propertyValues || {})[p.id] || [])
+      .map(id => p.options.find(o => o.id === id)?.name).filter(Boolean);
+    if (!vals.length) return;
+    let k = yamlKey(p.name);
+    while (usadas.has(k)) k += '_prop';
+    usadas.add(k);
+    out.push(`${k}:`);
+    vals.forEach(v => out.push(`  - ${yamlStr(v)}`));
+  });
+
+  out.push('---', '');
+  return out.join('\n');
+}
+
+/* Frontmatter do DOCUMENTO, para export com várias entradas.
+   Aqui não dá para emitir o frontmatter de cada entrada: só o primeiro
+   bloco de um arquivo é lido como frontmatter; os demais virariam texto
+   solto. Cada entrada continua com seu bloco <!-- ENTRADA -->. */
+function docFrontmatter(n) {
+  return ['---',
+    'source: "Lunoda"',
+    `exported: ${yamlStr(new Date().toISOString())}`,
+    `entries: ${n}`,
+    '---', '', ''].join('\n');
+}
+
+/* Deixa o checkbox do modal coerente com a preferência salva. */
+function syncFrontmatterUI() {
+  const cb = document.getElementById('expFrontmatter');
+  if (cb) cb.checked = mdFrontmatterOn();
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', syncFrontmatterUI);
+} else {
+  syncFrontmatterUI();
+}
 function exportAllJSON() {
   dl(JSON.stringify(db,null,2), 'base_backup_'+dateSlug()+'.json', 'application/json');
   closeModal('exportModal'); showToast('JSON exportado');
 }
 
 function exportAllMD() {
-  dl(db.entries.map(entryToMD).join(''), 'base_notas_'+dateSlug()+'.md', 'text/markdown');
+  const corpo = db.entries.map(e => entryToMD(e)).join('');
+  const head  = mdFrontmatterOn() ? docFrontmatter(db.entries.length) : '';
+  dl(head + corpo, 'base_notas_'+dateSlug()+'.md', 'text/markdown');
   closeModal('exportModal'); showToast('Markdown exportado');
+
 }
 
 function exportCurrentMD() {
   const e = db.entries.find(x=>x.id===currentId);
   if (!e) { showToast('Salve a entrada primeiro'); return; }
-  dl(entryToMD(e), (e.title||'nota')+'.md', 'text/markdown');
+  // Arquivo com uma entrada só: aqui o frontmatter da entrada é válido
+  // e é o que torna o .md utilizável num vault do Obsidian.
+  const head = mdFrontmatterOn() ? entryFrontmatter(e) : '';
+  dl(head + entryToMD(e), (e.title||'nota')+'.md', 'text/markdown');
+
 }
 
 function exportCurrentJSON() {
