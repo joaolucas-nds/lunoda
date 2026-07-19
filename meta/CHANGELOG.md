@@ -5,6 +5,29 @@
 
 ---
 
+## [12.1.0] — 2026-07-19 *(entregue como ASU, pendente de aplicação)*
+
+### Corrigido
+- **FIX-002 — integridade do Markdown exportado.** Descrição multilinha agora tem `>` em **todas** as linhas: antes, da 2ª linha em diante o texto escapava da citação e uma linha iniciada por `#` ou `-` virava estrutura do documento.
+- **FIX-002 — conteúdo de bloco sem delimitação.** O conteúdo agora vai entre `<!-- CONTEUDO:INICIO bloco=N -->` e `<!-- CONTEUDO:FIM bloco=N -->`, tornando possível separar conteúdo de estrutura mesmo quando o texto imita o formato do próprio export.
+
+### Adicionado
+- Marcador `<!-- BLOCO N -->` por bloco, par do `<!-- ENTRADA -->` já existente.
+- `saveDB` trata `QuotaExceededError`: avisa em vez de perder a alteração em silêncio.
+- `requestPersistence()` pede ao navegador para não expurgar os dados.
+- `warnIfStorageTight()` avisa uma vez por sessão ao passar de ~80% do teto prático (~5 MB).
+- `tests/smoke.mjs` — primeira verificação automática do projeto (Node puro, sem dependências).
+- `CLAUDE.md` — orientação para o Claude Code, incluindo o sistema `meta/` e o KCM.
+
+## [Não lançado]
+
+### Adicionado
+- Sistema de documentação de contexto migrado para `meta/` e alinhado ao Kit de Contexto Universal v1.74.0.
+- `.flatdropignore` (enxuga o que sobe ao Projeto do Claude).
+- Seção «Específico deste projeto (Lunoda)» no CEREBRO.
+
+> Nada aqui altera o `Lunoda_v12.html` — são mudanças de documentação e processo.
+
 ## [12.0.0] — 2026-07-05
 
 ### Adicionado

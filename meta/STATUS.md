@@ -8,7 +8,7 @@
 
 ## Versão atual
 
-**Lunoda v12** — arquivo canônico `Lunoda_v12.html` (no Projeto, ~2771 linhas, todas as funções da v12 confirmadas no disco).
+**Lunoda v12.1** (pendente de aplicação) — arquivo canônico `index.html` (no Projeto, ~2771 linhas, todas as funções da v12 confirmadas no disco).
 
 ## O que funciona
 
@@ -26,11 +26,27 @@
 
 ## Em progresso
 
+- **v12.1 entregue como instrução ASU `260719-asu0001.yaml`, aguardando aplicação.** Corrige a integridade do export MD (FIX-002) e adiciona rede de segurança de armazenamento (F8, parte 1). Validada em cópia: smoke 13/13 e `node --check` OK.
+
+## Em progresso (antigo)
+
 - Nada em execução no código no momento. A sessão de hoje montou o **sistema de documentação** do Projeto.
 
 ## Quebrado / pendências
 
-- Nenhum bug conhecido em aberto na v12.
+- **FIX-002 corrigido na v12.1, pendente de aplicação:** exports da v12 têm descrição multilinha sem `>` a partir da 2ª linha e conteúdo de bloco sem delimitador. Arquivos já exportados seguem com o defeito — reexportar depois de aplicar o patch.
+- `saveDB` da v12 não trata estouro de cota (corrigido na v12.1, mesma pendência).
+
+## 📁 Arquivos críticos (não mexer sem contexto)
+
+| Arquivo | Por quê |
+|---|---|
+| `index.html` | É o produto inteiro. Não editar às cegas; ver armadilhas no CONTEXT. |
+| `tests/smoke.mjs` | Única verificação automática do projeto. Rode antes de fechar mudança de export. |
+| `STORAGE_KEY = 'base_v4'` (dentro do HTML) | Renomear sem migração **apaga os dados do usuário**. |
+| `calcPropertyValues()` / `blockProps` | Núcleo do modelo de propriedades (DEC-003). Mudança aqui afeta exportação e filtros. |
+| `loadDB()` / `handleImport()` / `migrateOptionModes()` | Migração de formatos antigos. Quebrar aqui inutiliza backups antigos. |
+| `guides/lunoda_vN_guide.md` | Memória da evolução. Nunca sobrescrever guia antigo. |
 
 ## Backlog curto (próximos passos concretos)
 
@@ -39,6 +55,6 @@
 
 ## Última sessão
 
-**2026-07-05** — Montado o sistema de documentação de contexto (CONTEXT, STATUS, DECISIONS, CHANGELOG, IDEAS, ROADMAP, GLOSSARY, HISTORY, log). Capturadas no IDEAS as ideias novas do `Lunoda_ideias.txt` para a v13, com sinalização dos conflitos entre elas. Nenhuma alteração de código.
+**2026-07-19** — Verificados os `.txt` e o export `Lunoda - Blocos de notas.md` do mount: **tudo já registrado, pode arquivar**. O export real revelou dois defeitos de integridade (FIX-002), corrigidos na instrução ASU `260719-asu0001.yaml` junto com a rede de segurança de armazenamento. Criados `CLAUDE.md` e `tests/` (smoke em Node puro, sem dependências).
 
-**Próximo passo óbvio:** revisar as ideias da v13 no IDEAS, decidir o que entra, resolver os conflitos apontados, e pedir o guia da v13.
+**Próximo passo óbvio:** aplicar o ASU, rodar `node tests/smoke.mjs`, reexportar os `.md` antigos e então decidir entre F8-parte-2 (undo/redo) e F4 (UX de propriedades, que exige resolver C1/C2/Q1).

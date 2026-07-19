@@ -24,6 +24,47 @@ Público: uso próprio do autor. Sem multiusuário, sem servidor, sem nuvem.
 
 > **Por que arquivo único:** portabilidade total, zero setup, funciona offline, fácil versionar e subir no GitHub. Um framework + backend só se justificaria com colaboração em tempo real ou datasets de 10.000+ entradas — não é o caso.
 
+## O que o Lunoda deliberadamente NÃO é
+
+Delimitar isto evita retrabalho e propostas fora de escopo:
+- **Não é multiusuário nem colaborativo.** Sem servidor, sem contas, sem edição simultânea.
+- **Não é nuvem.** Os dados vivem no navegador do usuário; sincronização entre máquinas é feita **manualmente** via export/import de JSON.
+- **Não é um editor de texto rico.** Conteúdo é texto puro; sem WYSIWYG, sem negrito/itálico por botão.
+- **Não é um substituto de Notion/Obsidian.** É uma ferramenta pessoal focada em capturar interações com IAs e exportar tudo num arquivo só.
+- **Não busca escala.** Milhares de entradas não são meta; o teto prático é o do `localStorage` (~5 MB — ver armadilhas).
+
+## Estrutura do projeto
+
+```
+/
+├── index.html               # a aplicação (versão canônica)
+├── favicon.png              # ícone
+├── README.md                # README do produto (público)
+├── CLAUDE.md                # orientação para o Claude Code
+├── .gitignore
+├── .flatdropignore          # enxuga o que sobe ao Projeto do Claude
+├── INSTRUCOES-DO-PROJETO.md # instruções lidas em toda mensagem
+├── meta/                    # sistema de documentação de contexto
+│   ├── CEREBRO.md           # comportamento do assistente
+│   ├── CONTEXT.md           # este arquivo
+│   ├── STATUS.md            # o agora (rolante)
+│   ├── DECISIONS.md         # DEC / FIX
+│   ├── CHANGELOG.md         # versões entregues
+│   ├── IDEAS.md             # segundo cérebro
+│   ├── ROADMAP.md           # fases
+│   ├── GLOSSARY.md          # termos
+│   ├── HISTORY.md           # conhecimento consolidado
+│   └── LOG-TEMPLATE.md      # molde do log
+├── meta/ASU/                # Atualizador Automático de Scripts
+├── tests/                   # smoke em Node puro (ver DEC-009)
+│   ├── smoke.mjs
+│   └── fixtures/sample-db.json
+├── logs/                    # logs de sessão (AAAA-MM-DD.md)
+└── guides/                  # guias de versão (lunoda_vN_guide.md)
+```
+
+> Os docs de contexto ficam em **`meta/`** (padrão do kit). O `README.md` da raiz é o do produto — se um dia houver um README dentro de `meta/`, é outro arquivo, explicando o sistema de documentação.
+
 ## Modelo de dados
 
 O `db` tem duas coleções: `properties` e `entries`.
@@ -62,7 +103,7 @@ db = {
 - **Transferência de blocos:** modal com 4 ações — mover/copiar para entrada existente ou nova. Todas salvam a entrada atual, executam e abrem a entrada destino.
 - **Filtro interno de blocos:** por subtítulo, versão e propriedade+opções, com modo **E**/**OU** entre critérios. Só oculta (não remove de `editBlocks`).
 - **Filtros da tabela:** por texto, por data (Criado/Alterado, com intervalo De/Até) e por propriedade+opções. Independentes entre si.
-- **Exportação:** JSON (reimportável), Markdown (documento único, blocos e metadados bem identificados com `**ID:**`, `**Criado em:**`, `**Tags:**`, divisores `━━━`) e HTML (abrível/imprimível como PDF). Exporta tudo, seleção em massa, ou entrada única.
+- **Exportação:** JSON (reimportável), Markdown (documento único; a partir da v12.1 a descrição é citada linha a linha e o conteúdo de cada bloco vai entre `<!-- CONTEUDO:INICIO/FIM -->`, de modo que texto livre não se confunda com a estrutura — ver DEC-008/FIX-002; blocos e metadados bem identificados com `**ID:**`, `**Criado em:**`, `**Tags:**`, divisores `━━━`) e HTML (abrível/imprimível como PDF). Exporta tudo, seleção em massa, ou entrada única.
 - **Importação (`handleImport`):** normaliza formatos antigos, migra `inheritProps`→`blockProps` e `propertyOptionModes`→`propertyAutoFlags` (via `migrateOptionModes`). Mesclar ou substituir.
 
 ## Armadilhas conhecidas
@@ -71,6 +112,7 @@ db = {
 - **`editProps` legado** — a variável ainda existe no estado do editor mas **não é mais a fonte de verdade** da entrada; quem manda é `calcPropertyValues()` (union dos blocos). Não voltar a usá-la para decidir o que a entrada "tem".
 - **Nunca deixar entrada com 0 blocos** — ao mover/excluir todos os blocos, o sistema recria um bloco vazio. Manter essa invariante.
 - **CMD do Windows** — o autor usa Windows/CMD; comandos numa linha só, sem `\`, `-m` repetido no commit, mensagens de commit **sem acento** (o CMD corrompe).
+- **`saveDB` pode falhar por cota** — desde a v12.1 ele **retorna `false`** e avisa em vez de estourar. Quem chamar em fluxo crítico deve considerar o retorno.
 - **Prefixos de exportação** — arquivos exportados usam prefixo `base_` no nome (`base_backup_`, `base_notas_`, `base_selecionados_`) — resquício do nome antigo. Ver IDEAS (renomear para `lunoda_`).
 
 ## Produto / histórico de nomes

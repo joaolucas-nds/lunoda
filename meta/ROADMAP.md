@@ -43,6 +43,33 @@
 - Histórico de versões de bloco (snapshots + diff).
 - Entrada favorita/fixada; cor de entrada na tabela.
 
+## 🟡 F8 — Rede de segurança *(parte 1 entregue na v12.1; falta o undo/redo)*
+**Objetivo:** proteger o acervo antes de aumentar o poder de destruição da ferramenta.
+**Critério de conclusão:** o usuário não consegue perder trabalho por acidente nem por limite de armazenamento silencioso.
+- [x] Aviso ao passar de ~80% do teto (~5 MB) — `warnIfStorageTight()`, v12.1.
+- [x] `try/catch` de `QuotaExceededError` no salvamento, com mensagem acionável — v12.1.
+- [x] `navigator.storage.persist()` — `requestPersistence()`, v12.1.
+- [ ] **Undo/redo no editor (Ctrl+Z / Ctrl+Y) sobre snapshots do estado — único item restante da fase.**
+> **Por que antes da F4:** a v12 entregou excluir, mover e transferir **em lote**, sem desfazer e sem aviso de teto de armazenamento. O poder de estrago cresceu e a rede de segurança não acompanhou. É a fase de maior retorno por esforço no momento.
+
+## 🔵 F9 — Interoperabilidade do export *(futuro — pré-requisito já entregue)*
+**Objetivo:** o arquivo exportado deixar de ser só legível e passar a ser **importável por outras ferramentas**.
+- [ ] Markdown com **YAML frontmatter** (`title`, `id`, `created`, `updated`, `blocks`, propriedades como listas) — padrão lido por Obsidian, Hugo, Jekyll.
+- [ ] Seletor "MD simples / MD com frontmatter" na exportação, para não impor o formato.
+- [ ] (Avaliar) exportar uma entrada por arquivo, além do arquivo único — para quem quiser jogar num vault.
+- [ ] Reimportar `.md` (hoje só o JSON reimporta) — viável agora que o conteúdo é delimitado (DEC-008).
+> Cumpre o objetivo fundador do projeto ("exportar bem identificado") num nível que hoje só existe para olho humano. A delimitação do conteúdo (v12.1) era o pré-requisito estrutural.
+
+## 🔵 F10 — Navegação em acervo grande *(futuro)*
+**Objetivo:** manter a ferramenta usável quando houver centenas de entradas.
+- [ ] Busca full-text no conteúdo dos blocos, com destaque do trecho.
+- [ ] Atalhos de teclado (novo bloco, navegar entre blocos, foco na busca, fechar editor).
+
+## 🔵 F11 — Migração para IndexedDB *(futuro, condicionada)*
+**Objetivo:** remover o teto de ~5 MB do `localStorage`.
+**Gatilho:** só iniciar quando o indicador da F8 mostrar uso real perto do teto — não antes.
+- Muda `save`/`load` para assíncrono; é a mudança estrutural mais séria já cogitada. Exige plano de migração e backup obrigatório antes.
+
 ---
 
 ## 🚫 Itens descartados desta visão

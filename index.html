@@ -1065,7 +1065,59 @@ function migrateOptionModes(pom) {
   return flags;
 }
 
-function saveDB() { localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
+/* Salva o db no localStorage.
+   Trata estouro de cota em vez de falhar em silêncio: sem isto, ao bater
+   o teto (~5 MB) a alteração se perde sem o usuário perceber.
+   Retorna true se gravou, false caso contrário. */
+function saveDB() {
+  const payload = JSON.stringify(db);
+  try {
+    localStorage.setItem(STORAGE_KEY, payload);
+  } catch (err) {
+    // O nome/código do erro de cota varia por navegador.
+    const isQuota = !!err && (err.name === 'QuotaExceededError'
+      || err.name === 'NS_ERROR_DOM_QUOTA_REACHED'
+      || err.code === 22 || err.code === 1014);
+    if (isQuota) {
+      alert('ARMAZENAMENTO CHEIO\n\n'
+        + 'O navegador atingiu o limite de armazenamento local e esta '
+        + 'alteração NÃO foi salva.\n\n'
+        + 'Exporte um backup JSON agora (botão Exportar) antes de fechar a aba.');
+      showToast('Não salvou: armazenamento cheio');
+    } else {
+      console.error('[Lunoda] falha ao salvar:', err);
+      showToast('Não salvou (detalhes no console)');
+    }
+    return false;
+  }
+  requestPersistence();
+  warnIfStorageTight(payload.length);
+  return true;
+}
+
+/* Pede ao navegador para não expurgar os dados automaticamente.
+   É só uma otimização: falha silenciosa é aceitável. Roda uma vez. */
+let persistenceAsked = false;
+function requestPersistence() {
+  if (persistenceAsked) return;
+  persistenceAsked = true;
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().catch(() => {});
+  }
+}
+
+/* Avisa UMA vez por sessão ao se aproximar do teto prático do localStorage.
+   O limite exato varia por navegador (~5 MB); o tamanho do JSON serve
+   de aproximação conservadora para dar tempo de exportar um backup. */
+let storageWarned = false;
+function warnIfStorageTight(size) {
+  if (storageWarned) return;
+  const pct = Math.round((size / (5 * 1024 * 1024)) * 100);
+  if (pct >= 80) {
+    storageWarned = true;
+    showToast('Armazenamento em ~' + pct + '% do limite - exporte um backup');
+  }
+}
 
 /* ──────────────────────────────
    UTILS
@@ -2467,8 +2519,16 @@ function entryToMD(e) {
   let md = `# ${e.title || 'Sem título'}\n\n`;
 
   // ── Descrição (se houver) ──
+  // Cada linha leva seu próprio '>': sem isso, uma descrição multilinha
+  // perde o marcador de citação a partir da 2ª linha e qualquer linha
+  // iniciada por '#' ou '-' passa a ser lida como estrutura do documento.
   if (e.description) {
-    md += `> **Descrição/Resumo:** ${e.description}\n\n`;
+    const descLines = String(e.description).split('\n');
+    md += `> **Descrição/Resumo:** ${descLines[0]}\n`;
+    for (let li = 1; li < descLines.length; li++) {
+      md += `> ${descLines[li]}\n`;
+    }
+    md += `\n`;
   }
 
   // ── Metadados da entrada ──
@@ -2493,11 +2553,15 @@ function entryToMD(e) {
 
   // ── Blocos ──
   (e.blocks || []).forEach((b, i) => {
+    const num = i + 1;
     const blkTitle = b.subtitle
-      ? `[Bloco ${i + 1}] ${b.subtitle} · v${b.version || 1}`
-      : `[Bloco ${i + 1}]`;
+      ? `[Bloco ${num}] ${b.subtitle} · v${b.version || 1}`
+      : `[Bloco ${num}]`;
 
     md += `## ${blkTitle}\n\n`;
+    // Marcador de bloco, par do <!-- ENTRADA --> : torna o arquivo
+    // percorrível por máquina sem depender do texto do cabeçalho.
+    md += `<!-- BLOCO ${num} -->\n`;
 
     // Metadados do bloco
     if (b.subtitle) md += `**Subtítulo:** ${b.subtitle}  \n`;
@@ -2515,12 +2579,19 @@ function entryToMD(e) {
       }
     });
 
-    // Conteúdo do bloco
-    md += `\n**Conteúdo:**\n\n${b.content || '*(vazio)*'}\n\n`;
+    // Conteúdo do bloco, entre delimitadores.
+    // O conteúdo é texto livre e pode conter '#', '---' ou o próprio
+    // divisor; sem marcador não há como separar conteúdo de estrutura
+    // na releitura (o problema que aparecia nos exports reais).
+    md += `\n**Conteúdo:**\n\n`;
+    md += `<!-- CONTEUDO:INICIO bloco=${num} -->\n`;
+    md += `${b.content || '*(vazio)*'}\n`;
+    md += `<!-- CONTEUDO:FIM bloco=${num} -->\n\n`;
     md += `${DIV}\n\n`;
   });
 
   return md;
+
 }
 
 function exportAllJSON() {

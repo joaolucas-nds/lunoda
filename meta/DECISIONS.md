@@ -110,3 +110,86 @@ Reordenação em massa resolvida sem drag. O caso de duas versões diferentes se
 - **Causa raiz:** ao inserir o botão "Filtrar" (propriedade), o botão "Datas" foi removido acidentalmente do HTML da toolbar. A função `toggleDateRow()` continuava no JS, órfã.
 - **Solução:** restaurado o botão "Datas" na toolbar, ao lado do "Filtrar". Os dois filtros operam de forma independente.
 - **Lição:** ao adicionar um controle vizinho a outro na toolbar, conferir que o existente não foi sobrescrito. Filtros independentes não devem competir por espaço no mesmo bloco de HTML.
+
+---
+
+## DEC-006 — Documentação de contexto em `meta/`, README do produto na raiz
+**Data:** 2026-07-19 · **Status:** aceita
+
+### Contexto
+Os docs de contexto nasceram na raiz do repositório (montagem de 2026-07-05). O `_UPDATE-MANIFEST.md` do Kit de Contexto Universal define `meta/` como destino real de todos eles.
+
+### Decisão
+Mover CEREBRO, CONTEXT, STATUS, DECISIONS, CHANGELOG, IDEAS, ROADMAP, GLOSSARY, HISTORY e LOG-TEMPLATE para `meta/`. `INSTRUCOES-DO-PROJETO.md`, `README.md`, `.gitignore` e `.flatdropignore` ficam na raiz. Os guias de versão passam a viver em `guides/`.
+
+### Alternativas consideradas
+- **Manter tudo na raiz** — não quebraria nada, mas divergiria do kit e da convenção que o próprio manifesto declara; a raiz também fica poluída conforme os guias se acumulam.
+
+### Consequências
+Raiz limpa e alinhada ao kit. O `README.md` da raiz continua sendo o do produto — um eventual README dentro de `meta/` seria outro arquivo, sobre o sistema de documentação. Exige atualizar a estrutura descrita no README e no CONTEXT.
+
+---
+
+## DEC-007 — CEREBRO adota a base genérica do kit + seção específica do projeto
+**Data:** 2026-07-19 · **Status:** aceita
+
+### Contexto
+Chegou um template-update do KCM (Kit v1.74.0). O CEREBRO vivo do projeto era uma base genérica **anterior e sem versão**, e não continha nenhuma diretriz personalizada para o Lunoda — as customizações reais viviam espalhadas no CONTEXT e no DECISIONS.
+
+### Decisão
+Adotar o CEREBRO do template como base (mais atual e refinado) e concentrar o que é específico do Lunoda numa seção própria, «Específico deste projeto (Lunoda)», ao final do arquivo. Ganhos herdados do template: seções «Ao receber um template-update do KCM» e «Refino das Instruções do Projeto», além das regras de **pedido composto** (princípio 10) e **concordância em busca-e-troca** (princípio 11).
+
+### Alternativas consideradas
+- **Manter o CEREBRO antigo e enxertar só as novidades** — mais trabalhoso e propenso a divergir do kit na próxima atualização, sem ganho: o antigo não tinha conteúdo próprio a preservar.
+- **Substituição cega pelo template** — descartada: perderia a possibilidade de registrar o específico do projeto (o manifesto marca CEREBRO como `fusao` justamente por isso).
+
+### Consequências
+Atualizações futuras do kit passam a ser um diff limpo: base genérica de um lado, seção do projeto do outro. O específico do Lunoda deixa de ficar implícito.
+
+---
+
+## DEC-008 — Delimitadores HTML no export, em vez de escapar o conteúdo
+**Data:** 2026-07-19 · **Status:** aceita
+
+### Contexto
+O conteúdo de um bloco é texto livre — normalmente colado de uma conversa com IA. Ele pode conter `#`, `---`, `**negrito**` e até o próprio divisor `━━━` do export. Na releitura, não havia como distinguir o que era conteúdo do que era estrutura gerada pela ferramenta. O defeito apareceu nos dados reais do usuário: um bloco com instruções coladas produziu um `# ...` que virou título de entrada no `.md` exportado.
+
+### Decisão
+Envolver o conteúdo de cada bloco em `<!-- CONTEUDO:INICIO bloco=N -->` / `<!-- CONTEUDO:FIM bloco=N -->` e acrescentar `<!-- BLOCO N -->`, seguindo a convenção do `<!-- ENTRADA -->` que já existia.
+
+### Alternativas consideradas
+- **Cercar o conteúdo em bloco de código (```)** — resolveria a ambiguidade, mas mataria a formatação Markdown intencional do conteúdo e mudaria a aparência do documento.
+- **Escapar os caracteres perigosos** (`#` → `\#`) — polui o texto do usuário e é irreversível na importação.
+- **Não fazer nada e confiar no olho** — é o estado que gerou o defeito.
+
+### Consequências
+Comentários HTML são invisíveis no Markdown renderizado e triviais de casar por máquina — o export fica legível para humano **e** parseável. Abre caminho para a F9 (frontmatter YAML) e para uma futura reimportação de `.md`, hoje impossível.
+
+---
+
+## DEC-009 — Verificação automática mínima (smoke em Node), sem framework
+**Data:** 2026-07-19 · **Status:** aceita
+
+### Contexto
+O projeto nunca teve teste. Toda validação era visual, e um defeito de export só aparecia ao abrir o arquivo gerado — foi assim que o FIX-002 passou despercebido por três versões. Mas o `.html` único e sem build (DEC-001) não comporta uma suíte tradicional.
+
+### Decisão
+`tests/smoke.mjs`: script em **Node puro, sem dependências**, que recorta funções do `index.html` por varredura de chaves balanceadas e as executa isoladas, com um `db` de fixture. Cobre o `entryToMD()`, que é função pura. Rodar com `node tests/smoke.mjs`.
+
+### Alternativas consideradas
+- **Jest/Vitest** — exigiria `package.json`, `node_modules` e build: contraria a DEC-001 e o zero-setup.
+- **Página HTML de teste no navegador** — combinaria com o estilo do projeto, mas exige abrir e olhar; não dá para rodar antes de um commit nem num agente.
+- **Extrair o JS para arquivo separado e importar** — quebraria o arquivo único.
+
+### Consequências
+Ganho desproporcional ao custo: o smoke pegou os 5 sintomas do FIX-002 antes e depois do patch (5 falhas → 13 OK). Limite conhecido: cobre só funções puras — interface, `localStorage` e interações seguem sem cobertura e precisam de verificação manual declarada.
+
+---
+
+## FIX-002 — Export Markdown não separava conteúdo de estrutura
+**Data:** 2026-07-19 · **Corrigido em:** v12.1
+
+- **Sintoma:** num `.md` exportado com dados reais, a descrição multilinha aparecia sem `>` a partir da 2ª linha, e conteúdo de bloco contendo `#` gerava headings que se confundiam com títulos de entrada — o arquivo perdia a estrutura na releitura.
+- **Causa raiz:** em `entryToMD()`, tanto `e.description` quanto `b.content` eram interpolados **crus** na template string. O `>` era escrito uma única vez, antes da descrição inteira, e o conteúdo do bloco não tinha delimitador algum.
+- **Solução:** citar linha a linha a descrição; envolver o conteúdo em delimitadores HTML (DEC-008); acrescentar `<!-- BLOCO N -->`.
+- **Lição:** **texto livre interpolado em formato estruturado precisa de delimitador explícito.** O defeito sobreviveu a três versões porque o export "parecia certo" nos casos simples — só apareceu com dados reais, onde o usuário havia colado conteúdo que imitava a própria estrutura. Vale testar com entrada hostil, não só com a bem-comportada (é o que a fixture do smoke faz agora).

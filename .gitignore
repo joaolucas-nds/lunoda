@@ -1,13 +1,16 @@
+# .gitignore — NAO ignore meta/, logs/ nem guides/ (versionados de proposito).
+# O que nao deve subir ao Projeto do Claude fica no .flatdropignore, nao aqui.
+
 # ── Sistema operacional ──
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
 .DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 
 # ── Editores / IDEs ──
 .vscode/
@@ -16,13 +19,13 @@ $RECYCLE.BIN/
 *.swo
 *~
 
-# ── Saídas e backups locais (não versionar) ──
+# ── Trabalho local (nao versionar) ──
 outputs/
 backups/
 *.bak
 *.tmp
 
-# ── Exportações geradas pelo app (o usuário baixa; não vão pro repo) ──
+# ── Exportacoes geradas pelo app (o usuario baixa; nao vao pro repo) ──
 lunoda_backup_*.json
 lunoda_notas_*.md
 lunoda_notas_*.html
@@ -33,7 +36,3 @@ base_notas_*.md
 base_notas_*.html
 base_selecionados_*.json
 base_selecionados_*.md
-
-# ── Logs de sessão do sistema de documentação ──
-# (Mantidos no Git em logs/ — descomente a linha abaixo se preferir não versioná-los)
-# logs/
