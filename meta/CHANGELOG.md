@@ -5,7 +5,16 @@
 
 ---
 
-## [12.1.0] — 2026-07-19 *(entregue como ASU, pendente de aplicação)*
+## [12.2.0] — 2026-07-19 *(entregue como ASU, pendente de aplicação)*
+
+### Adicionado
+- **Undo/redo de operações estruturais no editor** (F8 parte 2, fase concluída). Cobre adicionar, remover, mover, duplicar e transferir blocos, e marcar propriedades — não a digitação, que continua com o desfazer nativo do navegador dentro de cada campo.
+- Atalhos `Ctrl+Z`, `Ctrl+Y` e `Ctrl+Shift+Z`. Dentro de campo de texto o `Ctrl+Z` segue sendo o do navegador.
+- Botões Desfazer/Refazer no cabeçalho do editor, esmaecidos quando não há o que fazer.
+- Guarda da invariante do projeto: undo/redo **nunca** deixa a entrada com 0 blocos.
+- `tests/history.mjs` — 18 asserções sobre o motor de histórico.
+
+## [12.1.0] — 2026-07-19 *(aplicada e verificada)*
 
 ### Corrigido
 - **FIX-002 — integridade do Markdown exportado.** Descrição multilinha agora tem `>` em **todas** as linhas: antes, da 2ª linha em diante o texto escapava da citação e uma linha iniciada por `#` ou `-` virava estrutura do documento.

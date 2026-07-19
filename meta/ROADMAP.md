@@ -21,7 +21,7 @@
 **Critério de conclusão:** seleção, reordenar em grupo, duplicar, excluir, mover/copiar para entrada existente/nova, filtro interno E/OU.
 - Entregue na v12 (ver DEC-004, DEC-005).
 
-## 🟡 F4 — UX de propriedades avançada + conforto de edição *(próxima)*
+## 🟡 F4 — UX de propriedades avançada + conforto de edição *(próxima — depende de decisão)*
 **Objetivo:** tornar a marcação de propriedades mais rápida (seleção em massa, botões do mouse) e a edição de texto mais confortável (tamanho das caixas).
 **Critério de conclusão:** a definir junto com o escopo da v13.
 - [ ] Propriedades em blocos selecionados (inverter posse) — depende de resolver conflito C1 (IDEAS).
@@ -43,14 +43,14 @@
 - Histórico de versões de bloco (snapshots + diff).
 - Entrada favorita/fixada; cor de entrada na tabela.
 
-## 🟡 F8 — Rede de segurança *(parte 1 entregue na v12.1; falta o undo/redo)*
+## 🟢 F8 — Rede de segurança *(concluída — v12.1 e v12.2)*
 **Objetivo:** proteger o acervo antes de aumentar o poder de destruição da ferramenta.
 **Critério de conclusão:** o usuário não consegue perder trabalho por acidente nem por limite de armazenamento silencioso.
 - [x] Aviso ao passar de ~80% do teto (~5 MB) — `warnIfStorageTight()`, v12.1.
 - [x] `try/catch` de `QuotaExceededError` no salvamento, com mensagem acionável — v12.1.
 - [x] `navigator.storage.persist()` — `requestPersistence()`, v12.1.
-- [ ] **Undo/redo no editor (Ctrl+Z / Ctrl+Y) sobre snapshots do estado — único item restante da fase.**
-> **Por que antes da F4:** a v12 entregou excluir, mover e transferir **em lote**, sem desfazer e sem aviso de teto de armazenamento. O poder de estrago cresceu e a rede de segurança não acompanhou. É a fase de maior retorno por esforço no momento.
+- [x] Undo/redo no editor (Ctrl+Z / Ctrl+Y) sobre snapshots do estado — v12.2, ver DEC-010.
+> Fase fechada. O acervo agora está protegido contra os dois modos de perda que existiam: estouro silencioso de armazenamento e exclusão em massa sem volta.
 
 ## 🔵 F9 — Interoperabilidade do export *(futuro — pré-requisito já entregue)*
 **Objetivo:** o arquivo exportado deixar de ser só legível e passar a ser **importável por outras ferramentas**.

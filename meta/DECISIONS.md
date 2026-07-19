@@ -193,3 +193,24 @@ Ganho desproporcional ao custo: o smoke pegou os 5 sintomas do FIX-002 antes e d
 - **Causa raiz:** em `entryToMD()`, tanto `e.description` quanto `b.content` eram interpolados **crus** na template string. O `>` era escrito uma única vez, antes da descrição inteira, e o conteúdo do bloco não tinha delimitador algum.
 - **Solução:** citar linha a linha a descrição; envolver o conteúdo em delimitadores HTML (DEC-008); acrescentar `<!-- BLOCO N -->`.
 - **Lição:** **texto livre interpolado em formato estruturado precisa de delimitador explícito.** O defeito sobreviveu a três versões porque o export "parecia certo" nos casos simples — só apareceu com dados reais, onde o usuário havia colado conteúdo que imitava a própria estrutura. Vale testar com entrada hostil, não só com a bem-comportada (é o que a fixture do smoke faz agora).
+
+---
+
+## DEC-010 — Undo por snapshot do editor, com os mutadores embrulhados
+**Data:** 2026-07-19 · **Status:** aceita
+
+### Contexto
+A v12 entregou excluir, mover e transferir blocos **em lote**, sem nenhum desfazer. O poder de estrago cresceu e a rede de segurança não acompanhou (F8). Faltava decidir *o que* guardar e *onde* registrar.
+
+### Decisão
+**O quê:** snapshots inteiros do editor, via o `getEditorSnapshot()` que já existia — o estado é o JSON de uma entrada, pequeno o bastante. Teto de 50 entradas.
+**Onde:** em vez de acrescentar `pushHistory()` dentro de cada um dos 11 mutadores, eles são **embrulhados** por uma lista de nomes ao final do bloco de histórico. O embrulho compara o snapshot antes/depois e só registra quando o estado muda de fato.
+**Escopo:** só operações estruturais. Digitação continua com o desfazer nativo do navegador dentro do campo — o `Ctrl+Z` só é interceptado fora de `INPUT`/`TEXTAREA`.
+
+### Alternativas consideradas
+- **Comando inverso por operação** (registrar "adicionei o bloco X" e saber removê-lo) — mais econômico em memória, mas exige escrever e manter uma inversa para cada ação; é onde esse tipo de recurso costuma quebrar. Não compensa num estado tão pequeno.
+- **Editar os 11 mutadores** — mais explícito para quem lê uma função isolada, mas espalha a mesma linha por 11 lugares e a próxima função nova nasce sem histórico por esquecimento. O embrulho concentra a regra num ponto só; o custo é a indireção, mitigada por comentário.
+- **Desfazer também da digitação** — duplicaria o comportamento nativo do navegador e brigaria com ele dentro do campo.
+
+### Consequências
+Fecha a F8. Adicionar cobertura a uma função nova é acrescentar um nome na lista. O embrulho depende de as funções serem declarações de topo (viram propriedades de `window`) — se alguma virar `const`, o embrulho a ignora silenciosamente, por isso há checagem de tipo e o `tests/history.mjs`. `restoreEditorSnapshot` recria um bloco vazio se o snapshot tiver zero, preservando a invariante do projeto.

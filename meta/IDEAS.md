@@ -89,6 +89,8 @@ Pergunta do autor. *Sugestão do assistente:* nesse caso, **desabilitar** a edi�
 
 ## ✅ Concluídas
 
+- **Undo/redo estrutural no editor** — v12.2 / DEC-010. Fecha a F8.
+
 - **Integridade do export MD (descrição citada + conteúdo delimitado)** — v12.1 / FIX-002, DEC-008. Era a raiz da queixa recorrente de "identificação" desde a v10.
 - **Rede de segurança de armazenamento (cota, persistência, aviso de 80%)** — v12.1 / F8 parte 1.
 - **Verificação automática mínima (smoke)** — v12.1 / DEC-009.
@@ -144,3 +146,10 @@ Gerada a `260719-asu0001.yaml` com `replace_context_block` (função inteira) e 
 - **O que ajudou muito:** a regra §4.7 do `INSTRUCTION_GUIDE` (não ancorar em glifo não-ASCII). O `entryToMD` é cheio de `━`, `·`, `—` e acentos; ancorar em `function entryToMD(e) {` e `\n}\n\nfunction exportAllJSON() {` — ASCII puro — evitou o problema por completo.
 - **Observação para o kit:** o guia recomenda edição cirúrgica, mas quando várias mudanças coordenadas caem na mesma função, substituir a função inteira via `replace_context_block` é mais seguro do que 3 patches pequenos com âncoras frágeis no meio de texto acentuado. Talvez valha o guia dizer isso explicitamente — hoje dá a entender que "menor é sempre melhor".
 - **Sugestão de fluxo:** aplicar a instrução numa cópia e rodar a verificação antes de entregar. Pegou 5 defeitos reais aqui e custou pouco.
+
+### 2026-07-19 — O teste pegou a fixture, não o código (e isso é bom sinal)
+Ao testar o undo/redo, a asserção "mutação nova limpa o redo" falhou. A causa não era o código: o `moveBlock` de mentira invertia a lista e, com **um bloco só**, inverter não muda nada — o embrulho corretamente não registrou histórico. O defeito estava no teste.
+Vale como lembrete de duas coisas: (1) quando um teste falha, investigar antes de "consertar" o código — quase se mexeu no que estava certo; (2) fixture com um único elemento esconde bug de ordenação e finge bug onde não há. As fixtures novas devem ter pelo menos 2–3 blocos quando a asserção envolve ordem.
+
+### 2026-07-19 — Embrulho de funções: registrar como padrão do projeto?
+A DEC-010 embrulhou 11 mutadores em vez de editá-los um a um. Funcionou bem e o diff ficou minúsculo. Se o padrão se repetir (ex.: para telemetria de uso, ou para marcar "sujo" no editor), vale promovê-lo a convenção no CONTEXT — com a ressalva de que depende de declaração de função no topo do script.

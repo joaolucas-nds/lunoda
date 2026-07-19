@@ -7,7 +7,8 @@ A solução é um **smoke em Node puro, sem dependências**.
 ## Rodar
 
 ```
-node tests/smoke.mjs
+node tests/smoke.mjs      (export / entryToMD)
+node tests/history.mjs    (undo/redo do editor)
 ```
 
 Sai com código `1` se algo falhar. Para ver o Markdown gerado quando há falha:
@@ -38,6 +39,20 @@ As asserções incluem duas **regressões** do FIX-002:
 - um bloco vazio.
 
 O FIX-002 sobreviveu a três versões porque o export parecia certo com dados bem-comportados. Testar com entrada hostil é o ponto.
+
+## `history.mjs` — undo/redo
+
+Monta um **editor de mentira** (dublês de DOM e mutadores) e recorta o bloco de histórico do `index.html` para exercitá-lo. 18 asserções, incluindo:
+
+- ação sem efeito não suja o histórico (o caso do `confirm` cancelado);
+- ramo novo invalida o refazer;
+- **undo/redo nunca deixa a entrada com 0 blocos** — a invariante do projeto;
+- o teto de 50 entradas é respeitado;
+- abrir outra entrada zera o histórico.
+
+Rode ao mexer nos mutadores estruturais ou na lista de nomes embrulhados (DEC-010).
+
+> Uma fixture com **um único bloco** esconde bug de ordenação e finge bug onde não há — foi o que aconteceu ao escrever este teste. Use 2–3 blocos quando a asserção envolver ordem.
 
 ## O que NÃO cobre
 

@@ -58,12 +58,16 @@ db = {
 Não há framework. `tests/smoke.mjs` é um harness em Node puro que **extrai funções do `index.html`** e as executa isoladamente — não precisa de navegador nem de instalação.
 
 ```
-node tests/smoke.mjs
+node tests/smoke.mjs      (export / entryToMD)
+node tests/history.mjs    (undo/redo do editor)
 ```
 
-Cobre hoje o `entryToMD()` (geração do Markdown), que é uma função pura dado um `db`. Roda em segundos e falha com mensagem clara. Detalhes em `tests/README.md`.
+`smoke.mjs` cobre o `entryToMD()` — função pura dado um `db`. `history.mjs` monta um editor de mentira e exercita o motor de undo/redo. Ambos rodam em segundos e falham com mensagem clara. Detalhes em `tests/README.md`.
 
-**Ao alterar `entryToMD`, `calcPropertyValues` ou qualquer coisa de export: rode o smoke antes de dizer que está pronto.**
+**Ao alterar `entryToMD`, `calcPropertyValues` ou qualquer coisa de export: rode o smoke.**
+**Ao alterar mutadores estruturais de bloco ou a lista de embrulho da DEC-010: rode o history.**
+
+> Se um teste falhar, **investigue antes de mexer no código** — já aconteceu de a fixture estar errada e o código certo.
 
 Para o que o smoke não cobre (interface, `localStorage`, arrastar, cores), verifique no navegador e diga explicitamente o que testou e o que não deu para testar.
 

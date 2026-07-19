@@ -729,6 +729,8 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
       Salvar
     </button>
+<button class="btn btn-ghost btn-xs" id="epUndoBtn" onclick="undoEditor()" title="Desfazer (Ctrl+Z)" style="opacity:.35;pointer-events:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg></button>
+<button class="btn btn-ghost btn-xs" id="epRedoBtn" onclick="redoEditor()" title="Refazer (Ctrl+Y)" style="opacity:.35;pointer-events:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3l3 2.7"/></svg></button>
     <button class="btn btn-ghost btn-xs" onclick="exportCurrentMD()" title="Exportar esta entrada como Markdown">MD</button>
     <button class="btn btn-ghost btn-xs" onclick="exportCurrentJSON()" title="Exportar esta entrada como JSON">JSON</button>
     <button class="btn btn-ghost btn-xs" onclick="exportCurrentHTML()" title="Exportar como HTML (abrível no navegador, imprimível como PDF)">HTML</button>
@@ -1523,6 +1525,116 @@ function getEditorSnapshot() {
   });
 }
 
+/* ──────────────────────────────
+   HISTORICO DO EDITOR (undo/redo)
+────────────────────────────── */
+
+/* Cobre operações ESTRUTURAIS (adicionar, remover, mover, duplicar,
+   transferir blocos e marcar propriedades) — não a digitação, que já
+   tem o desfazer nativo do navegador dentro de cada campo de texto.
+   Guarda snapshots inteiros do editor: o estado é pequeno (JSON de uma
+   entrada) e isso evita ter que escrever uma operação inversa para cada
+   ação, que é onde esse tipo de recurso costuma quebrar. */
+
+const HISTORY_LIMIT = 50;   // teto de memória; passa disso, a mais antiga sai
+let undoStack = [];
+let redoStack = [];
+
+/* Zera o histórico. Chamado ao abrir uma entrada: desfazer não deve
+   atravessar de uma entrada para outra. */
+function clearEditorHistory() {
+  undoStack = [];
+  redoStack = [];
+  updateHistoryButtons();
+}
+
+/* Reaplica um snapshot no editor.
+   Guarda a invariante do projeto: entrada nunca fica com 0 blocos. */
+function restoreEditorSnapshot(json) {
+  const s = JSON.parse(json);
+  document.getElementById('epTitleInput').value = s.title || '';
+  document.getElementById('epDesc').value = s.desc || '';
+  editPropAutoFlags = s.autoFlags || {};
+  editBlockProps    = s.blockProps || {};
+  editBlocks        = s.blocks || [];
+  if (editBlocks.length === 0) {
+    const nb = { id: uid(), subtitle: '', version: 1, content: '', blockProps: {} };
+    editBlocks = [nb];
+    editBlockProps[nb.id] = {};
+  }
+  // Os ids selecionados podem não existir mais no estado restaurado.
+  if (typeof selectedBlockIds !== 'undefined') selectedBlockIds.clear();
+  renderEditorProps();
+  renderBlocks();
+}
+
+function undoEditor() {
+  if (undoStack.length === 0) { showToast('Nada para desfazer'); return; }
+  redoStack.push(getEditorSnapshot());
+  restoreEditorSnapshot(undoStack.pop());
+  updateHistoryButtons();
+  showToast('Desfeito');
+}
+
+function redoEditor() {
+  if (redoStack.length === 0) { showToast('Nada para refazer'); return; }
+  undoStack.push(getEditorSnapshot());
+  restoreEditorSnapshot(redoStack.pop());
+  updateHistoryButtons();
+  showToast('Refeito');
+}
+
+/* Liga/desliga os botões conforme há o que desfazer ou refazer. */
+function updateHistoryButtons() {
+  const set = (id, on) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.opacity = on ? '' : '.35';
+    el.style.pointerEvents = on ? '' : 'none';
+  };
+  set('epUndoBtn', undoStack.length > 0);
+  set('epRedoBtn', redoStack.length > 0);
+}
+
+/* Embrulha os mutadores estruturais em vez de editar cada um deles.
+   Motivo: são 11 funções e o registro do histórico é sempre idêntico —
+   espalhar a mesma linha por 11 lugares só multiplica a chance de
+   esquecer uma ao criar a próxima. Para passar a cobrir uma função
+   nova, basta acrescentar o nome nesta lista.
+   O snapshot é comparado antes/depois: ação cancelada pelo usuário
+   (ex.: o confirm de excluir) não deixa entrada morta no histórico. */
+['addBlock', 'removeBlock', 'moveBlock', 'jumpBlockTo',
+ 'moveSelectedBlocks', 'duplicateBlock', 'duplicateSelectedBlocks',
+ 'deleteSelectedBlocks', 'toggleEntryPropAuto', 'toggleBlockPropOpt',
+ 'disableAutoFromBlock'].forEach(name => {
+  const original = window[name];
+  if (typeof original !== 'function') return;   // tolera renomeação futura
+  window[name] = function (...args) {
+    let before = null;
+    try { before = getEditorSnapshot(); } catch (_) { /* editor fechado */ }
+    const result = original.apply(this, args);
+    try {
+      if (before !== null && getEditorSnapshot() !== before) {
+        undoStack.push(before);
+        if (undoStack.length > HISTORY_LIMIT) undoStack.shift();
+        redoStack = [];               // ramo novo invalida o refazer
+        updateHistoryButtons();
+      }
+    } catch (_) { /* ignora: histórico é auxiliar, não pode quebrar a ação */ }
+    return result;
+  };
+});
+
+/* Abrir outra entrada zera o histórico (embrulho pelo mesmo motivo acima). */
+(function () {
+  const originalOpen = window.openEditor;
+  if (typeof originalOpen !== 'function') return;
+  window.openEditor = function (...args) {
+    const result = originalOpen.apply(this, args);
+    clearEditorHistory();
+    return result;
+  };
+})();
 function isEditorDirty() {
   return dirtySnapshot !== null && getEditorSnapshot() !== dirtySnapshot;
 }
@@ -2811,6 +2923,20 @@ document.addEventListener('keydown', e => {
   if ((e.ctrlKey||e.metaKey) && e.key === 's') {
     if (document.getElementById('editorPanel').classList.contains('open')) {
       e.preventDefault(); saveEntry();
+    }
+  }
+// Desfazer/refazer estrutural. Dentro de um campo de texto o Ctrl+Z
+// continua sendo o do navegador (desfaz a digitação), que é o que o
+// usuário espera ali — só assumimos o atalho fora deles.
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z' || e.key === 'y' || e.key === 'Y')) {
+    const el = document.activeElement;
+    const digitando = el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+    const editorAberto = document.getElementById('editorPanel').classList.contains('open');
+    if (!digitando && editorAberto) {
+      e.preventDefault();
+      const k = e.key.toLowerCase();
+      if (k === 'y' || (k === 'z' && e.shiftKey)) redoEditor();
+      else undoEditor();
     }
   }
   if (e.key === 'Escape') {

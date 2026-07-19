@@ -8,7 +8,7 @@
 
 ## Versão atual
 
-**Lunoda v12.1** (pendente de aplicação) — arquivo canônico `index.html` (no Projeto, ~2771 linhas, todas as funções da v12 confirmadas no disco).
+**Lunoda v12.2** (v12.1 aplicada; v12.2 pendente de aplicação) — arquivo canônico `index.html` (no Projeto, ~2771 linhas, todas as funções da v12 confirmadas no disco).
 
 ## O que funciona
 
@@ -26,23 +26,15 @@
 
 ## Em progresso
 
-- **v12.1 entregue como instrução ASU `260719-asu0001.yaml`, aguardando aplicação.** Corrige a integridade do export MD (FIX-002) e adiciona rede de segurança de armazenamento (F8, parte 1). Validada em cópia: smoke 13/13 e `node --check` OK.
-
-## Em progresso (antigo)
-
-- Nada em execução no código no momento. A sessão de hoje montou o **sistema de documentação** do Projeto.
-
-## Quebrado / pendências
-
-- **FIX-002 corrigido na v12.1, pendente de aplicação:** exports da v12 têm descrição multilinha sem `>` a partir da 2ª linha e conteúdo de bloco sem delimitador. Arquivos já exportados seguem com o defeito — reexportar depois de aplicar o patch.
-- `saveDB` da v12 não trata estouro de cota (corrigido na v12.1, mesma pendência).
+- **v12.2 entregue como `260719-asu0002.yaml`, aguardando aplicação.** Undo/redo estrutural no editor — fecha a fase F8. Validada em cópia: história 18/18, smoke 13/13 (sem regressão), `node --check` OK.
 
 ## 📁 Arquivos críticos (não mexer sem contexto)
 
 | Arquivo | Por quê |
 |---|---|
 | `index.html` | É o produto inteiro. Não editar às cegas; ver armadilhas no CONTEXT. |
-| `tests/smoke.mjs` | Única verificação automática do projeto. Rode antes de fechar mudança de export. |
+| `tests/smoke.mjs` | Verifica o export. Rode antes de fechar qualquer mudança em `entryToMD`. |
+| `tests/history.mjs` | Verifica o undo/redo. Rode ao mexer nos mutadores estruturais ou na lista de embrulho. |
 | `STORAGE_KEY = 'base_v4'` (dentro do HTML) | Renomear sem migração **apaga os dados do usuário**. |
 | `calcPropertyValues()` / `blockProps` | Núcleo do modelo de propriedades (DEC-003). Mudança aqui afeta exportação e filtros. |
 | `loadDB()` / `handleImport()` / `migrateOptionModes()` | Migração de formatos antigos. Quebrar aqui inutiliza backups antigos. |
@@ -55,6 +47,6 @@
 
 ## Última sessão
 
-**2026-07-19** — Verificados os `.txt` e o export `Lunoda - Blocos de notas.md` do mount: **tudo já registrado, pode arquivar**. O export real revelou dois defeitos de integridade (FIX-002), corrigidos na instrução ASU `260719-asu0001.yaml` junto com a rede de segurança de armazenamento. Criados `CLAUDE.md` e `tests/` (smoke em Node puro, sem dependências).
+**2026-07-19 (sessão 3)** — Verificada a aplicação da v12.1 no repositório: smoke 13/13 contra o `index.html` real, sintaxe válida, sem duplicação de âncora e o `saveDB` antigo removido. Em seguida, desenvolvida a **v12.2 (undo/redo)**, entregue como `260719-asu0002.yaml` e validada em cópia.
 
-**Próximo passo óbvio:** aplicar o ASU, rodar `node tests/smoke.mjs`, reexportar os `.md` antigos e então decidir entre F8-parte-2 (undo/redo) e F4 (UX de propriedades, que exige resolver C1/C2/Q1).
+**Próximo passo óbvio:** aplicar a v12.2, rodar os dois testes, conferir o desfazer no navegador. Depois: reexportar os `.md` antigos e decidir a F4 (exige resolver C1/C2/Q1 do IDEAS) ou a F9 (frontmatter YAML).
