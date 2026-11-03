@@ -39,6 +39,18 @@ Se há v1..v4 e cria-se v5, mudar o número de v5 para v3 empurra as existentes:
 Um quadrado geral para marcar ou desmarcar todos os blocos, que funcione conforme o filtro (age no que está aparecendo), com símbolo próprio quando só parte está marcada, desenhado segundo as práticas mais comuns e intuitivas. Pergunta do autor: com 4 de 10 marcados e um filtro que mostra 6 (2 deles marcados), o que o clique faz, e o que acontece com os 2 marcados que o filtro escondeu?
 > Fonte: conversa de 2026-11-03. **Status:** implementada na v13.1 (DEC-016) — ver Concluídas.
 
+### 2026-11 — Controle geral de tamanho para todos os blocos
+Além dos botões por caixa, um controle geral para aplicar o tamanho a todos os blocos de uma vez.
+> Fonte: conversa de 2026-11-03. **Status:** implementada na v13.2 (DEC-020) — ver Concluídas.
+
+### 2026-11 — Painel do editor mais largo ou em tela inteira
+Poder expandir o painel da direita para a esquerda, ou abri-lo completo: o espaço pequeno aperta comandos e deixa botões e opções pequenos ou difíceis de ver.
+> Fonte: conversa de 2026-11-03. **Status:** implementada na v13.2 (DEC-019) — ver Concluídas.
+
+### 2026-11 — Interface mais nítida e intuitiva
+Algumas coisas não estão nítidas; usar mais UX/UI. Medido pelo assistente: contraste do texto secundário de 1,7:1 (mínimo recomendado 4,5:1) e 22 textos em 9–10px.
+> Fonte: conversa de 2026-11-03. **Status:** primeira passada na v13.2 (DEC-018) — ver Concluídas. Novas observações de nitidez entram aqui.
+
 ---
 
 ## 🤖 Ideias Ativas — Assistente
@@ -105,6 +117,9 @@ Pergunta do autor. *Sugestão do assistente:* nesse caso, **desabilitar** a edi�
 
 ## ✅ Concluídas
 
+- **Legibilidade: contraste WCAG AA e piso de 11px** — v13.2 / DEC-018.
+- **Painel do editor ajustável e maximizar** — v13.2 / DEC-019.
+- **Controle geral de tamanho das caixas dos blocos** — v13.2 / DEC-020.
 - **Quadrado geral de seleção respeitando o filtro** — v13.1 / DEC-016.
 - **Tamanho das caixas de texto (Auto · Mín · P · M · G)** — v13.1 / DEC-017. Fecha a F4.
 - **Marcar propriedade nos blocos selecionados (uniformizar) + botão direito para o automático** — v13.0 / DEC-013, DEC-014.

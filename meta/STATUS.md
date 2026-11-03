@@ -8,7 +8,7 @@
 
 ## Versão Atual
 
-**Lunoda v13.1** — 2026-11-03 — quadrado geral de seleção respeitando o filtro e tamanho das caixas de texto (F4 concluída). Arquivo canônico `index.html`. Testes: `smoke` 28/28 e `history` 39/39 (rodada da wo0003).
+**Lunoda v13.2** — 2026-11-03 — legibilidade (contraste WCAG AA, piso de 11px), painel do editor ajustável/maximizar e controle geral do tamanho das caixas. Arquivo canônico `index.html`. Testes: `smoke` 28/28 e `history` 39/39 (rodada da wo0004).
 
 ## ✅ Funcionando
 
@@ -25,11 +25,14 @@
 - Marcar propriedade nos blocos selecionados (uniformizar, `✓`/`–`) e botão direito para a adição automática (v13.0).
 - Quadrado geral de seleção de blocos, que age nos visíveis e mostra os selecionados fora do filtro (v13.1).
 - Tamanho das caixas de texto: Auto (padrão) · Mín · P · M · G, padrão pelo botão direito (v13.1).
+- Painel do editor com largura ajustável (alça) e maximizar; largura lembrada (v13.2).
+- Controle geral «Caixas: Auto · P · M · G» no cabeçalho dos blocos (v13.2).
+- Texto secundário com contraste ≥ 4,5:1 e nada abaixo de 11px (v13.2).
 - Verificação automática: `node tests/smoke.mjs` e `node tests/history.mjs`.
 
 ## 🔧 Em Progresso
 
-- **v13.1 aplicada; falta a conferência no navegador** — roteiro na conversa de 2026-11-03. A v13.0 já foi conferida pelo autor (roteiro de 8 itens, todos ok).
+- **v13.2 aplicada; falta a conferência no navegador** — roteiro na conversa de 2026-11-03. v13.0 e v13.1 já conferidas pelo autor (todos os itens ok).
 
 ## ❌ Quebrado / Com Problema
 
@@ -43,11 +46,11 @@
 - [ ] **Conferir o undo/redo no navegador** — excluir blocos em massa e `Ctrl+Z`; `Ctrl+Z` dentro de campo de texto desfaz a digitação, não a estrutura; botões esmaecidos sem histórico; abrir outra entrada zera o histórico.
 - [ ] **Prints para o README** — cabeçalho do editor com Desfazer/Refazer; modal de exportação com o checkbox de frontmatter; propriedades renderizadas no Obsidian.
 - [ ] **Higiene do IDEAS** — ideias já implementadas (teto do `localStorage`, frontmatter, undo/redo) seguem também em «Ideias Ativas — Assistente», e três ideias ativas (reimportar `.md`, estender o smoke, exportar `.zip`) estão fora da seção delas (sob «Descartadas» e «Feedback para o Kit»). Curadoria por WO própria.
-- [ ] **Conferir a v13.1 no navegador** (roteiro na conversa de 2026-11-03).
-- [ ] **Projetar a F6 — empurrão de versão (DEC-015)** como WO. Alternativa: **F9 parte 2 — reimportar `.md`**.
+- [ ] **Conferir a v13.2 no navegador** (roteiro na conversa de 2026-11-03).
+- [ ] **Projetar a F6 — empurrão de versão (DEC-015)** como WO — próxima pela ordem combinada; depois **F9 parte 2 — reimportar `.md`** (começa por análise).
 
 ## 💬 Última conversa
 
-**2026-11-03** — Migração para o KCM v1.133.0 / modo Code (wo0001, `552d577`). Decididas C1, C2 e Q1 (DEC-013/014/015); entregue a **v13.0** (wo0002, `49c087e`), conferida no navegador. Desenhados e entregues o quadrado geral de seleção (DEC-016) e o tamanho das caixas (DEC-017): **v13.1** pela wo0003.
+**2026-11-03** — Migração para o KCM v1.133.0 / modo Code (wo0001, `552d577`). Decididas C1, C2 e Q1 (DEC-013/014/015); entregue a **v13.0** (wo0002, `49c087e`), conferida no navegador. Desenhados e entregues o quadrado geral de seleção (DEC-016) e o tamanho das caixas (DEC-017): **v13.1** pela wo0003, conferida no navegador. Pacote de interface (DEC-018/019/020) aprovado com prints de antes/depois: **v13.2** pela wo0004.
 
-**Próximo passo óbvio:** conferir a v13.1 no navegador; depois F6 ou F9 parte 2.
+**Próximo passo óbvio:** conferir a v13.2 no navegador; depois F6, depois F9 parte 2.

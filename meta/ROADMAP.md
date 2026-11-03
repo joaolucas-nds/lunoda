@@ -70,6 +70,14 @@
 **Gatilho:** só iniciar quando o indicador da F8 mostrar uso real perto do teto — não antes.
 - Muda `save`/`load` para assíncrono; é a mudança estrutural mais séria já cogitada. Exige plano de migração e backup obrigatório antes.
 
+## 🟢 F12 — Legibilidade e ergonomia do editor *(entregue — v13.2; falta conferir no navegador)*
+**Objetivo:** a interface nítida e confortável em telas de uso real.
+**Critério de conclusão:** texto secundário ≥ 4,5:1, nada abaixo de 11px, painel com largura ajustável, controle geral das caixas.
+- [x] Contraste WCAG AA e piso de 11px (DEC-018).
+- [x] Painel ajustável + maximizar (DEC-019).
+- [x] Controle geral «Caixas» (DEC-020).
+> Ordem combinada com o autor: esta fase, depois F6, depois F9 parte 2.
+
 ---
 
 ## 🚫 Itens descartados desta visão

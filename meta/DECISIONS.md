@@ -365,3 +365,56 @@ F4 parte 2: o espaço fixo das caixas (descrição 56px, bloco 90px) incomodava 
 
 ### Consequências
 Nenhuma mudança no formato dos dados nem no undo (tamanho não é estado da entrada). Altura arrastada à mão se perde quando a lista de blocos é redesenhada (ex.: ao filtrar) — aceito: o ajuste por caixa já é provisório por desenho.
+
+---
+
+## DEC-018 — Legibilidade: piso de contraste WCAG AA (4,5:1) e de 11px
+**Data:** 2026-11-03 · **Status:** aceita
+
+### Contexto
+O autor achava botões e opções pouco nítidos. Medido: `--text-muted` (#44444f, 41 usos — dicas, rótulos, contadores) tinha **1,7 a 1,8:1** contra os fundos do app, e `--text-dim` (#7a7a8c) **3,9 a 4,2:1**; o mínimo WCAG AA para texto comum é 4,5:1. Havia 22 textos em 9–10px e as opções não marcadas tinham opacidade .48.
+
+### Decisão
+`--text-dim` → #a2a2b6 (6,5–7,6:1) e `--text-muted` → #87879d (4,6–5,5:1), medidos contra `--bg`, `--surface`, `--surface2` e `--surface3`. Todo `font-size` de 9 ou 10px passa a 11px. `.btn-xs` e os botões de tamanho ganham preenchimento maior. Opção de propriedade não marcada: opacidade .7. Aprovado pelo autor com prints de antes/depois.
+
+### Alternativas consideradas
+- **Só clarear o `--text-muted`** — deixava títulos de seção (`--text-dim`) abaixo de 4,5:1 no `--surface2`.
+- **Branco para tudo** — perderia a hierarquia texto > dim > muted que organiza a tela.
+
+### Consequências
+Regra para cor nova de texto: **medir o contraste contra o `--surface2` (o fundo mais claro) e não ficar abaixo de 4,5:1**; nada abaixo de 11px. A hierarquia visual continua, mais clara.
+
+---
+
+## DEC-019 — Painel do editor com largura ajustável e maximizar
+**Data:** 2026-11-03 · **Status:** aceita
+
+### Contexto
+Largura fixa de 780px (ou 92% da janela) apertava comandos e textos.
+
+### Decisão
+Alça na borda esquerda do painel (arrastar ajusta; mínimo 480px, máximo a janela; duplo clique volta ao original) e botão **maximizar/restaurar** no cabeçalho. Preferência em `localStorage['lunoda_editor_w']` (`{w, max}`), fora do `db` (DEC-011). O painel passou a fechar por `transform` em vez de `right` negativo — com largura variável, um `right: -820px` fixo deixaria o painel largo aparecendo pela borda.
+
+### Alternativas consideradas
+- **Só maximizar** — resolve o aperto, mas tira a tabela de vista sempre que se quer só um pouco mais de espaço.
+- **Larguras pré-definidas (P/M/G)** — menos controle que arrastar, e mais um conjunto de botões.
+
+### Consequências
+Ao mudar a largura, as caixas em Auto são re-medidas (`taRefreshAll`). Largura maior que a janela é limitada ao abrir e ao redimensionar a janela.
+
+---
+
+## DEC-020 — Controle geral de tamanho das caixas dos blocos no cabeçalho
+**Data:** 2026-11-03 · **Status:** aceita · complementa a DEC-017
+
+### Contexto
+Aplicar um tamanho a todos os blocos já era possível pelo botão direito (que torna o modo o padrão), mas escondido. O autor pediu um controle geral.
+
+### Decisão
+«Caixas: Auto · P · M · G» no cabeçalho da lista de blocos, sempre visível. **Clique esquerdo** aplica a todos os blocos só nesta sessão; **botão direito** torna o padrão — os mesmos gestos das caixas individuais. O botão ativo é o modo comum a todos os blocos; se estiverem diferentes, nenhum fica ativo.
+
+### Alternativas consideradas
+- **Deixar só o botão direito** — funcional, mas não descobrível.
+
+### Consequências
+Mesma regra em dois lugares (caixa e geral), mesmo código (`taToolbarHTML('all')`). Sem mudança no formato dos dados.

@@ -23,6 +23,16 @@
 
 > Nada aqui altera o `index.html` — são mudanças de documentação e processo.
 
+## [13.2.0] — 2026-11-03
+
+### Adicionado
+- **Painel do editor ajustável** (DEC-019): alça na borda esquerda para arrastar a largura (duplo clique volta ao original) e botão **maximizar/restaurar** no cabeçalho. A largura é lembrada.
+- **Controle geral «Caixas: Auto · P · M · G»** no cabeçalho da lista de blocos (DEC-020): aplica a todos os blocos; botão direito torna padrão.
+
+### Modificado
+- **Legibilidade** (DEC-018): cores de texto secundário clareadas até o piso WCAG AA (`--text-muted` 1,7→4,6:1; `--text-dim` 3,9→6,5:1, no fundo mais claro), nada abaixo de 11px, botões pequenos maiores, opções não marcadas menos apagadas.
+- O painel fecha por `transform` em vez de `right` negativo (necessário para a largura variável).
+
 ## [13.1.0] — 2026-11-03
 
 ### Adicionado

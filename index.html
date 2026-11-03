@@ -19,8 +19,8 @@
   --border:      #2e2e36;
   --border-soft: #232329;
   --text:        #e8e8f0;
-  --text-dim:    #7a7a8c;
-  --text-muted:  #44444f;
+  --text-dim:    #a2a2b6;   /* 6,5–7,6:1 nos fundos do app (DEC-018) */
+  --text-muted:  #87879d;   /* 4,6–5,5:1 — piso WCAG AA para texto comum (DEC-018) */
   --accent:      #7c6af7;
   --accent-soft: rgba(124,106,247,.14);
   --accent-h:    #6a59e0;
@@ -82,7 +82,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 .btn-outline:hover  { border-color: var(--text-dim); color: var(--text); }
 .btn-danger   { background: transparent; color: var(--red); border: 1px solid var(--red); }
 .btn-danger:hover   { background: rgba(245,101,101,.1); }
-.btn-xs { padding: 3px 7px; font-size: 11px; }
+.btn-xs { padding: 4px 9px; font-size: 11.5px; }
 .icon-btn {
   display: inline-flex; align-items: center; justify-content: center;
   width: 26px; height: 26px; border-radius: var(--rs);
@@ -114,7 +114,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
   padding: 12px 14px 10px; border-bottom: 1px solid var(--border-soft);
   flex-shrink: 0;
 }
-.psb-title { font-family: var(--mono); font-size: 10px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: .09em; flex: 1; }
+.psb-title { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: .09em; flex: 1; }
 .psb-search-wrap { padding: 8px 10px; flex-shrink: 0; }
 .psb-search {
   width: 100%; background: var(--surface2); border: 1px solid var(--border);
@@ -145,9 +145,9 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
   color: var(--text); font-family: var(--sans); font-size: 11px; font-weight: 500;
   width: 70px; outline: none; padding: 0 2px;
 }
-.chip-del-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 10px; line-height: 1; padding: 0 1px; }
+.chip-del-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 11px; line-height: 1; padding: 0 1px; }
 .chip-del-btn:hover { color: var(--red); }
-.chip-edit-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 9px; padding: 0 1px; }
+.chip-edit-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 11px; padding: 0 1px; }
 .chip-edit-btn:hover { color: var(--accent); }
 .prop-add-opt { display: flex; gap: 5px; margin-top: 4px; }
 .prop-opt-input {
@@ -207,7 +207,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 .tbl th {
   padding: 9px 14px; text-align: left; background: var(--surface);
   border-bottom: 1px solid var(--border);
-  font-family: var(--mono); font-size: 10px; font-weight: 500; color: var(--text-muted);
+  font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--text-muted);
   text-transform: uppercase; letter-spacing: .08em; white-space: nowrap;
   user-select: none;
 }
@@ -248,13 +248,20 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
    EDITOR PANEL (slides from right)
 ════════════════════════════════════════════ */
 .editor-panel {
-  position: fixed; top: 0; right: -820px; width: min(var(--editor-w), 92vw);
+  /* Fechado por transform, não por right negativo: com largura ajustável (DEC-019), um right fixo
+     deixaria o painel largo aparecendo pela borda */
+  position: fixed; top: 0; right: 0; transform: translateX(calc(100% + 60px)); width: min(var(--editor-w), 92vw);
   height: 100vh; background: var(--surface); border-left: 1px solid var(--border);
   display: flex; flex-direction: column; z-index: 300;
-  transition: right .26s cubic-bezier(.4,0,.2,1);
+  transition: transform .26s cubic-bezier(.4,0,.2,1);
   box-shadow: -12px 0 40px rgba(0,0,0,.55);
 }
-.editor-panel.open { right: 0; }
+.editor-panel.open { transform: none; }
+.editor-panel.ep-max { width: 100vw !important; border-left: none; }
+/* Alça de largura na borda esquerda (DEC-019) */
+.ep-resize { position: absolute; left: -4px; top: 0; bottom: 0; width: 8px; cursor: col-resize; z-index: 5; }
+.ep-resize:hover, .ep-resize.drag { background: var(--accent-soft); }
+.editor-panel.ep-max .ep-resize { display: none; }
 .ep-head {
   display: flex; align-items: center; gap: 7px; padding: 11px 16px;
   border-bottom: 1px solid var(--border); flex-shrink: 0;
@@ -269,7 +276,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 
 /* Editor fields */
 .field-lbl {
-  font-family: var(--mono); font-size: 10px; font-weight: 500; color: var(--text-muted);
+  font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--text-muted);
   text-transform: uppercase; letter-spacing: .08em; margin-bottom: 5px;
 }
 .fi {
@@ -289,11 +296,14 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
   opacity: 0; pointer-events: none; transition: opacity .12s; }
 .block-body.ta-wrap .ta-size { top: 13px; right: 16px; }
 .ta-wrap:hover .ta-size { opacity: 1; pointer-events: auto; }
-.ta-size button { font-family: var(--mono); font-size: 9px; line-height: 1; padding: 3px 5px;
+.ta-size button { font-family: var(--mono); font-size: 11px; line-height: 1; padding: 4px 7px;
   border-radius: 4px; border: 1px solid var(--border-soft); background: var(--surface3);
   color: var(--text-dim); cursor: pointer; }
 .ta-size button:hover { color: var(--text); }
 .ta-size button.on { color: var(--text); border-color: var(--accent); }
+/* Controle geral (DEC-020): no cabeçalho, sempre visível — não é sobreposto ao texto */
+.ta-size.ta-size-all { position: static; opacity: 1; pointer-events: auto; align-items: center; gap: 3px; margin-right: 4px; }
+.ta-all-lbl { font-family: var(--mono); font-size: 11px; color: var(--text-muted); margin-right: 3px; }
 .ta-def-dot { display: inline-block; width: 3px; height: 3px; border-radius: 50%;
   background: currentColor; margin-left: 3px; vertical-align: middle; }
 .meta-row { display: flex; gap: 14px; flex-wrap: wrap; font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
@@ -304,7 +314,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 .ep-opt {
   padding: 3px 9px; border-radius: 20px; font-size: 12px; font-weight: 500;
   cursor: pointer; border: 2px solid transparent; transition: all .1s;
-  opacity: .48;
+  opacity: .7;   /* era .48: ilegível; a marcada segue em 1 e com ✓ (DEC-018) */
 }
 .ep-opt:hover { opacity: .75; }
 .ep-opt.sel { opacity: 1; border-color: rgba(255,255,255,.25); }
@@ -327,7 +337,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
   border-radius: var(--r) var(--r) 0 0;
 }
 .block-num {
-  font-family: var(--mono); font-size: 10px; color: var(--text-muted);
+  font-family: var(--mono); font-size: 11px; color: var(--text-muted);
   min-width: 18px; flex-shrink: 0; user-select: none;
 }
 .block-sub-input {
@@ -355,7 +365,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 /* Jump-to position */
 .pos-input {
   background: var(--surface2); border: 1px solid var(--border); border-radius: var(--rs);
-  color: var(--text-dim); font-family: var(--mono); font-size: 10px; text-align: center;
+  color: var(--text-dim); font-family: var(--mono); font-size: 11px; text-align: center;
   width: 28px; height: 22px; padding: 0 2px; outline: none;
 }
 .pos-input:focus { border-color: var(--accent); color: var(--text); }
@@ -377,14 +387,14 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 .sug-drop.open { display: block; }
 .sug-sec { padding: 3px 0; }
 .sug-sec + .sug-sec { border-top: 1px solid var(--border-soft); }
-.sug-lbl { font-family: var(--mono); font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; padding: 5px 11px 2px; }
+.sug-lbl { font-family: var(--mono); font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; padding: 5px 11px 2px; }
 .sug-item { padding: 6px 12px; font-size: 12px; color: var(--text-dim); cursor: pointer; transition: background .09s; }
 .sug-item:hover { background: var(--surface2); color: var(--text); }
 .sug-empty { padding: 10px 12px; font-size: 12px; color: var(--text-muted); }
 
 /* Version adjuster hint */
 .ver-hint {
-  font-family: var(--mono); font-size: 10px; color: var(--text-muted);
+  font-family: var(--mono); font-size: 11px; color: var(--text-muted);
   padding: 2px 4px; display: none; white-space: nowrap;
 }
 .ver-hint.show { display: block; }
@@ -456,14 +466,14 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
   display: flex; flex-direction: column; gap: 10px;
 }
 .ep-props-hint {
-  font-size: 10px; color: var(--text-muted); font-family: var(--mono);
+  font-size: 11px; color: var(--text-muted); font-family: var(--mono);
   margin-bottom: 4px; line-height: 1.5;
 }
 .ep-prop-group {
   display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap;
 }
 .ep-prop-lbl {
-  font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+  font-family: var(--mono); font-size: 11px; color: var(--text-dim);
   text-transform: uppercase; letter-spacing: .07em;
   padding-top: 5px; min-width: 70px; max-width: 100px; flex-shrink: 0;
 }
@@ -488,7 +498,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 }
 .block-props-toggle:hover .bpt-lbl { color: var(--text-dim); }
 .bpt-lbl {
-  font-family: var(--mono); font-size: 9px; color: var(--text-muted);
+  font-family: var(--mono); font-size: 11px; color: var(--text-muted);
   text-transform: uppercase; letter-spacing: .07em; flex-shrink: 0;
 }
 .bpt-chips { display: flex; flex-wrap: wrap; gap: 3px; flex: 1; min-width: 0; }
@@ -504,13 +514,13 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 
 .blk-prop-row { display: flex; flex-direction: column; gap: 4px; }
 .blk-prop-row-lbl {
-  font-family: var(--mono); font-size: 9px; color: var(--text-muted);
+  font-family: var(--mono); font-size: 11px; color: var(--text-muted);
   text-transform: uppercase; letter-spacing: .07em;
 }
 .blk-prop-opts { display: flex; flex-wrap: wrap; gap: 3px; }
 .blk-prop-chip {
   display: inline-flex; align-items: center; gap: 3px;
-  padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 500;
+  padding: 2px 7px; border-radius: 20px; font-size: 11px; font-weight: 500;
   border: 1px solid transparent; transition: .12s; user-select: none;
 }
 .blk-prop-chip.toggleable { cursor: pointer; }
@@ -559,7 +569,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 }
 .blk-mass-bar.visible { display: flex; }
 .blk-mass-cnt {
-  font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+  font-family: var(--mono); font-size: 11px; color: var(--text-dim);
   white-space: nowrap; margin-right: 4px;
 }
 .blk-mass-sep { width: 1px; height: 14px; background: var(--border); margin: 0 2px; }
@@ -607,20 +617,20 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 .blk-filter-sel:focus { border-color: var(--accent); color: var(--text); }
 .blk-filter-opt-chips { display: flex; flex-wrap: wrap; gap: 3px; }
 .blk-foc { /* filter opt chip */
-  padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 500;
+  padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500;
   cursor: pointer; border: 2px solid transparent; opacity: .45; transition: .1s;
 }
 .blk-foc:hover { opacity: .75; }
 .blk-foc.sel { opacity: 1; border-color: rgba(255,255,255,.3); }
 .blk-filter-mode { display: flex; gap: 0; border: 1px solid var(--border); border-radius: var(--rs); overflow: hidden; }
 .blk-fm-btn {
-  padding: 3px 8px; font-size: 10px; font-weight: 500;
+  padding: 3px 8px; font-size: 11px; font-weight: 500;
   font-family: var(--mono); background: none; border: none;
   color: var(--text-muted); cursor: pointer; transition: .1s;
 }
 .blk-fm-btn.active { background: var(--accent-soft); color: var(--accent); }
 .blk-filter-lbl {
-  font-family: var(--mono); font-size: 10px; color: var(--text-muted);
+  font-family: var(--mono); font-size: 11px; color: var(--text-muted);
   text-transform: uppercase; letter-spacing: .07em; white-space: nowrap;
 }
 </style>
@@ -741,6 +751,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 
 <!-- EDITOR PANEL -->
 <div class="editor-panel" id="editorPanel">
+  <div class="ep-resize" id="epResize" title="Arraste para ajustar a largura · duplo clique: tamanho original"></div>
   <div class="ep-head">
     <span class="ep-title" id="epTitle">Nova entrada</span>
     <button class="btn btn-primary btn-xs" onclick="saveEntry()" title="Ctrl+S">
@@ -754,6 +765,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
     <button class="btn btn-ghost btn-xs" onclick="exportCurrentHTML()" title="Exportar como HTML (abrível no navegador, imprimível como PDF)">HTML</button>
     <div style="flex:1"></div>
     <button class="btn btn-danger btn-xs" id="epDeleteBtn" onclick="deleteCurrentEntry()" style="display:none">Excluir</button>
+    <button class="icon-btn" id="epMaxBtn" onclick="toggleEditorMax()" title="Maximizar (tela inteira)"></button>
     <button class="icon-btn" onclick="requestCloseEditor()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
@@ -769,7 +781,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
     <div>
       <div class="field-lbl" style="display:flex;align-items:center;gap:6px">
         Descrição / Resumo
-        <span style="font-size:10px;opacity:.5;font-weight:400">opcional</span>
+        <span style="font-size:11px;opacity:.5;font-weight:400">opcional</span>
       </div>
       <div class="ta-wrap" id="epDescWrap">
         <textarea class="fi fi-desc" id="epDesc" placeholder="Resumo rápido para identificação (não é obrigatório)..."></textarea>
@@ -788,6 +800,8 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
           <div class="field-lbl" style="margin-bottom:0">Blocos de Conteúdo</div>
         </div>
         <div style="display:flex;align-items:center;gap:5px">
+          <!-- Controle geral de tamanho das caixas dos blocos (DEC-020); desenhado por taRenderAllBar -->
+          <div class="ta-size ta-size-all" data-ta="all"></div>
           <span class="filter-info" id="blockCount"></span>
           <button class="btn btn-ghost btn-xs" id="blkFilterBtn" onclick="toggleBlockFilter()" title="Filtrar blocos">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
@@ -922,7 +936,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
     <!-- Separador -->
     <div style="display:flex;align-items:center;gap:8px;margin:2px 0">
       <div style="flex:1;height:1px;background:var(--border)"></div>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted)">ou</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-muted)">ou</span>
       <div style="flex:1;height:1px;background:var(--border)"></div>
     </div>
 
@@ -1541,6 +1555,7 @@ function openEditor(id = null) {
   renderBlocks();
   renderBlockFilterBar();
 
+  applyEditorWidth();   // largura lembrada / maximizado (DEC-019)
   document.getElementById('editorPanel').classList.add('open');
   document.getElementById('editorOverlay').classList.add('visible');
   taRenderDescBar();
@@ -1857,7 +1872,7 @@ function renderBlockPropBar(bid, container) {
       html += `<span class="blk-prop-chip on" style="background:${col.bg};color:${col.text}">${esc(opt.name)}</span>`;
     });
   });
-  chipsEl.innerHTML = html || `<span style="font-size:10px;color:var(--text-muted);font-family:var(--mono)">nenhuma</span>`;
+  chipsEl.innerHTML = html || `<span style="font-size:11px;color:var(--text-muted);font-family:var(--mono)">nenhuma</span>`;
 }
 
 /* Constrói (ou reconstrói) o painel expandido de props do bloco */
@@ -1931,6 +1946,7 @@ function renderBlocks() {
   updateBlockMassBar();
   // Tamanho das caixas (DEC-017): o HTML acabou de ser recriado, reaplica o modo de cada uma
   editBlocks.forEach(b => taApply(b.id));
+  taRenderAllBar();
 }
 
 function buildBlockEl(b, idx, total) {
@@ -2278,12 +2294,26 @@ function taApply(key) {
   if (bar) bar.querySelectorAll('button').forEach(btn => btn.classList.toggle('on', btn.dataset.mode === mode));
 }
 
-/* Barra de botões de uma caixa; o ponto marca o padrão do tipo. */
+/* Barra de botões de uma caixa; o ponto marca o padrão do tipo.
+   key 'all' = controle geral do cabeçalho (DEC-020): sempre visível, age em todos os blocos,
+   e o botão ativo é o modo comum a todos (nenhum, se estiverem diferentes). */
 function taToolbarHTML(key) {
   const kind = taKind(key), def = taDefaults()[kind];
-  return `<div class="ta-size" data-ta="${key}">` + TA_MODES[kind].map(m =>
-    `<button type="button" data-mode="${m}" title="${TA_LABEL[m]} — ${TA_TIP[m]}${m === def ? ' (padrão)' : ''} · botão direito: usar como padrão">`
+  const all = key === 'all', common = all ? taCommonBlockMode() : null;
+  return `<div class="ta-size${all ? ' ta-size-all' : ''}" data-ta="${key}">`
+    + (all ? '<span class="ta-all-lbl">Caixas</span>' : '')
+    + TA_MODES[kind].map(m =>
+    `<button type="button" data-mode="${m}"${all && m === common ? ' class="on"' : ''} title="${all ? 'Todos os blocos: ' : ''}${TA_LABEL[m]} — ${TA_TIP[m]}${m === def ? ' (padrão)' : ''} · botão direito: usar como padrão">`
     + `${TA_LABEL[m]}${m === def ? '<span class="ta-def-dot"></span>' : ''}</button>`).join('') + `</div>`;
+}
+/* Modo comum a todos os blocos, ou null se diferem. */
+function taCommonBlockMode() {
+  const ms = editBlocks.map(b => taModeOf(b.id));
+  return ms.length && ms.every(m => m === ms[0]) ? ms[0] : null;
+}
+function taRenderAllBar() {
+  const bar = document.querySelector('.ta-size[data-ta="all"]');
+  if (bar) bar.outerHTML = taToolbarHTML('all');
 }
 function taRenderDescBar() {
   const w = document.getElementById('epDescWrap'); if (!w) return;
@@ -2301,8 +2331,13 @@ function taRefreshAll() {
 document.addEventListener('click', ev => {
   const btn = ev.target.closest && ev.target.closest('.ta-size button'); if (!btn) return;
   const key = btn.closest('.ta-size').dataset.ta;
-  taSessionModes[key] = btn.dataset.mode;
-  taApply(key);
+  if (key === 'all') {   // controle geral: todos os blocos, só nesta sessão (DEC-020)
+    editBlocks.forEach(b => { taSessionModes[b.id] = btn.dataset.mode; taApply(b.id); });
+  } else {
+    taSessionModes[key] = btn.dataset.mode;
+    taApply(key);
+  }
+  taRenderAllBar();
 });
 document.addEventListener('contextmenu', ev => {
   const btn = ev.target.closest && ev.target.closest('.ta-size button'); if (!btn) return;
@@ -2310,7 +2345,9 @@ document.addEventListener('contextmenu', ev => {
   const key = btn.closest('.ta-size').dataset.ta, kind = taKind(key), mode = btn.dataset.mode;
   const d = taDefaults(); d[kind] = mode;
   try { localStorage.setItem(TA_SIZE_KEY, JSON.stringify(d)); } catch (_) {}
-  delete taSessionModes[key];   // a caixa clicada passa a seguir o padrão novo
+  // a caixa clicada passa a seguir o padrão novo; no controle geral, todos os blocos
+  if (key === 'all') editBlocks.forEach(b => { delete taSessionModes[b.id]; });
+  else delete taSessionModes[key];
   taRefreshAll();
   showToast(`Padrão das caixas ${kind === 'desc' ? 'de descrição' : 'dos blocos'}: ${TA_LABEL[mode]}`);
 });
@@ -2319,6 +2356,66 @@ document.addEventListener('input', ev => {
   const el = ev.target;
   if (el && el.dataset && el.dataset.taMode === 'auto') taFit(el);
 });
+
+/* ──────────────────────────────
+   LARGURA DO PAINEL DO EDITOR (DEC-019)
+   Alça na borda esquerda + botão maximizar. Lembrado em localStorage, fora do db (DEC-011).
+────────────────────────────── */
+const EDITOR_W_KEY = 'lunoda_editor_w';
+const EDITOR_W_MIN = 480;
+const ICON_MAX     = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>';
+const ICON_RESTORE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>';
+
+function editorPrefs() {
+  try {
+    const v = JSON.parse(localStorage.getItem(EDITOR_W_KEY) || '{}') || {};
+    return { w: Number(v.w) || null, max: !!v.max };
+  } catch (_) { return { w: null, max: false }; }
+}
+function saveEditorPrefs(p) {
+  try { localStorage.setItem(EDITOR_W_KEY, JSON.stringify(p)); } catch (_) {}
+}
+/* Nunca menor que o mínimo, nunca maior que a janela. */
+function clampEditorW(w) {
+  return Math.max(Math.min(EDITOR_W_MIN, window.innerWidth), Math.min(w, window.innerWidth));
+}
+/* Aplica largura lembrada ou maximizado; sem preferência, vale o CSS (780px ou 92% da janela). */
+function applyEditorWidth() {
+  const panel = document.getElementById('editorPanel'); if (!panel) return;
+  const p = editorPrefs();
+  panel.classList.toggle('ep-max', p.max);
+  panel.style.width = (!p.max && p.w) ? clampEditorW(p.w) + 'px' : '';
+  const btn = document.getElementById('epMaxBtn');
+  if (btn) {
+    btn.title = p.max ? 'Restaurar largura' : 'Maximizar (tela inteira)';
+    btn.innerHTML = p.max ? ICON_RESTORE : ICON_MAX;
+  }
+}
+function toggleEditorMax() {
+  const p = editorPrefs(); p.max = !p.max;
+  saveEditorPrefs(p); applyEditorWidth();
+  requestAnimationFrame(taRefreshAll);   // largura nova muda a altura das caixas em Auto
+}
+// Arrastar a alça; duplo clique volta ao tamanho original.
+(function () {
+  const h = document.getElementById('epResize'); if (!h) return;
+  h.addEventListener('mousedown', ev => {
+    ev.preventDefault();
+    const panel = document.getElementById('editorPanel');
+    h.classList.add('drag'); document.body.style.userSelect = 'none';
+    const move = e => { panel.style.width = clampEditorW(window.innerWidth - e.clientX) + 'px'; };
+    const up = () => {
+      document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up);
+      h.classList.remove('drag'); document.body.style.userSelect = '';
+      saveEditorPrefs({ w: parseInt(panel.style.width, 10) || null, max: false });
+      applyEditorWidth(); taRefreshAll();
+    };
+    document.addEventListener('mousemove', move); document.addEventListener('mouseup', up);
+  });
+  h.addEventListener('dblclick', () => { saveEditorPrefs({ w: null, max: false }); applyEditorWidth(); taRefreshAll(); });
+})();
+window.addEventListener('resize', applyEditorWidth);
+applyEditorWidth();   // desenha o ícone do botão já na carga
 
 /* ──────────────────────────────
    FILTRO INTERNO DE BLOCOS

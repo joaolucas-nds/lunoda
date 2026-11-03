@@ -17,7 +17,7 @@ Público: uso próprio do autor. Sem multiusuário, sem servidor, sem nuvem.
 ## Stack
 
 - **Arquivo único `.html`** — HTML + CSS + JavaScript vanilla, sem build, sem dependências, sem framework.
-- Persistência local via **`localStorage`** (chave `base_v4`). Preferências de interface ficam em chaves próprias, fora do `db` (DEC-011): `lunoda_md_frontmatter` e `lunoda_ta_size` (padrão de tamanho das caixas, DEC-017).
+- Persistência local via **`localStorage`** (chave `base_v4`). Preferências de interface ficam em chaves próprias, fora do `db` (DEC-011): `lunoda_md_frontmatter`, `lunoda_ta_size` (padrão de tamanho das caixas, DEC-017) e `lunoda_editor_w` (largura do painel e maximizado, DEC-019).
 - Fonte web: IBM Plex Sans / IBM Plex Mono (Google Fonts).
 - Hospedado no **GitHub** (upload por arrastar arquivo). Favicon `favicon.png` na raiz do repositório.
 - Roda direto no navegador, offline. Não precisa de servidor.
@@ -103,7 +103,8 @@ db = {
 - **Herança automática (`toggleEntryPropAuto`):** **botão direito** numa opção (no painel da entrada ou no chip do bloco) liga/desliga a flag `propertyAutoFlags` (DEC-014). Ligada = novos blocos nascem com essa opção. **Não altera blocos existentes.** Clicar no chip `●auto` dentro de um bloco (`disableAutoFromBlock`) remove a opção daquele bloco E desliga a flag na entrada.
 - **Marcar nos selecionados (`onEntryOptClick` → `applyPropToSelectedBlocks`):** com blocos selecionados, o clique esquerdo numa opção do painel da entrada **uniformiza** nos selecionados (DEC-013); sem seleção, só mostra um aviso. O painel acompanha a seleção (`updateBlockMassBar` chama `renderEditorProps`).
 - **Quadrado geral (`toggleSelectAllVisibleBlocks`):** no cabeçalho da lista, age só sobre os blocos **visíveis** (`getFilteredBlocks()`); selecionados escondidos pelo filtro continuam selecionados e aparecem no contador («· K fora do filtro», `hiddenSelectedCount`). **Ações em massa agem em TODOS os selecionados, inclusive os escondidos** — o confirm do Excluir avisa (DEC-016).
-- **Tamanho das caixas (`taApply` / `taFit`):** modo por caixa na sessão (`taSessionModes`, zera em `openEditor`) sobre um padrão por tipo no `localStorage`. Auto mede `scrollHeight`, então caixa escondida (filtrada, colapsada) não é medida: `renderBlocks` e `toggleCollapse` reaplicam (DEC-017).
+- **Tamanho das caixas (`taApply` / `taFit`):** modo por caixa na sessão (`taSessionModes`, zera em `openEditor`) sobre um padrão por tipo no `localStorage`. Auto mede `scrollHeight`, então caixa escondida (filtrada, colapsada) não é medida: `renderBlocks` e `toggleCollapse` reaplicam (DEC-017). O controle geral do cabeçalho é a mesma barra com a chave `'all'` (`taToolbarHTML('all')`, DEC-020).
+- **Largura do painel (`applyEditorWidth`):** o painel fecha por `transform`, não por `right` negativo — qualquer largura fica escondida. A alça (`#epResize`) e o maximizar gravam `{w, max}`; ao mudar a largura, `taRefreshAll` re-mede as caixas em Auto (DEC-019).
 - **Sugestão de versão:** ao digitar subtítulo do bloco, sugere `Nome vN+1` a partir dos subtítulos já usados na entrada e de uma lista de IAs comuns (`AI_HINTS`).
 - **Seleção de blocos + ações em massa (interno ao editor):** checkbox por bloco → barra com Subir/Descer (move o grupo mantendo ordem relativa), Duplicar, Excluir, Mover para, Copiar para.
 - **Transferência de blocos:** modal com 4 ações — mover/copiar para entrada existente ou nova. Todas salvam a entrada atual, executam e abrem a entrada destino.
@@ -121,6 +122,7 @@ db = {
 - **`saveDB` pode falhar por cota** — desde a v12.1 ele **retorna `false`** e avisa em vez de estourar. Quem chamar em fluxo crítico deve considerar o retorno.
 - **`.map(entryToMD)` passa o índice como 2º argumento** — um parâmetro opcional novo em `entryToMD` receberia `0, 1, 2…` em silêncio. Não acrescente parâmetro sem trocar os call sites (por isso o frontmatter é montado nos pontos de exportação, não dentro dela).
 - **Texto livre interpolado em formato estruturado precisa de delimitador explícito** (FIX-002) — vale para descrição, conteúdo de bloco e qualquer campo novo no export.
+- **Cor nova de texto: medir antes** — contraste ≥ 4,5:1 contra o `--surface2` (o fundo mais claro) e nada abaixo de 11px (DEC-018). Opacidade baixa num texto conta: `.48` sobre um chip já claro o derrubava para ilegível.
 - **Prefixos de exportação** — arquivos exportados usam prefixo `base_` no nome (`base_backup_`, `base_notas_`, `base_selecionados_`) — resquício do nome antigo. Ver IDEAS (renomear para `lunoda_`).
 
 ## 📁 Arquivos Críticos (não mexer sem contexto)
