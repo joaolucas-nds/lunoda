@@ -324,3 +324,44 @@ O empurrão **ignora a seleção**: age só no bloco cujo número foi editado. R
 
 ### Consequências
 A F6 fica desbloqueada e especificada. A função nova entra na lista do embrulho do undo.
+
+---
+
+## DEC-016 — Quadrado geral de seleção age sobre os blocos VISÍVEIS; a seleção sobrevive ao filtro
+**Data:** 2026-11-03 · **Status:** aceita
+
+### Contexto
+O editor não tinha «selecionar todos os blocos», só o «✕ Sel». E o filtro interno não mexe na seleção: ações em massa já agiam também em selecionados escondidos pelo filtro, sem nenhum aviso — dava para excluir o que não se via. Pesquisa de padrões (design systems e reclamações de usuários de ferramentas de tabela): a seleção é um conjunto que o filtro não zera; o «selecionar todos» age no que está visível; selecionados fora da vista têm de aparecer explicitamente; o estado misto mostra «–» e é só do sistema.
+
+### Decisão
+Quadrado no cabeçalho da lista de blocos, calculado sobre `getFilteredBlocks()`: vazio (nenhum visível marcado), `–` (parte), `✓` (todos). Clique: todos os visíveis marcados → desmarca **só os visíveis**; senão → marca **todos os visíveis**. É a regra da DEC-013 aplicada à seleção. Selecionados escondidos pelo filtro ficam como estão, e o contador mostra «N selecionados · K fora do filtro». O confirm do Excluir em massa diz quantos dos excluídos estão escondidos — e passou a dizer «Ctrl+Z desfaz» (o texto antigo, «Não pode ser desfeito», era falso desde a v12.2).
+
+### Alternativas consideradas
+- **O clique substitui a seleção pelos visíveis** — «o que vejo é o que está marcado», mas desmarca em silêncio o que foi marcado antes do filtro.
+- **Mudar o filtro limpa a seleção** — o mais seguro para ações em massa, mas joga fora o trabalho de marcar.
+- **Clique no misto limpa tudo (como o Gmail)** — contradiria a DEC-013 e o comportamento nativo do checkbox indeterminado.
+
+### Consequências
+Uma regra só para propriedade e seleção. O risco de agir no que o filtro esconde fica visível no contador e no confirm. A opção (c) da C2 (Adiadas) perde força: «todos os blocos» agora custa um clique no quadrado. Coberto por `tests/history.mjs` (seção 12).
+
+---
+
+## DEC-017 — Tamanho das caixas de texto: padrão por tipo no localStorage, ajuste por caixa só na sessão
+**Data:** 2026-11-03 · **Status:** aceita
+
+### Contexto
+F4 parte 2: o espaço fixo das caixas (descrição 56px, bloco 90px) incomodava em textos longos. O autor pediu botões perto de cada caixa (minimizar, P, M, G) e um modo que cresce sozinho, com a rolagem passando a ser a da entrada inteira.
+
+### Decisão
+- **Modos:** descrição tem Auto · Mín · P · M · G; blocos têm Auto · P · M · G — sem «Mín» nos blocos porque o colapsar já cumpre esse papel. P/M/G fixam 4/10/20 linhas; Mín, 1 linha.
+- **Auto** cresce com o conteúdo, sem teto, sem rolagem interna e sem alça manual (a alça brigaria com o crescimento). Fora do Auto a alça volta para o ajuste fino.
+- **Clique esquerdo** num botão muda só aquela caixa, só enquanto a entrada está aberta. **Botão direito** torna o modo o padrão do tipo (descrição ou blocos) — o mesmo gesto da DEC-014 —, gravado em `localStorage['lunoda_ta_size']`, fora do `db` (DEC-011). Padrão inicial: Auto nos dois.
+- Os botões aparecem **só ao passar o mouse** — no foco cobririam o texto enquanto se digita.
+
+### Alternativas consideradas
+- **Um padrão único para as duas caixas** — o que se havia combinado; mudado porque, sem «Mín» nos blocos, um padrão «Mín» não teria efeito neles.
+- **Tamanho por bloco gravado no dado** — sobreviveria a exportar/importar, mas põe estado de interface no formato dos dados (rejeitado na DEC-011 pelo mesmo motivo).
+- **Auto sempre ligado, P/M/G como altura mínima** — um texto longo cresceria mesmo em «P», e o botão deixaria de fazer o que diz.
+
+### Consequências
+Nenhuma mudança no formato dos dados nem no undo (tamanho não é estado da entrada). Altura arrastada à mão se perde quando a lista de blocos é redesenhada (ex.: ao filtrar) — aceito: o ajuste por caixa já é provisório por desenho.

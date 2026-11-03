@@ -11,10 +11,12 @@
 ### 2026-07 — Propriedades em blocos selecionados (inverter posse)
 Quando **nenhum** bloco está selecionado, clicar numa propriedade funciona como hoje (liga/desliga a adição automática a novos blocos). Quando **há blocos selecionados**, clicar numa propriedade não mexe no automático — ela **adiciona/remove a propriedade nos blocos selecionados**. Com vários selecionados em estados mistos (uns têm, outros não), a ação **inverte a posse** de cada um: quem tinha perde, quem não tinha recebe.
 > Fonte: `Lunoda_ideias.txt`. Depende de checkbox por bloco (já existe na v12). **Ver conflito C1 abaixo.**
+> **Status (2026-11-03):** implementada na v13.0 com a regra **uniformizar** em vez de inverter (DEC-013) — ver Concluídas.
 
 ### 2026-07 — Controles de tamanho das caixas de texto longo
 Botões visuais perto de cada textarea (descrição e blocos) para: minimizar, tamanho pequeno, médio, longo. E um modo em que a caixa **cresce sozinha conforme as quebras de linha** (o bloco aumenta verticalmente sem barra de rolagem interna — a rolagem passa a ser a da entrada inteira). Motivação: o espaço fixo atual é irritante para textos longos.
 > Fonte: `Lunoda_ideias.txt`. Viável (autosize de textarea é simples). Baixo risco.
+> **Status (2026-11-03):** implementada na v13.1 (DEC-017); «minimizar» ficou só na descrição — nos blocos, o colapsar cumpre o papel. Ver Concluídas.
 
 ### 2026-07 — Ações por botão do mouse na ativação de propriedades
 Redefinir o comportamento de clique nas propriedades por botão:
@@ -22,6 +24,7 @@ Redefinir o comportamento de clique nas propriedades por botão:
 - **Meio:** na entrada, sem função definida ainda. **No bloco**, ativa "herança entre versões" (ver ideia abaixo).
 - **Direito:** liga/desliga a **adição automática a novos blocos** (aceende um círculo/risco na caixa da propriedade), tanto na entrada quanto no bloco — sem marcar/desmarcar a propriedade em bloco nenhum.
 > Fonte: `Lunoda_ideias.txt`. **Ver conflitos C1 e C2 abaixo.** Envolve `contextmenu` (botão direito) e `auxclick`/mousedown botão 1 (meio); exige `preventDefault` do menu de contexto.
+> **Status (2026-11-03):** esquerdo e direito implementados na v13.0 (DEC-013, DEC-014); o **botão do meio** segue aberto, junto com a herança entre versões (F5, C3).
 
 ### 2026-07 — Herança de propriedade entre versões de um mesmo nome de bloco
 O botão do **meio** do mouse numa propriedade define herança **entre todas as versões de um mesmo subtítulo** (nome do bloco). Exemplo: propriedade marcada na v1 mas não na v2/v3 — meio-clique na v2 desmarca nas 3 versões, trava o estado (esquerdo não marca mais, direito/automático é ignorado) e mantém desmarcado para versões futuras desse nome. Meio-clique de novo desliga a herança (as versões mantêm o último estado). Para marcar em todas e nas futuras: marca com o esquerdo em qualquer versão e aciona o meio para "propagar + herdar".
@@ -30,6 +33,11 @@ O botão do **meio** do mouse numa propriedade define herança **entre todas as 
 ### 2026-07 — Reordenação por número de versão empurrando as demais
 Se há v1..v4 e cria-se v5, mudar o número de v5 para v3 empurra as existentes: v3→v4, v4→v5. Pergunta em aberto do autor: o que fazer se **duas versões diferentes** estiverem selecionadas ao tentar isso.
 > Fonte: `Lunoda_ideias.txt`. **Ver questão aberta Q1.**
+> **Status (2026-11-03):** Q1 resolvida (DEC-015); implementação na F6.
+
+### 2026-11 — Selecionar/desmarcar todos os blocos, respeitando o filtro
+Um quadrado geral para marcar ou desmarcar todos os blocos, que funcione conforme o filtro (age no que está aparecendo), com símbolo próprio quando só parte está marcada, desenhado segundo as práticas mais comuns e intuitivas. Pergunta do autor: com 4 de 10 marcados e um filtro que mostra 6 (2 deles marcados), o que o clique faz, e o que acontece com os 2 marcados que o filtro escondeu?
+> Fonte: conversa de 2026-11-03. **Status:** implementada na v13.1 (DEC-016) — ver Concluídas.
 
 ---
 
@@ -91,11 +99,15 @@ Pergunta do autor. *Sugestão do assistente:* nesse caso, **desabilitar** a edi�
 ## 🛌 Adiadas
 > Decisão consciente de não fazer agora. Cada item com **o gatilho que a traz de volta**: ideia adiada sem gatilho é ideia perdida.
 - **Migração para IndexedDB** — adiada porque o uso real não se aproxima do teto de ~5 MB — **volta quando** o aviso dos 80% (`warnIfStorageTight()`) disparar em uso real. Plano em ROADMAP, F11.
-- **Esquerdo sem seleção = marcar em todos os blocos da entrada** (opção (c) da C2) — adiada porque, no hábito antigo, o clique que ligava o automático viraria marcação em massa — **volta quando** o autor notar que seleciona todos os blocos à mão com frequência (hoje o editor não tem «selecionar todos os blocos»).
+- **Esquerdo sem seleção = marcar em todos os blocos da entrada** (opção (c) da C2) — adiada porque, no hábito antigo, o clique que ligava o automático viraria marcação em massa — **volta quando** o autor notar que, mesmo com o quadrado geral da v13.1 (DEC-016), ainda marca todos os blocos com frequência só para aplicar uma propriedade.
 
 ---
 
 ## ✅ Concluídas
+
+- **Quadrado geral de seleção respeitando o filtro** — v13.1 / DEC-016.
+- **Tamanho das caixas de texto (Auto · Mín · P · M · G)** — v13.1 / DEC-017. Fecha a F4.
+- **Marcar propriedade nos blocos selecionados (uniformizar) + botão direito para o automático** — v13.0 / DEC-013, DEC-014.
 
 - **Frontmatter YAML na exportação Markdown** — v12.3 / DEC-011. Fecha a parte 1 da F9.
 
@@ -179,3 +191,8 @@ Vale registrar como hábito: **falhou o teste → reproduzir e entender antes de
 - **Ordem do merge:** o chat rodou `git status` sem `GIT_OPTIONAL_LOCKS=0` antes de chegar à regra no CEREBRO novo — o caso exato do «Aplique PRIMEIRO». Nenhum `.git/*.lock` ficou. Sugestão ao kit: a regra do git só-leitura também no `_UPDATE-PROMPT`, que é lido antes de tudo.
 - **Desvios deste projeto:** `.claude/settings.json` com `node tests/*`, `node --check` e `git log` no `allow`; `CLAUDE.md` com build/teste preenchidos; o chat regravou o STATUS inteiro nesta migração (DEC-012); sem seção «Feedback para o ASU» no IDEAS — o template a traz mesmo com `ASU nao` (candidata a ser condicional no kit).
 - **Arquivo no lugar errado:** `meta/README.md` era a versão nova do `tests/README.md`. Nenhuma comparação do pacote apontaria isso; apareceu porque o CONTEXT dizia que um README em `meta/` «seria outro arquivo».
+
+### 2026-11-03 — Instrução de ritmo vazou do lote em que foi dada
+O autor pediu as decisões C1, C2 e Q1 «uma de cada vez». O assistente carregou o pedido para as perguntas da F4 parte 2, que eram independentes, e gastou um turno do autor entregando uma pergunta só — contra o princípio «consolida perguntas inevitáveis num único momento». Lição: instrução de ritmo vale para o lote em que foi dada; perguntas independentes vêm juntas, e só se separa quando a resposta de uma muda a outra, dizendo o motivo. Se repetir, vira item no CEREBRO.
+### 2026-11-03 — Ideia implementada ficou em «Ativas»
+A wo0002 implementou duas ideias do autor e não mudou o status delas no IDEAS; só apareceu na conferência da wo0003. Sugestão ao kit: o checklist da WO que entrega uma ideia inclui «status da ideia no IDEAS → Concluídas».

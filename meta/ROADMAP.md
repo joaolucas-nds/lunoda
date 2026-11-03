@@ -21,12 +21,13 @@
 **Critério de conclusão:** seleção, reordenar em grupo, duplicar, excluir, mover/copiar para entrada existente/nova, filtro interno E/OU.
 - Entregue na v12 (ver DEC-004, DEC-005).
 
-## 🟡 F4 — UX de propriedades avançada + conforto de edição *(em curso — parte 1 na v13.0)*
+## 🟢 F4 — UX de propriedades avançada + conforto de edição *(entregue — v13.0 e v13.1; v13.1 falta conferir no navegador)*
 **Objetivo:** tornar a marcação de propriedades mais rápida (seleção em massa, botões do mouse) e a edição de texto mais confortável (tamanho das caixas).
 **Critério de conclusão:** marcação em massa e botão direito funcionando (parte 1) + caixas de texto com tamanho controlável (parte 2).
-- [x] Propriedades em blocos selecionados — **uniformizar** (DEC-013), v13.0. Falta conferir no navegador.
+- [x] Propriedades em blocos selecionados — **uniformizar** (DEC-013), v13.0. Conferida no navegador pelo autor.
 - [x] Botão direito = adição automática; esquerdo sem seleção só avisa (DEC-014), v13.0. O botão do meio fica com a F5.
-- [ ] Controles de tamanho / autosize das caixas de texto — parte 2.
+- [x] Controles de tamanho / autosize das caixas de texto — parte 2 (DEC-017), v13.1.
+- [x] Quadrado geral de seleção respeitando o filtro (DEC-016), v13.1 — pedido no caminho da F4.
 
 ## 🔵 F5 — Herança entre versões de um mesmo nome de bloco *(futuro, sem data)*
 **Objetivo:** propagar/travar propriedades entre todas as versões de um mesmo subtítulo (a "herança" antiga, agora restrita a versões).

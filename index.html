@@ -282,6 +282,20 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 .fi-title { font-size: 15px; font-weight: 600; }
 .fi-desc  { font-size: 13px; line-height: 1.65; min-height: 56px; }
 .fi-ta    { font-size: 13px; line-height: 1.7; resize: vertical; min-height: 90px; }
+/* Tamanho das caixas (DEC-017): botões no canto, só ao passar o mouse —
+   no foco eles cobririam o texto enquanto se digita */
+.ta-wrap { position: relative; }
+.ta-size { position: absolute; top: 5px; right: 8px; display: flex; gap: 2px; z-index: 2;
+  opacity: 0; pointer-events: none; transition: opacity .12s; }
+.block-body.ta-wrap .ta-size { top: 13px; right: 16px; }
+.ta-wrap:hover .ta-size { opacity: 1; pointer-events: auto; }
+.ta-size button { font-family: var(--mono); font-size: 9px; line-height: 1; padding: 3px 5px;
+  border-radius: 4px; border: 1px solid var(--border-soft); background: var(--surface3);
+  color: var(--text-dim); cursor: pointer; }
+.ta-size button:hover { color: var(--text); }
+.ta-size button.on { color: var(--text); border-color: var(--accent); }
+.ta-def-dot { display: inline-block; width: 3px; height: 3px; border-radius: 50%;
+  background: currentColor; margin-left: 3px; vertical-align: middle; }
 .meta-row { display: flex; gap: 14px; flex-wrap: wrap; font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
 
 /* Prop selector in editor */
@@ -757,7 +771,9 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
         Descrição / Resumo
         <span style="font-size:10px;opacity:.5;font-weight:400">opcional</span>
       </div>
-      <textarea class="fi fi-desc" id="epDesc" placeholder="Resumo rápido para identificação (não é obrigatório)..."></textarea>
+      <div class="ta-wrap" id="epDescWrap">
+        <textarea class="fi fi-desc" id="epDesc" placeholder="Resumo rápido para identificação (não é obrigatório)..."></textarea>
+      </div>
     </div>
     <!-- Propriedades dinâmicas -->
     <div id="epPropsArea"></div>
@@ -766,7 +782,11 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
     <div>
       <!-- Header dos blocos -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <div class="field-lbl" style="margin-bottom:0">Blocos de Conteúdo</div>
+        <div style="display:flex;align-items:center;gap:7px">
+          <!-- Quadrado geral: age sobre os blocos VISÍVEIS (respeita o filtro) — DEC-016 -->
+          <input type="checkbox" class="block-cb" id="blkSelAll" onclick="toggleSelectAllVisibleBlocks()" title="Selecionar todos os blocos visíveis">
+          <div class="field-lbl" style="margin-bottom:0">Blocos de Conteúdo</div>
+        </div>
         <div style="display:flex;align-items:center;gap:5px">
           <span class="filter-info" id="blockCount"></span>
           <button class="btn btn-ghost btn-xs" id="blkFilterBtn" onclick="toggleBlockFilter()" title="Filtrar blocos">
@@ -1508,6 +1528,8 @@ function openEditor(id = null) {
   }
 
   // Reset seleção e filtro de blocos ao abrir editor
+  // (e o ajuste de tamanho por caixa, que vale só enquanto a entrada está aberta — DEC-017)
+  taSessionModes = {};
   selectedBlockIds.clear();
   blkFilterText = '';
   blkFilterVer  = null;
@@ -1521,6 +1543,8 @@ function openEditor(id = null) {
 
   document.getElementById('editorPanel').classList.add('open');
   document.getElementById('editorOverlay').classList.add('visible');
+  taRenderDescBar();
+  requestAnimationFrame(taRefreshAll);   // mede depois que o painel está visível
 
   dirtySnapshot = getEditorSnapshot();
   setTimeout(() => document.getElementById('epTitleInput').focus(), 80);
@@ -1905,6 +1929,8 @@ function renderBlocks() {
     n > 1 ? (v < n ? `${v} de ${n} blocos` : `${n} blocos`) : '';
 
   updateBlockMassBar();
+  // Tamanho das caixas (DEC-017): o HTML acabou de ser recriado, reaplica o modo de cada uma
+  editBlocks.forEach(b => taApply(b.id));
 }
 
 function buildBlockEl(b, idx, total) {
@@ -1970,7 +1996,8 @@ function buildBlockEl(b, idx, total) {
       </div>
       <div class="block-props-body hidden" id="bpbody_${b.id}"></div>
     </div>
-    <div class="block-body">
+    <div class="block-body ta-wrap">
+      ${taToolbarHTML(b.id)}
       <textarea class="fi fi-ta" data-bid="${b.id}"
         placeholder="Cole ou escreva aqui..."
         oninput="syncContent('${b.id}',this.value)"
@@ -2001,6 +2028,7 @@ function adjVer(bid, delta) {
 
 function toggleCollapse(bid) {
   document.querySelector(`.block-item[data-bid="${bid}"]`)?.classList.toggle('collapsed');
+  taApply(bid);   // ao expandir, o Auto precisa medir o conteúdo de novo
 }
 function removeBlock(bid) {
   editBlocks = editBlocks.filter(b=>b.id!==bid);
@@ -2065,7 +2093,17 @@ function updateBlockMassBar() {
   const cnt = document.getElementById('blkMassCnt');
   const desBtn = document.getElementById('blkDeselectBtn');
   if (bar) { bar.classList.toggle('visible', n > 0); }
-  if (cnt) cnt.textContent = `${n} bloco${n!==1?'s':''} selecionado${n!==1?'s':''}`;
+  const hid = hiddenSelectedCount();
+  if (cnt) cnt.textContent = `${n} bloco${n!==1?'s':''} selecionado${n!==1?'s':''}`
+    + (hid > 0 ? ` · ${hid} fora do filtro` : '');
+  // Quadrado geral: ✓ todos os visíveis · – parte deles · vazio nenhum (DEC-016)
+  const sa = document.getElementById('blkSelAll');
+  if (sa) {
+    const st = blockSelectAllState();
+    sa.checked = st === 'all';
+    sa.indeterminate = st === 'mixed';
+    sa.title = st === 'all' ? 'Desmarcar os blocos visíveis' : 'Selecionar todos os blocos visíveis';
+  }
   if (desBtn) desBtn.style.display = n > 0 ? '' : 'none';
   // O painel da entrada mostra o estado (✓ / –) dos selecionados: acompanha a seleção
   renderEditorProps();
@@ -2145,12 +2183,142 @@ function deleteSelectedBlocks() {
   if (editBlocks.length - n < 1) {
     showToast('Mantenha ao menos 1 bloco na entrada'); return;
   }
-  if (!confirm(`Excluir ${n} bloco(s) selecionado(s)? Não pode ser desfeito.`)) return;
+  const hid = hiddenSelectedCount();
+  // Avisa o que o filtro esconde: excluir o que não se vê é o risco que o contador sozinho não fecha (DEC-016)
+  if (!confirm(`Excluir ${n} bloco(s) selecionado(s)?`
+    + (hid > 0 ? `\n\n${hid} deles está(ão) escondido(s) pelo filtro e também será(ão) excluído(s).` : '')
+    + `\n\nCtrl+Z desfaz.`)) return;
   editBlocks = editBlocks.filter(b => !selectedBlockIds.has(b.id));
   selectedBlockIds.clear();
   renderBlocks();
   showToast(`${n} bloco(s) excluído(s)`);
 }
+
+/* Estado do quadrado geral sobre os blocos VISÍVEIS (respeita o filtro): 'none' | 'all' | 'mixed'.
+   Selecionados escondidos pelo filtro não entram na conta (DEC-016). */
+function blockSelectAllState() {
+  const vis = getFilteredBlocks();
+  if (vis.length === 0) return 'none';
+  const n = vis.filter(b => selectedBlockIds.has(b.id)).length;
+  return n === 0 ? 'none' : (n === vis.length ? 'all' : 'mixed');
+}
+
+/* Clique no quadrado geral — a mesma regra da DEC-013, aplicada à seleção (DEC-016):
+   todos os visíveis marcados → desmarca só os visíveis; senão (nenhum ou misto) → marca todos os visíveis.
+   Os escondidos pelo filtro ficam como estão; o contador os mostra e o ✕ Sel limpa tudo. */
+function toggleSelectAllVisibleBlocks() {
+  const vis = getFilteredBlocks();
+  const all = blockSelectAllState() === 'all';
+  vis.forEach(b => all ? selectedBlockIds.delete(b.id) : selectedBlockIds.add(b.id));
+  renderBlocks();   // redesenha checkboxes e destaque; chama updateBlockMassBar
+}
+
+/* Quantos selecionados o filtro está escondendo (só blocos que existem na entrada). */
+function hiddenSelectedCount() {
+  const vis = new Set(getFilteredBlocks().map(b => b.id));
+  return editBlocks.filter(b => selectedBlockIds.has(b.id) && !vis.has(b.id)).length;
+}
+
+/* ──────────────────────────────
+   TAMANHO DAS CAIXAS DE TEXTO (F4 parte 2 — DEC-017)
+   Padrão por tipo de caixa no localStorage (fora do db, como o frontmatter — DEC-011);
+   ajuste por caixa só enquanto a entrada está aberta. 'min' só existe na descrição:
+   nos blocos, o colapsar já cumpre esse papel.
+────────────────────────────── */
+const TA_SIZE_KEY = 'lunoda_ta_size';
+const TA_MODES = { desc: ['auto', 'min', 'p', 'm', 'g'], block: ['auto', 'p', 'm', 'g'] };
+const TA_LINES = { min: 1, p: 4, m: 10, g: 20 };   // altura em linhas de texto
+const TA_LABEL = { auto: 'Auto', min: 'Mín', p: 'P', m: 'M', g: 'G' };
+const TA_TIP   = { auto: 'cresce com o texto', min: 'uma linha', p: 'pequena', m: 'média', g: 'grande' };
+let taSessionModes = {};   // { 'desc' | blockId: modo } — zera ao abrir outra entrada
+
+function taDefaults() {
+  try {
+    const v = JSON.parse(localStorage.getItem(TA_SIZE_KEY) || '{}') || {};
+    return { desc: v.desc || 'auto', block: v.block || 'auto' };
+  } catch (_) { return { desc: 'auto', block: 'auto' }; }
+}
+function taKind(key) { return key === 'desc' ? 'desc' : 'block'; }
+function taModeOf(key) {
+  const m = taSessionModes[key] || taDefaults()[taKind(key)];
+  return TA_MODES[taKind(key)].includes(m) ? m : 'auto';
+}
+function taElOf(key) {
+  return key === 'desc' ? document.getElementById('epDesc')
+                        : document.querySelector(`textarea.fi-ta[data-bid="${key}"]`);
+}
+
+/* Auto: altura = conteúdo (sem rolagem interna; a rolagem passa a ser a do editor).
+   Caixa fora da tela (filtrada, colapsada) mede 0 — aí não mexe; reaplica quando aparecer. */
+function taFit(el) {
+  if (!el || el.offsetParent === null) return;
+  const cs = getComputedStyle(el);
+  const borders = (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
+  el.style.height = 'auto';
+  el.style.height = (el.scrollHeight + borders) + 'px';   // box-sizing: border-box
+}
+
+/* Aplica o modo à caixa e marca o botão ativo. Fora do Auto, a alça manual volta para o ajuste fino. */
+function taApply(key) {
+  const el = taElOf(key); if (!el) return;
+  const mode = taModeOf(key);
+  el.dataset.taMode = mode;
+  if (mode === 'auto') {
+    el.style.resize = 'none'; el.style.overflowY = 'hidden'; el.style.minHeight = '';
+    taFit(el);
+  } else {
+    const cs  = getComputedStyle(el);
+    const lh  = parseFloat(cs.lineHeight) || 20;
+    const box = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0)
+              + (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
+    el.style.resize = 'vertical'; el.style.overflowY = 'auto'; el.style.minHeight = '0';
+    el.style.height = Math.round(TA_LINES[mode] * lh + box) + 'px';
+  }
+  const bar = document.querySelector(`.ta-size[data-ta="${key}"]`);
+  if (bar) bar.querySelectorAll('button').forEach(btn => btn.classList.toggle('on', btn.dataset.mode === mode));
+}
+
+/* Barra de botões de uma caixa; o ponto marca o padrão do tipo. */
+function taToolbarHTML(key) {
+  const kind = taKind(key), def = taDefaults()[kind];
+  return `<div class="ta-size" data-ta="${key}">` + TA_MODES[kind].map(m =>
+    `<button type="button" data-mode="${m}" title="${TA_LABEL[m]} — ${TA_TIP[m]}${m === def ? ' (padrão)' : ''} · botão direito: usar como padrão">`
+    + `${TA_LABEL[m]}${m === def ? '<span class="ta-def-dot"></span>' : ''}</button>`).join('') + `</div>`;
+}
+function taRenderDescBar() {
+  const w = document.getElementById('epDescWrap'); if (!w) return;
+  w.querySelector('.ta-size')?.remove();
+  w.insertAdjacentHTML('afterbegin', taToolbarHTML('desc'));
+}
+/* Redesenha todas as barras (o ponto do padrão muda) e reaplica todos os tamanhos. */
+function taRefreshAll() {
+  document.querySelectorAll('.ta-size').forEach(bar => { bar.outerHTML = taToolbarHTML(bar.dataset.ta); });
+  taApply('desc');
+  editBlocks.forEach(b => taApply(b.id));
+}
+
+// Esquerdo: só esta caixa, só nesta sessão. Direito: vira o padrão do tipo (DEC-017, mesmo gesto da DEC-014).
+document.addEventListener('click', ev => {
+  const btn = ev.target.closest && ev.target.closest('.ta-size button'); if (!btn) return;
+  const key = btn.closest('.ta-size').dataset.ta;
+  taSessionModes[key] = btn.dataset.mode;
+  taApply(key);
+});
+document.addEventListener('contextmenu', ev => {
+  const btn = ev.target.closest && ev.target.closest('.ta-size button'); if (!btn) return;
+  ev.preventDefault();
+  const key = btn.closest('.ta-size').dataset.ta, kind = taKind(key), mode = btn.dataset.mode;
+  const d = taDefaults(); d[kind] = mode;
+  try { localStorage.setItem(TA_SIZE_KEY, JSON.stringify(d)); } catch (_) {}
+  delete taSessionModes[key];   // a caixa clicada passa a seguir o padrão novo
+  taRefreshAll();
+  showToast(`Padrão das caixas ${kind === 'desc' ? 'de descrição' : 'dos blocos'}: ${TA_LABEL[mode]}`);
+});
+// Auto acompanha a digitação
+document.addEventListener('input', ev => {
+  const el = ev.target;
+  if (el && el.dataset && el.dataset.taMode === 'auto') taFit(el);
+});
 
 /* ──────────────────────────────
    FILTRO INTERNO DE BLOCOS

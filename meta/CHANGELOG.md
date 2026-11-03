@@ -23,6 +23,19 @@
 
 > Nada aqui altera o `index.html` — são mudanças de documentação e processo.
 
+## [13.1.0] — 2026-11-03
+
+### Adicionado
+- **Quadrado geral de seleção de blocos** (DEC-016) no cabeçalho da lista: age sobre os blocos **visíveis** (respeita o filtro), com `–` no estado misto. O contador mostra quantos selecionados estão **fora do filtro**.
+- **Tamanho das caixas de texto** (F4 parte 2, DEC-017): botões Auto · Mín · P · M · G na descrição e Auto · P · M · G nos blocos, ao passar o mouse. **Auto** (padrão) cresce com o texto, sem rolagem interna. Clique esquerdo ajusta só aquela caixa enquanto a entrada está aberta; botão direito torna o modo o padrão.
+- `tests/history.mjs` cobre o quadrado geral com filtro (11 asserções novas, 39 no total).
+
+### Modificado
+- O confirm do Excluir em massa diz quantos dos blocos estão escondidos pelo filtro.
+
+### Corrigido
+- O confirm do Excluir em massa dizia «Não pode ser desfeito»; desde a v12.2 o `Ctrl+Z` desfaz. Texto corrigido.
+
 ## [13.0.0] — 2026-11-03
 
 ### Modificado

@@ -17,7 +17,7 @@ Público: uso próprio do autor. Sem multiusuário, sem servidor, sem nuvem.
 ## Stack
 
 - **Arquivo único `.html`** — HTML + CSS + JavaScript vanilla, sem build, sem dependências, sem framework.
-- Persistência local via **`localStorage`** (chave `base_v4`).
+- Persistência local via **`localStorage`** (chave `base_v4`). Preferências de interface ficam em chaves próprias, fora do `db` (DEC-011): `lunoda_md_frontmatter` e `lunoda_ta_size` (padrão de tamanho das caixas, DEC-017).
 - Fonte web: IBM Plex Sans / IBM Plex Mono (Google Fonts).
 - Hospedado no **GitHub** (upload por arrastar arquivo). Favicon `favicon.png` na raiz do repositório.
 - Roda direto no navegador, offline. Não precisa de servidor.
@@ -102,6 +102,8 @@ db = {
 - **Editor (painel lateral):** título, descrição, propriedades da entrada, lista de blocos. Cada bloco tem subtítulo, versão, conteúdo, checkbox de seleção, barra de propriedades (`Props ▼`) e ações (duplicar / colapsar / remover).
 - **Herança automática (`toggleEntryPropAuto`):** **botão direito** numa opção (no painel da entrada ou no chip do bloco) liga/desliga a flag `propertyAutoFlags` (DEC-014). Ligada = novos blocos nascem com essa opção. **Não altera blocos existentes.** Clicar no chip `●auto` dentro de um bloco (`disableAutoFromBlock`) remove a opção daquele bloco E desliga a flag na entrada.
 - **Marcar nos selecionados (`onEntryOptClick` → `applyPropToSelectedBlocks`):** com blocos selecionados, o clique esquerdo numa opção do painel da entrada **uniformiza** nos selecionados (DEC-013); sem seleção, só mostra um aviso. O painel acompanha a seleção (`updateBlockMassBar` chama `renderEditorProps`).
+- **Quadrado geral (`toggleSelectAllVisibleBlocks`):** no cabeçalho da lista, age só sobre os blocos **visíveis** (`getFilteredBlocks()`); selecionados escondidos pelo filtro continuam selecionados e aparecem no contador («· K fora do filtro», `hiddenSelectedCount`). **Ações em massa agem em TODOS os selecionados, inclusive os escondidos** — o confirm do Excluir avisa (DEC-016).
+- **Tamanho das caixas (`taApply` / `taFit`):** modo por caixa na sessão (`taSessionModes`, zera em `openEditor`) sobre um padrão por tipo no `localStorage`. Auto mede `scrollHeight`, então caixa escondida (filtrada, colapsada) não é medida: `renderBlocks` e `toggleCollapse` reaplicam (DEC-017).
 - **Sugestão de versão:** ao digitar subtítulo do bloco, sugere `Nome vN+1` a partir dos subtítulos já usados na entrada e de uma lista de IAs comuns (`AI_HINTS`).
 - **Seleção de blocos + ações em massa (interno ao editor):** checkbox por bloco → barra com Subir/Descer (move o grupo mantendo ordem relativa), Duplicar, Excluir, Mover para, Copiar para.
 - **Transferência de blocos:** modal com 4 ações — mover/copiar para entrada existente ou nova. Todas salvam a entrada atual, executam e abrem a entrada destino.

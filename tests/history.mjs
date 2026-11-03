@@ -212,6 +212,48 @@ const check = (n, c, d = '') => c
   }
 }
 
+// 12. Quadrado geral de seleção respeitando o filtro (DEC-016) — funções REAIS do index.html.
+//     Cinco blocos; o filtro por versão 1 mostra b1, b2 e b4. b3 fica escondido — é o caso que importa.
+{
+  const nomes = ['getFilteredBlocks', 'blockSelectAllState', 'toggleSelectAllVisibleBlocks', 'hiddenSelectedCount'];
+  const fontes = nomes.map(n => { const i = html.indexOf(`function ${n}(`); return i === -1 ? null : html.slice(i, html.indexOf('\n}\n', i) + 2); });
+  check('funcoes do quadrado geral existem no index.html', fontes.every(Boolean), nomes.filter((n, i) => !fontes[i]).join(', '));
+  if (fontes.every(Boolean)) {
+    const montar = () => {
+      const ctx = {
+        editBlocks: [1, 1, 2, 1, 3].map((v, i) => ({ id: 'b' + (i + 1), subtitle: 'A', version: v, content: '', blockProps: {} })),
+        editBlockProps: {}, selectedBlockIds: new Set(),
+        blkFilterText: '', blkFilterVer: null, blkFilterPropId: null, blkFilterOptIds: new Set(), blkFilterMode: 'and',
+        renderBlocks: () => {},
+      };
+      const api = new Function('ctx', `with (ctx) { ${fontes.join('\n')}; return { ${nomes.join(', ')} }; }`)(ctx);
+      return { ctx, api };
+    };
+    const sel = ctx => [...ctx.selectedBlockIds].sort().join(',');
+
+    let { ctx, api } = montar();
+    ctx.blkFilterVer = 1;
+    check('quadrado: nenhum visivel marcado = none', api.blockSelectAllState() === 'none');
+    ctx.selectedBlockIds.add('b1'); ctx.selectedBlockIds.add('b3');
+    check('quadrado: 1 de 3 visiveis = mixed', api.blockSelectAllState() === 'mixed');
+    check('ocultos: 1 selecionado fora do filtro', api.hiddenSelectedCount() === 1, `n=${api.hiddenSelectedCount()}`);
+    api.toggleSelectAllVisibleBlocks();
+    check('clique no misto marca todos os visiveis e mantem o oculto', sel(ctx) === 'b1,b2,b3,b4', sel(ctx));
+    check('quadrado: todos os visiveis = all', api.blockSelectAllState() === 'all');
+    api.toggleSelectAllVisibleBlocks();
+    check('clique no all desmarca so os visiveis', sel(ctx) === 'b3', sel(ctx));
+    ctx.blkFilterVer = null;
+    check('sem filtro: o oculto volta a contar (1 de 5 = mixed)', api.blockSelectAllState() === 'mixed' && api.hiddenSelectedCount() === 0);
+    api.toggleSelectAllVisibleBlocks();
+    check('sem filtro, clique no misto: todos os 5', sel(ctx) === 'b1,b2,b3,b4,b5', sel(ctx));
+    ctx.blkFilterVer = 9;
+    check('filtro sem resultado: quadrado = none e o clique nao desmarca nada',
+      api.blockSelectAllState() === 'none' && (api.toggleSelectAllVisibleBlocks(), sel(ctx) === 'b1,b2,b3,b4,b5'));
+    ctx.selectedBlockIds.add('fantasma');
+    check('ocultos ignoram id que nao existe mais na entrada', api.hiddenSelectedCount() === 5, `n=${api.hiddenSelectedCount()}`);
+  }
+}
+
 console.log('\nLunoda — teste do historico (undo/redo)\n');
 console.log(out.join('\n'));
 console.log(`\n  ${pass} ok, ${fail} falha(s)\n`);
