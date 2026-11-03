@@ -71,7 +71,7 @@ A busca da tabela hoje alcança título e metadados; conteúdo de bloco é onde 
 ---
 
 ## ⚠️ Análise de conflitos e questões abertas — v13
-> O CEREBRO manda analisar antes de aceitar. Estas ideias novas se sobrepõem em alguns pontos; resolver antes de projetar o guia.
+> O CEREBRO manda analisar antes de aceitar. Estas ideias novas se sobrepõem em alguns pontos; resolver antes de projetar a WO da F4.
 
 **C1 — "Clique esquerdo na propriedade com blocos selecionados" aparece em DUAS ideias com regras diferentes.**
 Na ideia "inverter posse", o esquerdo com seleção inverte a posse por bloco. Na ideia "ações por botão do mouse", o esquerdo com seleção "marca/desmarca/inverte" — texto ambíguo (marca? desmarca? inverte?). *Sugestão:* adotar **inverter** como padrão do esquerdo-com-seleção (é o que a primeira ideia descreve em detalhe e cobre o caso misto). Unificar as duas descrições numa só regra.
@@ -84,6 +84,12 @@ Hoje o esquerdo na entrada (sem seleção) já liga/desliga o automático. A nov
 
 **Q1 — Reordenar por número de versão com duas versões diferentes selecionadas.**
 Pergunta do autor. *Sugestão do assistente:* nesse caso, **desabilitar** a edição direta do número (a operação "empurrar" só faz sentido para um bloco por vez); ou aplicar o empurrão na ordem em que aparecem, um após o outro — mas isso pode gerar resultado surpreendente. Mais seguro: permitir a reordenação-por-número só com **um** bloco selecionado/editado e avisar quando houver mais.
+
+---
+
+## 🛌 Adiadas
+> Decisão consciente de não fazer agora. Cada item com **o gatilho que a traz de volta**: ideia adiada sem gatilho é ideia perdida.
+- **Migração para IndexedDB** — adiada porque o uso real não se aproxima do teto de ~5 MB — **volta quando** o aviso dos 80% (`warnIfStorageTight()`) disparar em uso real. Plano em ROADMAP, F11.
 
 ---
 
@@ -163,3 +169,10 @@ Alternativas a avaliar: (a) escrever um zip mínimo à mão (formato *stored*, s
 ### 2026-07-19 — Segunda vez que um teste apontou para o lugar errado
 Na sessão 3 a fixture tinha um bloco só e fingiu um bug; nesta, o extrator do smoke não entendia regex e acusou "chaves desbalanceadas" como se o código de produção estivesse quebrado (FIX-003). Nos dois casos o código estava certo e a ferramenta de teste, errada.
 Vale registrar como hábito: **falhou o teste → reproduzir e entender antes de tocar no código**. Já está no CLAUDE.md; se acontecer uma terceira vez, vale promover a princípio no CEREBRO.
+
+### 2026-11-03 — Template-update do KCM v1.133.0: troca ASU → Code
+- **Distância:** CEREBRO vivo na v1.74.0, 59 versões atrás. A tabela «Linhas revogadas» listava 4 textos; a varredura pelo comportamento achou ~36 pontos que mandavam, em 8 arquivos — o aviso do manifesto («o número é piso») se confirmou com folga.
+- **Superfície ausente:** o repositório não tinha `.claude/`; «varra as skills primeiro» teria rodado sobre nada. O prompt do pacote mandar declarar a ausência antes de comparar evitou o falso limpo.
+- **Ordem do merge:** o chat rodou `git status` sem `GIT_OPTIONAL_LOCKS=0` antes de chegar à regra no CEREBRO novo — o caso exato do «Aplique PRIMEIRO». Nenhum `.git/*.lock` ficou. Sugestão ao kit: a regra do git só-leitura também no `_UPDATE-PROMPT`, que é lido antes de tudo.
+- **Desvios deste projeto:** `.claude/settings.json` com `node tests/*`, `node --check` e `git log` no `allow`; `CLAUDE.md` com build/teste preenchidos; o chat regravou o STATUS inteiro nesta migração (DEC-012); sem seção «Feedback para o ASU» no IDEAS — o template a traz mesmo com `ASU nao` (candidata a ser condicional no kit).
+- **Arquivo no lugar errado:** `meta/README.md` era a versão nova do `tests/README.md`. Nenhuma comparação do pacote apontaria isso; apareceu porque o CONTEXT dizia que um README em `meta/` «seria outro arquivo».

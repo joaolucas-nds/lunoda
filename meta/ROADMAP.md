@@ -27,7 +27,7 @@
 - [ ] Propriedades em blocos selecionados (inverter posse) — depende de resolver conflito C1 (IDEAS).
 - [ ] Controles de tamanho / autosize das caixas de texto.
 - [ ] Ações por botão do mouse (esq/meio/dir) — depende de resolver C2 (IDEAS).
-> Antes de projetar o guia da v13, fechar os conflitos C1–C2 e a questão Q1 listados no IDEAS.
+> Antes de projetar a WO da F4, fechar os conflitos C1–C2 e a questão Q1 listados no IDEAS.
 
 ## 🔵 F5 — Herança entre versões de um mesmo nome de bloco *(futuro, sem data)*
 **Objetivo:** propagar/travar propriedades entre todas as versões de um mesmo subtítulo (a "herança" antiga, agora restrita a versões).
@@ -57,8 +57,7 @@
 - [x] Markdown com **YAML frontmatter** — v12.3, ver DEC-011.
 - [x] Seletor "MD simples / MD com frontmatter" na exportação — v12.3.
 - [ ] Exportar uma entrada por arquivo (`.zip`) — o que um vault realmente quer; esbarra no zero-dependência (ver IDEAS).
-- [ ] **Reimportar `.md` — único item grande restante da fase.**
-- [ ] Reimportar `.md` (hoje só o JSON reimporta) — viável agora que o conteúdo é delimitado (DEC-008).
+- [ ] **Reimportar `.md`** (hoje só o JSON reimporta) — único item grande restante da fase; viável agora que o conteúdo é delimitado (DEC-008) e os metadados vão em YAML (DEC-011).
 > Cumpre o objetivo fundador do projeto ("exportar bem identificado") num nível que hoje só existe para olho humano. A delimitação do conteúdo (v12.1) era o pré-requisito estrutural.
 
 ## 🔵 F10 — Navegação em acervo grande *(futuro)*

@@ -25,7 +25,7 @@ Isso permite testar as funções **puras** sem tocar no arquivo único.
 
 ## O que cobre hoje
 
-`entryToMD()` — a geração do Markdown exportado. Foi escolhida primeiro porque é onde o defeito é mais caro e menos visível: um export corrompido só aparece quando o usuário vai reler o arquivo, possivelmente meses depois.
+`entryToMD()` — a geração do Markdown exportado — e, desde a v12.3, o **frontmatter YAML**. Foi escolhida primeiro porque é onde o defeito é mais caro e menos visível: um export corrompido só aparece quando o usuário vai reler o arquivo, possivelmente meses depois.
 
 As asserções incluem duas **regressões** do FIX-002:
 - toda linha da descrição precisa começar com `>`;
@@ -39,6 +39,16 @@ As asserções incluem duas **regressões** do FIX-002:
 - um bloco vazio.
 
 O FIX-002 sobreviveu a três versões porque o export parecia certo com dados bem-comportados. Testar com entrada hostil é o ponto.
+
+### Frontmatter YAML
+
+15 asserções sobre chaves, escape e colisão. A entrada nº 2 da fixture existe só para isso: título com **aspas, dois-pontos e barra invertida**, e uma propriedade chamada **"ID"**, que colide com a chave reservada do frontmatter.
+
+> YAML inválido não estoura: ele quebra o parse do **outro** lado, em silêncio. Por isso as asserções checam a forma exata do escape, e não apenas "gerou alguma coisa".
+
+### Sobre o recortador de funções
+
+O `extractFunction` varre chaves balanceadas ignorando string, comentário **e literal de regex**. A parte da regex foi acrescentada no FIX-003: sem ela, uma função contendo `/"/g` fazia a varredura ler a aspa como início de string e desalinhar. Se um dia o recorte falhar com "chaves desbalanceadas", suspeite de sintaxe que o varredor ainda não conhece — não do código de produção.
 
 ## `history.mjs` — undo/redo
 

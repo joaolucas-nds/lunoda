@@ -1,7 +1,7 @@
 # HISTORY.md — Conhecimento Consolidado
 
 > **Opcional.** Arquivo-baú para conhecimento denso que já foi aprendido e não muda mais — guias técnicos, análises de viabilidade, notas de migração — que tornariam o CONTEXT pesado demais.
-> Não é lido no início da sessão; o assistente consulta sob demanda quando o assunto aparece.
+> Não é lido ao abrir a conversa; o assistente consulta sob demanda quando o assunto aparece.
 
 ---
 
@@ -33,11 +33,11 @@
 - `propertyOptionModes` (v10) → `propertyAutoFlags` via `migrateOptionModes` (só o que estava em modo `all` vira flag; `custom`/`none` são ignorados porque os blocos já guardam suas opções explícitas).
 - Chaves de `localStorage` tentadas em ordem: `base_v4` (atual), `base_notas_v3`, `base_notas_v2`, `nexus_db_v4`.
 
-## 4. Fluxo de trabalho de desenvolvimento (procedimento herdado)
+## 4. Fluxo de trabalho de desenvolvimento (procedimento herdado — superado pela DEC-012)
 
 1. Autor descreve o que quer para a próxima versão (texto livre, às vezes via `Lunoda_ideias.txt` no mount).
 2. Assistente lê a versão canônica (`Lunoda_v12.html` no mount) + guias anteriores, analisa, projeta.
 3. Assistente entrega **guia `lunoda_vN_guide.md`** com passo a passo: bloco antigo a localizar (âncora literal) → bloco novo completo. Sem editar o arquivo diretamente.
 4. Autor aplica manualmente, testa e sobe a nova versão ao GitHub (upload por arrastar).
 
-> Ver DEC-002. Os guias das versões ficam preservados — são a memória da evolução e a base para reconstruir contexto.
+> Ver DEC-002, superada pela DEC-012 (WO + Claude Code). Os guias das versões não foram preservados no repositório; o raciocínio deles sobrevive em DECISIONS e neste arquivo.

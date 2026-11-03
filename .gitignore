@@ -1,4 +1,4 @@
-# .gitignore — NAO ignore meta/, logs/ nem guides/ (versionados de proposito).
+# .gitignore — NAO ignore .claude/, meta/ nem logs/ (versionados de proposito).
 # O que nao deve subir ao Projeto do Claude fica no .flatdropignore, nao aqui.
 
 # ── Sistema operacional ──

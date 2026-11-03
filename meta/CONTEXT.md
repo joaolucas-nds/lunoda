@@ -1,6 +1,6 @@
 # CONTEXT.md — Lunoda
 
-> Arquivo **estável**. O assistente lê no início de cada sessão para se ambientar.
+> Arquivo **estável**. O assistente lê ao abrir cada conversa para se ambientar.
 > Muda pouco: só em alteração estrutural (stack, arquitetura, escopo, nova armadilha descoberta).
 > Mantenha enxuto — descreve o que o projeto É, não o que está acontecendo agora (isso é o STATUS).
 
@@ -40,7 +40,8 @@ Delimitar isto evita retrabalho e propostas fora de escopo:
 ├── index.html               # a aplicação (versão canônica)
 ├── favicon.png              # ícone
 ├── README.md                # README do produto (público)
-├── CLAUDE.md                # orientação para o Claude Code
+├── CLAUDE.md                # guia raiz do Claude Code (lido em todo turno)
+├── .claude/                 # settings.json (permissões) + skills/ (apply-wo, wrap, sondar)
 ├── .gitignore
 ├── .flatdropignore          # enxuga o que sobe ao Projeto do Claude
 ├── INSTRUCOES-DO-PROJETO.md # instruções lidas em toda mensagem
@@ -54,13 +55,15 @@ Delimitar isto evita retrabalho e propostas fora de escopo:
 │   ├── ROADMAP.md           # fases
 │   ├── GLOSSARY.md          # termos
 │   ├── HISTORY.md           # conhecimento consolidado
-│   └── LOG-TEMPLATE.md      # molde do log
-├── meta/ASU/                # Atualizador Automático de Scripts
+│   ├── SPEC.md              # modelo de spec de feature (sob demanda)
+│   ├── LOG-TEMPLATE.md      # molde do log
+│   └── workorders/          # WOs do chat para o Code (AAMMDD-woNNNN-desc.md) + _TEMPLATE.md
 ├── tests/                   # smoke em Node puro (ver DEC-009)
-│   ├── smoke.mjs
+│   ├── README.md            # como rodar e o que cobre
+│   ├── smoke.mjs            # export + frontmatter YAML
+│   ├── history.mjs          # undo/redo
 │   └── fixtures/sample-db.json
-├── logs/                    # logs de sessão (AAAA-MM-DD.md)
-└── guides/                  # guias de versão (lunoda_vN_guide.md)
+└── logs/                    # log do dia (AAAA-MM-DD.md)
 ```
 
 > Os docs de contexto ficam em **`meta/`** (padrão do kit). O `README.md` da raiz é o do produto — se um dia houver um README dentro de `meta/`, é outro arquivo, explicando o sistema de documentação.
@@ -113,17 +116,30 @@ db = {
 - **Nunca deixar entrada com 0 blocos** — ao mover/excluir todos os blocos, o sistema recria um bloco vazio. Manter essa invariante.
 - **CMD do Windows** — o autor usa Windows/CMD; comandos numa linha só, sem `\`, `-m` repetido no commit, mensagens de commit **sem acento** (o CMD corrompe).
 - **`saveDB` pode falhar por cota** — desde a v12.1 ele **retorna `false`** e avisa em vez de estourar. Quem chamar em fluxo crítico deve considerar o retorno.
+- **`.map(entryToMD)` passa o índice como 2º argumento** — um parâmetro opcional novo em `entryToMD` receberia `0, 1, 2…` em silêncio. Não acrescente parâmetro sem trocar os call sites (por isso o frontmatter é montado nos pontos de exportação, não dentro dela).
+- **Texto livre interpolado em formato estruturado precisa de delimitador explícito** (FIX-002) — vale para descrição, conteúdo de bloco e qualquer campo novo no export.
 - **Prefixos de exportação** — arquivos exportados usam prefixo `base_` no nome (`base_backup_`, `base_notas_`, `base_selecionados_`) — resquício do nome antigo. Ver IDEAS (renomear para `lunoda_`).
+
+## 📁 Arquivos Críticos (não mexer sem contexto)
+
+| Arquivo | Por quê |
+|---|---|
+| `index.html` | É o produto inteiro. Não editar às cegas; ver as armadilhas acima. |
+| `tests/smoke.mjs` | Verifica o export. Rode antes de fechar qualquer mudança em `entryToMD`. |
+| `tests/history.mjs` | Verifica o undo/redo. Rode ao mexer nos mutadores estruturais ou na lista de embrulho. |
+| `STORAGE_KEY = 'base_v4'` (dentro do HTML) | Renomear sem migração **apaga os dados do usuário**. |
+| `calcPropertyValues()` / `blockProps` | Núcleo do modelo de propriedades (DEC-003). Mudança aqui afeta exportação e filtros. |
+| `loadDB()` / `handleImport()` / `migrateOptionModes()` | Migração de formatos antigos. Quebrar aqui inutiliza backups antigos. |
 
 ## Produto / histórico de nomes
 
-O app já se chamou **Synap** (guia v10) e **base**/**Nexus** em versões ainda mais antigas — daí `STORAGE_KEY='base_v4'`, prefixos `base_` e a chave legada `nexus_db_v4`. Nome atual definitivo: **Lunoda** (desde a v10/v11). Os arquivos de trabalho seguem nomeados `base_vN.html` no histórico de uploads, mas a versão canônica no Projeto é `Lunoda_v12.html`.
+O app já se chamou **Synap** (guia v10) e **base**/**Nexus** em versões ainda mais antigas — daí `STORAGE_KEY='base_v4'`, prefixos `base_` e a chave legada `nexus_db_v4`. Nome atual definitivo: **Lunoda** (desde a v10/v11). Os arquivos de trabalho antigos aparecem como `base_vN.html` / `Lunoda_v12.html` no histórico de uploads; a versão canônica hoje é o `index.html` do repositório.
 
-## Fluxo de desenvolvimento (peculiar — importante)
+## Fluxo de desenvolvimento (duas raias — importante)
 
-O desenvolvimento **não** é feito por edição direta do arquivo pelo assistente. O padrão é:
-1. O autor descreve o que quer para a próxima versão.
-2. O assistente analisa as versões, projeta, e **entrega um guia `.md` passo a passo** (blocos antigos a substituir + blocos novos completos, com âncoras exatas).
-3. O autor **aplica manualmente** as mudanças e sobe a nova versão.
+Desde 2026-11-03 o projeto trabalha com **duas raias** (ver DEC-012, que supera a DEC-002):
+1. **Chat (planejamento)** — conversa com a pasta do projeto vinculada. Analisa, projeta e **autora**: grava inteiros os docs de curadoria (CEREBRO, CONTEXT, Instruções, GLOSSARY, análises) e escreve **WOs** em `meta/workorders/` para o resto. Git pelo chat é só leitura.
+2. **Claude Code (execução)** — roda no repositório. Aplica a WO com `/apply-wo <arquivo>` (âncora exata, ou PARA e reporta), roda `node tests/smoke.mjs` e `node tests/history.mjs`, faz os appends em STATUS/DECISIONS/CHANGELOG, commita e empurra. Fecha a tarefa com `/wrap`.
+3. O **autor** decide, cola a linha `/apply-wo` no Code e testa no navegador o que os testes não cobrem.
 
-Isso está registrado como decisão (ver DECISIONS DEC-001). Os guias já produzidos: `synap_v10_guide.md` (v9→v10, por outra IA), `lunoda_v11_guide.md` (v10→v11), `lunoda_v12_guide.md` (v11→v12).
+Histórico do fluxo: guia `.md` aplicado à mão (v10–v12, DEC-002) → instrução ASU em YAML (v12.1–v12.3) → WO + Claude Code (a partir de 2026-11-03). Os guias antigos (`synap_v10_guide.md`, `lunoda_v11_guide.md`, `lunoda_v12_guide.md`) não estão no repositório; o raciocínio deles sobrevive em DECISIONS e HISTORY.

@@ -1,6 +1,6 @@
 # GLOSSARY.md — Termos do Projeto
 
-> **Opcional.** Use quando o projeto tem vocabulário próprio (nomes de módulos, conceitos, identificadores) que o assistente reexplicaria a cada sessão sem isto.
+> **Opcional.** Use quando o projeto tem vocabulário próprio (nomes de módulos, conceitos, identificadores) que o assistente reexplicaria a cada conversa sem isto.
 > Mantenha curto: só o que não é óbvio para alguém de fora.
 
 ---
@@ -21,9 +21,13 @@
 - **`editProps`** — variável legada do editor; **não é mais fonte de verdade** (ver armadilha no CONTEXT).
 
 ## Comandos / artefatos
-- **`Lunoda_vN.html`** — a aplicação. Versão canônica atual: `Lunoda_v12.html`.
-- **`lunoda_vN_guide.md`** — guia passo a passo de uma versão para a próxima (o produto de cada sessão de dev — ver DEC-002).
+- **`index.html`** — a aplicação. Nos uploads antigos aparece como `Lunoda_vN.html` / `base_vN.html`.
+- **`lunoda_vN_guide.md`** — *(histórico)* guia passo a passo de uma versão para a próxima, o produto do fluxo da DEC-002 (v10–v12). Os arquivos não estão no repositório.
+- **WO (work order)** — `meta/workorders/AAMMDD-woNNNN-desc.md`: instrução escrita pelo chat, com âncoras exatas, aplicada pelo Code com `/apply-wo`. Substitui o guia e a instrução ASU (DEC-012).
+- **`/apply-wo` · `/wrap` · `/sondar`** — skills do Claude Code em `.claude/skills/`: aplicar uma WO; fechar a tarefa (append + commit + push); passada exploratória que devolve candidatos, nunca veredito.
+- **Relatório de trabalho** — `../AAMMDD-HHMM-code-lunoda-<ato>-<alvo>.txt`, na pasta-pai, fora do Git: o que o Code fez, conferências cruas, commit.
 - **`favicon.png`** — ícone na raiz do repositório GitHub.
+- **ASU** — *(histórico)* Atualizador Automático de Scripts: patch YAML por âncora usado nas v12.1–v12.3. Desligado em 2026-11-03 (DEC-012).
 
 ## Identificadores
 - **`STORAGE_KEY = 'base_v4'`** — chave do `localStorage`. Não muda com a versão do app; não alterar sem migração (perderia dados).

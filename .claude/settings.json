@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Read", "Write", "Edit", "Grep", "Glob",
+      "Bash(git status:*)", "Bash(git diff:*)", "Bash(git add:*)", "Bash(git commit:*)", "Bash(git push:*)",
+      "Bash(git log:*)", "Bash(node --check:*)", "Bash(node tests/smoke.mjs)", "Bash(node tests/history.mjs)"
+    ],
+    "deny": ["Bash(rm -rf:*)"],
+    "additionalDirectories": ["../"]
+  }
+}

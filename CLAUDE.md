@@ -1,92 +1,40 @@
-# CLAUDE.md — Lunoda
+# Lunoda — guia para o Claude Code
 
-Instruções para o Claude Code neste repositório. Leia antes de qualquer alteração.
+> Arquivo-raiz lido pelo Claude Code em todo turno. Mantenha CURTO (< 200 linhas — custa token em todo turno).
+> Regra prática: se remover uma linha e o Claude ainda acerta, ela não pertence aqui. Procedural detalhado → vira skill em `.claude/skills/`.
+> O comportamento detalhado do assistente está em `meta/CEREBRO.md`.
 
-## O que é este projeto
+## Ritual de início
+Leia `meta/CEREBRO.md` → o doc de contexto do projeto (ex.: `meta/CONTEXT.md`) → `meta/STATUS.md` antes de agir. Confirme em uma frase o que entendeu.
 
-**Lunoda** é uma ferramenta pessoal, offline, em **arquivo `.html` único**: `index.html` (HTML+CSS+JS vanilla, ~2.770 linhas, sem build, sem dependências, sem backend). Serve para capturar interações com IAs em blocos e exportar tudo num arquivo só (JSON/MD/HTML).
-
-O arquivo único é **decisão consciente** (`meta/DECISIONS.md`, DEC-001), não dívida técnica. **Não proponha framework, bundler ou backend** sem o usuário levantar o assunto.
-
-## Antes de escrever código: leia o `meta/`
-
-Este repositório usa o **Kit de Contexto Universal (KCM)** — um sistema de documentação que preserva contexto entre sessões de IA. Os arquivos ficam em `meta/` e têm papéis distintos:
-
-| Arquivo | Papel | Quando ler |
-|---|---|---|
-| `meta/CEREBRO.md` | Como o assistente deve agir (princípios, higiene, gatilhos) | Início de sessão |
-| `meta/CONTEXT.md` | O que o projeto é: modelo de dados, peças críticas, **armadilhas** | Início de sessão |
-| `meta/STATUS.md` | O agora: o que funciona, o que quebrou, arquivos críticos | Início de sessão |
-| `meta/CHANGELOG.md` | Versões entregues (SemVer) | Última entrada, no início |
-| `meta/DECISIONS.md` | **Por que** as coisas são como são (DEC-N) e bugs graves (FIX-N) | Antes de mudar arquitetura |
-| `meta/IDEAS.md` | Segundo cérebro — nunca perde nada | Ao capturar ideia nova |
-| `meta/ROADMAP.md` | Fases de evolução (F1…F11) | Ao escolher o que fazer |
-| `meta/GLOSSARY.md` | Termos próprios | Ao topar jargão |
-| `meta/HISTORY.md` | Conhecimento consolidado de fases antigas | Sob demanda |
-
-**Ordem de leitura no início:** `CEREBRO` → `CONTEXT` → `STATUS` → última entrada do `CHANGELOG`.
-
-**Regra de higiene que mais importa:** `STATUS.md` é **rolante** (o resolvido sai e vira linha no `CHANGELOG`); `IDEAS.md` **nunca perde** (ideia muda de status, não some). Uma fonte de verdade por dado.
-
-Ao final de uma mudança relevante, atualize `STATUS`, `CHANGELOG`, `DECISIONS` (se houve decisão), `IDEAS` (se surgiu ideia) e escreva `logs/AAAA-MM-DD.md`.
-
-## Armadilhas do código — confira antes de mexer
-
-- **`STORAGE_KEY = 'base_v4'`** — não renomeie sem rotina de migração: **apaga os dados do usuário**. O nome antigo do app era outro; a chave ficou.
-- **`editProps` é legado.** A fonte de verdade das propriedades é o **bloco** (`blockProps`); a entrada é **calculada** por `calcPropertyValues()` (união das opções dos blocos). Não volte a usar `editProps` para decidir o que a entrada "tem".
-- **Nunca deixe uma entrada com 0 blocos** — ao mover/excluir todos, recrie um bloco vazio.
-- **Exportações usam prefixo `base_`** (nome antigo). Ao renomear para `lunoda_`, confira a concordância no entorno.
-- **Sem suíte de testes até agora.** A ferramenta é visual; ver `tests/` abaixo para o que já dá para verificar automaticamente.
-
-## Modelo de dados (resumo)
-
-```js
-db = {
-  properties: [ { id, name, options: [ { id, name, colorId } ] } ],
-  entries: [ {
-    id, title, description,
-    propertyValues:    { propId: [optId] },  // CALCULADO: união dos blocos
-    propertyAutoFlags: { propId: [optId] },  // herda só para blocos NOVOS
-    blocks: [ { id, subtitle, version, content, blockProps: { propId: [optId] } } ],
-    createdAt, updatedAt
-  } ]
-}
-```
-
-## Testes
-
-Não há framework. `tests/smoke.mjs` é um harness em Node puro que **extrai funções do `index.html`** e as executa isoladamente — não precisa de navegador nem de instalação.
-
-```
-node tests/smoke.mjs      (export / entryToMD)
-node tests/history.mjs    (undo/redo do editor)
-```
-
-`smoke.mjs` cobre o `entryToMD()` — função pura dado um `db`. `history.mjs` monta um editor de mentira e exercita o motor de undo/redo. Ambos rodam em segundos e falham com mensagem clara. Detalhes em `tests/README.md`.
-
-**Ao alterar `entryToMD`, `calcPropertyValues` ou qualquer coisa de export: rode o smoke.**
-**Ao alterar mutadores estruturais de bloco ou a lista de embrulho da DEC-010: rode o history.**
-
-> Se um teste falhar, **investigue antes de mexer no código** — já aconteceu de a fixture estar errada e o código certo.
-
-Para o que o smoke não cobre (interface, `localStorage`, arrastar, cores), verifique no navegador e diga explicitamente o que testou e o que não deu para testar.
+## Build / validação
+- Build: nenhum — arquivo único `index.html`, sem build (DEC-001). Sintaxe: extraia o `<script>` e rode `node --check`.
+- Testes/validação: `node tests/smoke.mjs` e `node tests/history.mjs` — rode antes de commitar mudança de código.
+- Mudança só de doc (meta/) NÃO precisa de build; a rede é o `git diff`.
+- Adicione seus comandos de build/teste ao `allow` de `.claude/settings.json`.
 
 ## Convenções
+- Mensagens de commit **sem acento**.
+- Edições nos meta/ são **append-only** pelo Code (STATUS, DECISIONS); curadoria que reescreve vem do chat (arquivo inteiro OU WO).
+- Ao aplicar uma WO de `meta/workorders/`: ache cada âncora exatamente; se não achar, PARE e reporte. Não mexa fora das edições nomeadas. `git diff` antes do commit.
+- **Ao fechar a tarefa, RELATE o trabalho** — o que fez, achados e desvios do que a tarefa pedia, arquivos tocados, resultado do build/validação e o commit. **Não** copie o bloco de fecho do `meta/CEREBRO.md`: aquele é da raia de planejamento, e trocar relatório por formulário perde o que só você viu.
 
-- Nomes de arquivos, funções e variáveis em **inglês**; comentários em **PT-BR**.
-- Commits em PT-BR, imperativo curto, **sem acento** (o CMD do usuário corrompe).
-- Legibilidade primeiro; performance só se medida.
-- **Mudança mínima que resolve** — prefira o diff menor ao refactor grande não pedido.
-- Preserve comentários existentes; remova só os órfãos.
+## Quando eu pedir medição
+- Eu leio a pasta com teto de contexto e de tempo por comando; você lê o repositório inteiro. Se eu pedir para **medir**, o pedido não tem âncora nem commit: não edite nada, não conserte nada, não sugira nada.
+- Responda com o **número cru e o comando que o produziu**. Sem interpretação, sem recomendação — se você achar que o número indica um problema, diga o número primeiro e a suspeita depois, separada.
+- Se o alvo estiver fora da raiz do repositório, isso depende de `permissions.additionalDirectories` no `.claude/settings.json` (a mesma chave do relatório em arquivo). Se a leitura for negada, DIGA — não estime.
 
-## Ambiente
+## Push e relatório — nesta ordem, sempre
+- **Verde** (validação passou, ou WO só de doc com o `git diff` conferido) → `add`, `commit` e **`push`, sem perguntar.** Não peça permissão para o que já está decidido.
+- **Vermelho** (validação falhou, âncora não encontrada, `git diff` com arquivo fora do previsto) → **não commite e não empurre.** E **não pergunte em prosa** («posso dar push?») — pergunta escrita no meio do texto passa despercebida. Feche com um **menu numerado** de saídas reais, a recomendada em **1** — ex.: `1) corrigir <o quê> e revalidar (recomendado)  2) reverter as edições  3) commitar local, sem push  4) empurrar assim mesmo`.
+- **O relatório é o ÚLTIMO passo** — só depois de resolvido o push. Ele diz o que de fato aconteceu: empurrado (com o hash), não empurrado (com o motivo), ou aguardando a escolha do menu. **Relatório escrito antes da decisão conta metade da história** e vira mentira assim que o push sai; se a escolha chegar depois, **reescreva o relatório**, não deixe a versão velha valendo.
 
-Windows (CMD). Comandos numa linha só, sem `\` de continuação; `-m` repetido para múltiplos parágrafos no commit; caminhos com `\`.
+## Relatório em arquivo (sempre, sem pedir)
+- Ao fechar QUALQUER tarefa (`/apply-wo` ou `/wrap`), grave o MESMO relatório também em `../AAMMDD-HHMM-code-<slug>-<ato>-<alvo>.txt` — pasta-PAI do repo, fora do versionamento. **`<slug>`** = nome curto do projeto (a pasta-pai costuma ser compartilhada por vários repos). **`<ato>`** = vocabulário FECHADO: `apply` · `wrap` · `probe` · `explore` — nada fora desta lista. **`<alvo>`** = a WO (`wo0108`) quando houver uma; senão, duas ou três palavras com hífen sobre o que foi feito (`teto-narrative`). Exemplo: `260903-2011-code-kcm-apply-wo0108.txt`. O nome existe para responder «qual relatório trata do quê» sem abrir nenhum deles.
+- Exige `permissions.additionalDirectories` no `.claude/settings.json`. Se a escrita for negada, DIGA e siga — o relatório no chat continua sendo a entrega.
+- **Para desligar:** apague esta seção. O relatório no chat não muda.
 
-## ASU (Atualizador Automático de Scripts)
-
-O repositório tem o ASU em `meta/ASU/`. É a via preferida para **editar** arquivos existentes a partir do chat: uma instrução `.yaml` aplica patches por âncora, com backup e rollback.
-
-No Claude Code você edita direto — **não precisa gerar ASU aqui**. O ASU existe para quando o trabalho acontece no chat, sem acesso ao disco. Se você mudar o formato de algum doc de heading estável, lembre que âncoras de terceiros podem depender dele.
-
-Referência: `meta/ASU/INSTRUCTION_GUIDE.md`.
+## Config (modelo × esforço)
+- WO com diff exato já validado → **Sonnet**, esforço proporcional (mecânico = baixo/médio).
+- Tarefa com julgamento sem rede (refator multi-arquivo, WO que delega decisão) → **Opus**, esforço alto.
+- Esforço proporcional à ambiguidade; `/effort low` para o trivial.

@@ -34,7 +34,7 @@ Portabilidade e zero-setup totais; funciona offline. Custo: sem colaboração em
 ---
 
 ## DEC-002 — Desenvolvimento por GUIA passo a passo, não por edição direta
-**Data:** 2026-04 (aprox.) · **Status:** aceita
+**Data:** 2026-04 (aprox.) · **Status:** superada por DEC-012
 
 ### Contexto
 O autor aplica as mudanças manualmente e sobe a nova versão ao GitHub. Precisa de instruções precisas, não de um arquivo pronto que ele apenas substituiria às cegas.
@@ -248,3 +248,25 @@ O `.md` de uma entrada passa a ser consultável por outra ferramenta. Nada muda 
 - **Causa raiz:** o recortador varre chaves ignorando string e comentário, mas não conhecia **literal de regex**. Em `.replace(/"/g, ...)`, a aspa dentro da regex era lida como início de string, e a varredura desalinhava do ponto ali em diante.
 - **Solução:** reconhecer regex por heurística — depois de identificador, número ou `)`/`]`, uma `/` é divisão; nos demais casos inicia regex (com `[...]` tratado, já que `/` dentro de classe não fecha). Em paralelo, `yamlStr` foi reescrita com `split/join`, que naquele nível de escape é mais legível que a versão com regex.
 - **Lição:** ferramenta de teste é código como qualquer outro e falha como qualquer outro. O erro se manifestou como falso alarme sobre o código de produção — a segunda vez na mesma semana em que o teste apontou para o lugar errado (ver o caso da fixture de um bloco só, no log de 2026-07-19 sessão 3). Diante de falha de teste: reproduzir e entender **antes** de mexer no código.
+
+---
+
+## DEC-012 — Desenvolvimento em duas raias: chat autora, Claude Code aplica (WO)
+**Data:** 2026-11-03 · **Status:** aceita · SUPERA a DEC-002
+
+### Contexto
+O fluxo mudou duas vezes sem decisão registrada que acompanhasse: guia `.md` aplicado à mão (DEC-002, v10–v12) → instrução ASU em YAML (v12.1–v12.3, desvio registrado só no IDEAS). O template-update do KCM v1.133.0 chegou gerado com `Code sim · ASU nao`, e o autor confirmou a troca de vez em 2026-11-03. O chat agora roda com a pasta do projeto vinculada.
+
+### Decisão
+Duas raias. O **chat** analisa, projeta e autora: grava inteiros os docs de curadoria (CEREBRO, CONTEXT, Instruções, GLOSSARY, análises) e escreve WOs em `meta/workorders/` para o resto; git pelo chat é só leitura. O **Claude Code** aplica a WO com `/apply-wo` (âncora exata, ou PARA e reporta), roda `node tests/smoke.mjs` e `node tests/history.mjs`, faz os appends nos `meta/`, commita e empurra. O ASU sai: `meta/ASU/` foi movido para fora do repositório.
+
+### Alternativas consideradas
+- **Manter o ASU** — funcionou nas v12.1–v12.3 (3 instruções aplicadas), mas deixa com o autor rodar o aplicador e conferir à mão; o Code aplica, testa e commita num passo só.
+- **Voltar ao guia `.md`** — já abandonado na prática; aplicar à mão fica mais caro a cada versão (~3.084 linhas hoje).
+- **Chat editando o `index.html` direto** — possível com a pasta vinculada, mas deixaria código sem teste rodado e sem commit; a raia de execução existe para isso.
+
+### Consequências
+- A WO é o artefato de mudança; o relatório de trabalho do Code fica na pasta-pai (`../AAMMDD-HHMM-code-lunoda-<ato>-<alvo>.txt`), fora do Git.
+- Nesta migração o chat também regravou o `STATUS.md` inteiro (curadoria: fatos defasados e a seção «Arquivos críticos» movida para o CONTEXT). Daqui em diante o STATUS volta a ser append do Code; reescrita só por WO ou como curadoria declarada.
+- A seção «Específico deste projeto» da DEC-007 virou «Técnicas específicas deste projeto» no CEREBRO — a moldura que o kit promete não sobrescrever.
+- Os guias de versão (`lunoda_vN_guide.md`) não existem no repositório; a regra de preservá-los saiu do CEREBRO.

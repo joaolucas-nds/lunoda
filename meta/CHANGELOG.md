@@ -5,7 +5,25 @@
 
 ---
 
-## [12.3.0] — 2026-07-19 *(entregue como ASU, pendente de aplicação)*
+## [Não lançado]
+
+### Modificado
+- **Processo: ASU → Claude Code com WO** (DEC-012). Sistema de documentação alinhado ao Kit de Contexto Universal **v1.133.0** (antes v1.74.0): CEREBRO e Instruções refeitos sobre a base nova; «Específico deste projeto» virou «Técnicas específicas deste projeto»; o CONTEXT recebeu os «Arquivos Críticos» (antes no STATUS) e o fluxo em duas raias.
+
+### Adicionado
+- `.claude/settings.json` e as skills `/apply-wo`, `/wrap` e `/sondar`; `CLAUDE.md` novo na raiz.
+- `meta/SPEC.md` (modelo de spec de feature) e `meta/workorders/` com o modelo de WO.
+- Sistema de documentação de contexto migrado para `meta/` e alinhado ao Kit de Contexto Universal v1.74.0 *(2026-07-19)*.
+- `.flatdropignore` (enxuga o que sobe ao Projeto do Claude) *(2026-07-19; refeito na v1.133.0)*.
+- Seção «Específico deste projeto (Lunoda)» no CEREBRO *(2026-07-19; hoje «Técnicas específicas»)*.
+
+### Removido
+- `meta/ASU/` e os dois `CLAUDE.md` antigos (raiz e `meta/`) — movidos para fora do repositório, não apagados.
+- `meta/README.md` — era a versão nova do README dos testes no lugar errado; agora é `tests/README.md`.
+
+> Nada aqui altera o `index.html` — são mudanças de documentação e processo.
+
+## [12.3.0] — 2026-07-19 *(aplicada — commit `0699b26`)*
 
 ### Adicionado
 - **Frontmatter YAML opcional na exportação Markdown** (F9 parte 1). Exportar uma entrada sozinha gera um `.md` com metadados legíveis por Obsidian, Hugo e afins; exportar várias gera um frontmatter de documento (origem, data, contagem) e cada entrada mantém seu bloco `<!-- ENTRADA -->`.
@@ -36,15 +54,6 @@
 - `warnIfStorageTight()` avisa uma vez por sessão ao passar de ~80% do teto prático (~5 MB).
 - `tests/smoke.mjs` — primeira verificação automática do projeto (Node puro, sem dependências).
 - `CLAUDE.md` — orientação para o Claude Code, incluindo o sistema `meta/` e o KCM.
-
-## [Não lançado]
-
-### Adicionado
-- Sistema de documentação de contexto migrado para `meta/` e alinhado ao Kit de Contexto Universal v1.74.0.
-- `.flatdropignore` (enxuga o que sobe ao Projeto do Claude).
-- Seção «Específico deste projeto (Lunoda)» no CEREBRO.
-
-> Nada aqui altera o `Lunoda_v12.html` — são mudanças de documentação e processo.
 
 ## [12.0.0] — 2026-07-05
 
