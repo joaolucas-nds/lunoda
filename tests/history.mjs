@@ -26,7 +26,7 @@ const code = html.slice(i0, i1 + END.length);
 
 /* ── Editor de mentira ─────────────────────────────────────── */
 
-function novoEditor() {
+function novoEditor(prep) {
   const campos = { epTitleInput: { value: '' }, epDesc: { value: '' },
                    epUndoBtn: { style: {} }, epRedoBtn: { style: {} },
                    editorPanel: { classList: { contains: () => true } } };
@@ -60,6 +60,9 @@ function novoEditor() {
   ['moveSelectedBlocks','duplicateBlock','duplicateSelectedBlocks','toggleEntryPropAuto',
    'toggleBlockPropOpt','disableAutoFromBlock','removeBlock']
     .forEach(n => { ctx.window[n] = () => {}; });
+
+  // Preparo opcional: instala mutadores REAIS antes de o embrulho rodar.
+  if (prep) prep(ctx);
 
   const api = new Function('ctx', `with (ctx) {
     ${code}
@@ -165,6 +168,48 @@ const check = (n, c, d = '') => c
   ctx.window.addBlock();
   check('botao desfazer fica ativo', campos.epUndoBtn.style.opacity === '');
   check('botao refazer segue inativo', campos.epRedoBtn.style.opacity === '.35');
+}
+
+// 11. Uniformizar nos blocos selecionados (DEC-013) — com a função REAL do index.html.
+//     Três blocos: b1 e b2 selecionados, b3 não — fixture de um bloco esconderia o caso misto.
+{
+  const a0 = html.indexOf('function applyPropToSelectedBlocks(');
+  check('applyPropToSelectedBlocks existe no index.html', a0 !== -1);
+  if (a0 !== -1) {
+    const src = html.slice(a0, html.indexOf('\n}\n', a0) + 2);
+    const montar = (props) => novoEditor(ctx => {
+      ctx.editBlocks = ['b1', 'b2', 'b3'].map(id => ({ id, subtitle: 'A', version: 1, content: id, blockProps: {} }));
+      ctx.editBlockProps = props;
+      ['b1', 'b2'].forEach(id => ctx.selectedBlockIds.add(id));
+      ctx.renderBlockPropBar = () => {};
+      ctx.buildBlockPropBody = () => {};
+      ctx.window.applyPropToSelectedBlocks = new Function('ctx', `with (ctx) { ${src}; return applyPropToSelectedBlocks; }`)(ctx);
+    });
+    const tem = (ctx, id) => ((ctx.editBlockProps[id] || {}).p || []).includes('o');
+
+    let { ctx, api } = montar({ b1: { p: ['o'] }, b2: {}, b3: {} });
+    ctx.window.applyPropToSelectedBlocks('p', 'o');
+    check('misto: todos os selecionados recebem', tem(ctx, 'b1') && tem(ctx, 'b2'));
+    check('misto: bloco NAO selecionado fica intocado', !tem(ctx, 'b3'));
+    check('uniformizar empilha undo (nome esta na lista do embrulho)', api.undoLen() === 1, `len=${api.undoLen()}`);
+    api.undoEditor();
+    check('undo desfaz o uniformizar', tem(ctx, 'b1') && !tem(ctx, 'b2'));
+
+    ({ ctx } = montar({ b1: { p: ['o'] }, b2: { p: ['o'] }, b3: { p: ['o'] } }));
+    ctx.window.applyPropToSelectedBlocks('p', 'o');
+    check('todos tem: remove de todos os selecionados', !tem(ctx, 'b1') && !tem(ctx, 'b2'));
+    check('todos tem: nao selecionado mantem a opcao', tem(ctx, 'b3'));
+
+    ({ ctx } = montar({}));
+    ctx.window.applyPropToSelectedBlocks('p', 'o');
+    check('nenhum tem: todos os selecionados recebem', tem(ctx, 'b1') && tem(ctx, 'b2') && !tem(ctx, 'b3'));
+
+    ({ ctx, api } = montar({ b1: {}, b2: {}, b3: {} }));
+    ctx.selectedBlockIds.clear();
+    ctx.window.applyPropToSelectedBlocks('p', 'o');
+    check('sem selecao: nada muda', !tem(ctx, 'b1') && !tem(ctx, 'b2') && !tem(ctx, 'b3'));
+    check('sem selecao: historico nao suja', api.undoLen() === 0, `len=${api.undoLen()}`);
+  }
 }
 
 console.log('\nLunoda — teste do historico (undo/redo)\n');

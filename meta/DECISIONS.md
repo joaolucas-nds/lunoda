@@ -270,3 +270,57 @@ Duas raias. O **chat** analisa, projeta e autora: grava inteiros os docs de cura
 - Nesta migração o chat também regravou o `STATUS.md` inteiro (curadoria: fatos defasados e a seção «Arquivos críticos» movida para o CONTEXT). Daqui em diante o STATUS volta a ser append do Code; reescrita só por WO ou como curadoria declarada.
 - A seção «Específico deste projeto» da DEC-007 virou «Técnicas específicas deste projeto» no CEREBRO — a moldura que o kit promete não sobrescrever.
 - Os guias de versão (`lunoda_vN_guide.md`) não existem no repositório; a regra de preservá-los saiu do CEREBRO.
+
+---
+
+## DEC-013 — Marcar propriedade nos blocos selecionados: UNIFORMIZAR, não inverter (C1)
+**Data:** 2026-11-03 · **Status:** aceita
+
+### Contexto
+Com blocos selecionados, o clique numa opção do painel da entrada deve agir nos selecionados. Duas ideias do autor descreviam regras diferentes para o caso misto (uns têm, outros não): inverter a posse de cada um, ou um «marca/desmarca/inverte» ambíguo (conflito C1 no IDEAS).
+
+### Decisão
+**Uniformizar:** se TODOS os selecionados têm a opção, o clique remove de todos; senão (nenhum ou misto), dá a todos. Bloco não selecionado não é tocado. O painel mostra `✓` (todos têm) e `–` (misto). Implementado em `applyPropToSelectedBlocks()`, coberto pelo undo (nome na lista do embrulho, DEC-010).
+
+### Alternativas consideradas
+- **Inverter posse por bloco** — era a regra descrita em detalhe e a sugestão do assistente em julho. Descartada: no estado misto, inverter produz OUTRO estado misto, e nenhum número de cliques chega a «todos com» ou «todos sem». Nos estados uniformes as duas regras coincidem; a diferença é só no misto, e ali inverter não serve ao uso real.
+
+### Consequências
+Dois cliques levam a qualquer estado uniforme. O estado misto passa a ser visível no painel. Regra coberta por `tests/history.mjs` (seção 11) com a função real recortada do `index.html`.
+
+---
+
+## DEC-014 — Botão direito liga o automático; esquerdo sem seleção só avisa (C2)
+**Data:** 2026-11-03 · **Status:** aceita · SUBSTITUI o clique esquerdo da v12 no painel da entrada
+
+### Contexto
+Até a v12.3, o clique esquerdo numa opção do painel da entrada ligava/desligava a adição automática a novos blocos. Com a DEC-013, o esquerdo com seleção ganhou outra função, e o autor queria o automático no botão direito — o app não usava o botão direito em lugar nenhum (conflito C2).
+
+### Decisão
+**Botão direito** (`contextmenu` com `preventDefault`) liga/desliga a adição automática — no painel da entrada E nos chips do bloco (o automático é da entrada). **Esquerdo sem seleção não age:** mostra o aviso «Selecione blocos para marcar · botão direito liga o automático». O clique esquerdo no chip `●auto` dentro do bloco continua como na v12 (`disableAutoFromBlock`).
+
+### Alternativas consideradas
+- **(a) Manter o esquerdo-sem-seleção como automático** — zero aprendizado, mas o esquerdo faria duas coisas diferentes conforme houvesse seleção.
+- **(c) Esquerdo-sem-seleção = marcar em TODOS os blocos** — a mais elegante («sem seleção = todos»), mas no hábito antigo o clique que ligava o automático viraria marcação em massa. Adiada no IDEAS, com gatilho.
+
+### Consequências
+Troca de memória muscular, mitigada pelo aviso. Esquerdo sempre marca; direito sempre controla o automático. Painéis de bloco abertos passam a ser reconstruídos ao ligar o automático (antes ficavam sem o `●auto` novo).
+
+---
+
+## DEC-015 — Empurrão de versão ignora a seleção e só renumera (Q1)
+**Data:** 2026-11-03 · **Status:** aceita · implementação na F6
+
+### Contexto
+A ideia «reordenar por número de versão» (F6) tinha uma pergunta aberta do autor: o que fazer com duas versões selecionadas. No código, a versão é um número por bloco, editado no campo `ver-num` (`syncVer`) ou pelos botões −/+ (`adjVer`) — sempre um bloco por vez; duplicata de número não é impedida.
+
+### Decisão
+O empurrão **ignora a seleção**: age só no bloco cujo número foi editado. Regras: só no grupo de **mesmo subtítulo**; só quando o número novo **já está ocupado** no grupo (número livre é só gravado); é um **mover** (v5→v3 faz v3→v4 e v4→v5, a vaga deixada é ocupada; duplicatas existentes se movem juntas, sem renumerar o resto); −/+ seguem a mesma regra (trocam com o vizinho); **só os números mudam — a posição dos blocos na lista fica**; coberto pelo undo.
+
+### Alternativas consideradas
+- **Bloquear o campo com 2+ selecionados** — atrapalharia sem motivo: selecionar para uma ação em massa impediria corrigir um número.
+- **Aplicar a todos os selecionados em sequência** — resultado dependente da ordem, imprevisível.
+- **Reposicionar os blocos junto com o número** — mais código e confusão com Subir/Descer; o autor escolheu só números.
+
+### Consequências
+A F6 fica desbloqueada e especificada. A função nova entra na lista do embrulho do undo.

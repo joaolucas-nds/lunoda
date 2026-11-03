@@ -23,6 +23,19 @@
 
 > Nada aqui altera o `index.html` — são mudanças de documentação e processo.
 
+## [13.0.0] — 2026-11-03
+
+### Modificado
+- **Clique nas opções de propriedade** (F4 parte 1, DEC-014). O **botão direito** liga/desliga a adição automática a novos blocos — no painel da entrada e nos chips do bloco. O **esquerdo sem blocos selecionados não age mais**: mostra um aviso curto com o caminho novo. *Muda a memória muscular: até a v12.3 o esquerdo ligava o automático.*
+
+### Adicionado
+- **Marcar propriedade nos blocos selecionados** (DEC-013): com blocos selecionados, o clique esquerdo numa opção do painel da entrada **uniformiza** — se todos os selecionados têm, remove de todos; senão, dá a todos. O painel mostra `✓` (todos têm) e `–` (misto). Coberto pelo undo.
+- `tests/history.mjs` cobre a regra de uniformizar e o embrulho no undo (10 asserções novas, 28 no total).
+
+### Corrigido
+- O texto de ajuda do painel de propriedades dizia que ativar uma opção a adicionava «a todos os blocos existentes e futuros»; desde a v12 (DEC-004) só os NOVOS recebem. Texto refeito.
+- Painéis de propriedade de bloco abertos não mostravam o `●auto` ao ligar o automático na entrada; agora são reconstruídos.
+
 ## [12.3.0] — 2026-07-19 *(aplicada — commit `0699b26`)*
 
 ### Adicionado

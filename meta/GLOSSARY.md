@@ -9,9 +9,11 @@
 - **Entrada (entry)** — um registro/"página" da tabela. Tem título, descrição, propriedades e uma lista de blocos.
 - **Bloco (block)** — unidade de conteúdo dentro de uma entrada. Tem subtítulo, versão, conteúdo e suas próprias propriedades (`blockProps`). É a **fonte de verdade** das propriedades.
 - **Propriedade (property)** — categoria com opções coloridas (ex.: "Tags", "IA Utilizada"). Cada opção tem `id`, `name`, `colorId`.
-- **Herança automática** — flag por opção (`propertyAutoFlags`) que faz **blocos novos** nascerem com aquela opção. Não afeta blocos existentes.
+- **Herança automática / adição automática** — flag por opção (`propertyAutoFlags`) que faz **blocos novos** nascerem com aquela opção. Não afeta blocos existentes. Desde a v13, liga/desliga pelo **botão direito** (DEC-014).
 - **Chip `●auto`** — no painel de um bloco, indica opção vinda da herança automática. Clicar remove do bloco e desliga a flag na entrada.
-- **Inverter posse** — (ideia v13) com blocos selecionados, clicar numa propriedade adiciona a quem não tem e remove de quem tem.
+- **Uniformizar** — (v13, DEC-013) com blocos selecionados, o clique esquerdo numa opção da entrada dá a todos os selecionados, ou remove de todos se todos já têm. `✓` = todos têm · `–` = misto.
+- **Inverter posse** — *(descartada, C1)* regra alternativa em que quem tinha perdia e quem não tinha recebia; no caso misto não uniformiza nunca.
+- **Empurrão de versão** — (F6, DEC-015) trocar o número de versão de um bloco para um número já ocupado no mesmo subtítulo renumera os vizinhos; só números, não posições.
 - **Herança entre versões** — (ideia v13) propagar/travar uma propriedade em todas as versões de um mesmo subtítulo de bloco.
 
 ## Arquiteturas / módulos

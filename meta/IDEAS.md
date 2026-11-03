@@ -72,6 +72,7 @@ A busca da tabela hoje alcança título e metadados; conteúdo de bloco é onde 
 
 ## ⚠️ Análise de conflitos e questões abertas — v13
 > O CEREBRO manda analisar antes de aceitar. Estas ideias novas se sobrepõem em alguns pontos; resolver antes de projetar a WO da F4.
+> **Resolvidos em 2026-11-03:** C1 → uniformizar (DEC-013) · C2 → botão direito = automático, esquerdo sem seleção só avisa (DEC-014) · Q1 → o empurrão ignora a seleção e só renumera (DEC-015). **C3 segue aberto** (F5).
 
 **C1 — "Clique esquerdo na propriedade com blocos selecionados" aparece em DUAS ideias com regras diferentes.**
 Na ideia "inverter posse", o esquerdo com seleção inverte a posse por bloco. Na ideia "ações por botão do mouse", o esquerdo com seleção "marca/desmarca/inverte" — texto ambíguo (marca? desmarca? inverte?). *Sugestão:* adotar **inverter** como padrão do esquerdo-com-seleção (é o que a primeira ideia descreve em detalhe e cobre o caso misto). Unificar as duas descrições numa só regra.
@@ -90,6 +91,7 @@ Pergunta do autor. *Sugestão do assistente:* nesse caso, **desabilitar** a edi�
 ## 🛌 Adiadas
 > Decisão consciente de não fazer agora. Cada item com **o gatilho que a traz de volta**: ideia adiada sem gatilho é ideia perdida.
 - **Migração para IndexedDB** — adiada porque o uso real não se aproxima do teto de ~5 MB — **volta quando** o aviso dos 80% (`warnIfStorageTight()`) disparar em uso real. Plano em ROADMAP, F11.
+- **Esquerdo sem seleção = marcar em todos os blocos da entrada** (opção (c) da C2) — adiada porque, no hábito antigo, o clique que ligava o automático viraria marcação em massa — **volta quando** o autor notar que seleciona todos os blocos à mão com frequência (hoje o editor não tem «selecionar todos os blocos»).
 
 ---
 
@@ -119,6 +121,7 @@ Pergunta do autor. *Sugestão do assistente:* nesse caso, **desabilitar** a edi�
 ## 🚫 Descartadas
 > Ideia avaliada e recusada. O motivo evita reabrir a discussão depois.
 
+- **Inverter posse no caso misto (C1, opção A)** — descartada em 2026-11-03 porque, no estado misto, inverter produz outro estado misto e nenhum número de cliques uniformiza. Substituída por uniformizar (DEC-013).
 - **Modelo Todos/Custom/Nenhum por opção (v10)** — descartado porque era complexo, pouco intuitivo e empilhava a UI verticalmente. Substituído pela herança por flag (DEC-003).
 - **Herança opaca de propriedades (v9)** — descartada porque não identificava, na exportação, QUAL opção o bloco herdava. Substituída pelo modelo bloco-como-fonte-de-verdade (DEC-003).
 - **Filtro/seleção/duplicação/transferência DENTRO das entradas na v11** — adiado à época por ser "avançado demais"; **depois implementado na v12**, então saiu de descartadas para concluídas.

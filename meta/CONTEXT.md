@@ -100,7 +100,8 @@ db = {
 ## Como as peças críticas funcionam
 
 - **Editor (painel lateral):** título, descrição, propriedades da entrada, lista de blocos. Cada bloco tem subtítulo, versão, conteúdo, checkbox de seleção, barra de propriedades (`Props ▼`) e ações (duplicar / colapsar / remover).
-- **Herança automática (`toggleEntryPropAuto`):** clicar numa opção no painel da entrada liga/desliga a flag `propertyAutoFlags`. Ligada = novos blocos nascem com essa opção. **Não altera blocos existentes.** Clicar no chip `●auto` dentro de um bloco (`disableAutoFromBlock`) remove a opção daquele bloco E desliga a flag na entrada.
+- **Herança automática (`toggleEntryPropAuto`):** **botão direito** numa opção (no painel da entrada ou no chip do bloco) liga/desliga a flag `propertyAutoFlags` (DEC-014). Ligada = novos blocos nascem com essa opção. **Não altera blocos existentes.** Clicar no chip `●auto` dentro de um bloco (`disableAutoFromBlock`) remove a opção daquele bloco E desliga a flag na entrada.
+- **Marcar nos selecionados (`onEntryOptClick` → `applyPropToSelectedBlocks`):** com blocos selecionados, o clique esquerdo numa opção do painel da entrada **uniformiza** nos selecionados (DEC-013); sem seleção, só mostra um aviso. O painel acompanha a seleção (`updateBlockMassBar` chama `renderEditorProps`).
 - **Sugestão de versão:** ao digitar subtítulo do bloco, sugere `Nome vN+1` a partir dos subtítulos já usados na entrada e de uma lista de IAs comuns (`AI_HINTS`).
 - **Seleção de blocos + ações em massa (interno ao editor):** checkbox por bloco → barra com Subir/Descer (move o grupo mantendo ordem relativa), Duplicar, Excluir, Mover para, Copiar para.
 - **Transferência de blocos:** modal com 4 ações — mover/copiar para entrada existente ou nova. Todas salvam a entrada atual, executam e abrem a entrada destino.

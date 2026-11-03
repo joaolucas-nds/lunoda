@@ -21,13 +21,12 @@
 **Critério de conclusão:** seleção, reordenar em grupo, duplicar, excluir, mover/copiar para entrada existente/nova, filtro interno E/OU.
 - Entregue na v12 (ver DEC-004, DEC-005).
 
-## 🟡 F4 — UX de propriedades avançada + conforto de edição *(próxima — depende de decisão)*
+## 🟡 F4 — UX de propriedades avançada + conforto de edição *(em curso — parte 1 na v13.0)*
 **Objetivo:** tornar a marcação de propriedades mais rápida (seleção em massa, botões do mouse) e a edição de texto mais confortável (tamanho das caixas).
-**Critério de conclusão:** a definir junto com o escopo da v13.
-- [ ] Propriedades em blocos selecionados (inverter posse) — depende de resolver conflito C1 (IDEAS).
-- [ ] Controles de tamanho / autosize das caixas de texto.
-- [ ] Ações por botão do mouse (esq/meio/dir) — depende de resolver C2 (IDEAS).
-> Antes de projetar a WO da F4, fechar os conflitos C1–C2 e a questão Q1 listados no IDEAS.
+**Critério de conclusão:** marcação em massa e botão direito funcionando (parte 1) + caixas de texto com tamanho controlável (parte 2).
+- [x] Propriedades em blocos selecionados — **uniformizar** (DEC-013), v13.0. Falta conferir no navegador.
+- [x] Botão direito = adição automática; esquerdo sem seleção só avisa (DEC-014), v13.0. O botão do meio fica com a F5.
+- [ ] Controles de tamanho / autosize das caixas de texto — parte 2.
 
 ## 🔵 F5 — Herança entre versões de um mesmo nome de bloco *(futuro, sem data)*
 **Objetivo:** propagar/travar propriedades entre todas as versões de um mesmo subtítulo (a "herança" antiga, agora restrita a versões).
@@ -35,7 +34,7 @@
 
 ## 🔵 F6 — Reordenação por número de versão *(futuro, sem data)*
 **Objetivo:** mudar o número de versão de um bloco empurrando os demais.
-- Depende de resolver a questão Q1 (duas versões selecionadas).
+- **Desbloqueada:** regras fechadas na DEC-015 (Q1) — o empurrão ignora a seleção, age só no grupo de mesmo subtítulo e só muda números, não posições.
 
 ## 🔵 F7 — Melhorias adiadas da v12 *(futuro, sem data)*
 - Drag-and-drop de blocos (alternativa ao mover por botões).
