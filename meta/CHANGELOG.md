@@ -23,6 +23,12 @@
 
 > Nada aqui altera o `index.html` — são mudanças de documentação e processo.
 
+## [13.3.0] — 2026-11-04
+
+### Adicionado
+- **Empurrão de versão** (F6, DEC-015, DEC-021): trocar o número de versão de um bloco para um número já ocupado no mesmo subtítulo renumera os vizinhos (v5→v3 faz v3→v4 e v4→v5); os botões −/+ trocam com o vizinho. Só números mudam, a posição na lista fica. Um aviso diz quantas versões foram renumeradas. Coberto pelo undo — antes, mudar o número de versão não entrava no histórico.
+- `tests/history.mjs` cobre o empurrão (13 asserções novas, 52 no total).
+
 ## [13.2.0] — 2026-11-03
 
 ### Adicionado

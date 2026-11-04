@@ -418,3 +418,23 @@ Aplicar um tamanho a todos os blocos já era possível pelo botão direito (que 
 
 ### Consequências
 Mesma regra em dois lugares (caixa e geral), mesmo código (`taToolbarHTML('all')`). Sem mudança no formato dos dados.
+
+---
+
+## DEC-021 — Detalhes da implementação do empurrão de versão (F6)
+**Data:** 2026-11-04 · **Status:** aceita · complementa a DEC-015
+
+### Contexto
+A DEC-015 fixou as regras do empurrão. Ao implementar, apareceram três pontos que ela não cobria.
+
+### Decisão
+- **Bloco sem subtítulo não forma grupo** e não empurra ninguém — blocos sem nome não são versões de uma mesma coisa; tratá-los como grupo renumeraria blocos sem relação entre si.
+- **O grupo ignora maiúsculas e espaços nas pontas** («A» e «a » são o mesmo subtítulo) — a mesma comparação que o aviso «mesmo subtítulo existe» já usava (`updateVerHint`).
+- **A sugestão de versão (`applySug`) não empurra:** ela já escolhe o próximo número livre.
+- Quando o empurrão renumera alguém, um aviso diz «v5 → v3 · N versão(ões) renumerada(s)»; os campos mudam no lugar, sem redesenhar a lista.
+
+### Alternativas consideradas
+- **Tratar «sem subtítulo» como um grupo** — coerente no papel, mas renumeraria em cascata blocos que só têm em comum a falta de nome.
+
+### Consequências
+Implementado em `setBlockVersion()`, chamado por `syncVer` (campo) e `adjVer` (−/+), na lista do embrulho do undo. Coberto pela seção 13 do `tests/history.mjs`.

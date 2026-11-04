@@ -33,7 +33,8 @@ O botão do **meio** do mouse numa propriedade define herança **entre todas as 
 ### 2026-07 — Reordenação por número de versão empurrando as demais
 Se há v1..v4 e cria-se v5, mudar o número de v5 para v3 empurra as existentes: v3→v4, v4→v5. Pergunta em aberto do autor: o que fazer se **duas versões diferentes** estiverem selecionadas ao tentar isso.
 > Fonte: `Lunoda_ideias.txt`. **Ver questão aberta Q1.**
-> **Status (2026-11-03):** Q1 resolvida (DEC-015); implementação na F6.
+> **Status (2026-11-03):** Q1 resolvida (DEC-015).
+> **Status (2026-11-04):** implementada na v13.3 (DEC-021) — ver Concluídas.
 
 ### 2026-11 — Selecionar/desmarcar todos os blocos, respeitando o filtro
 Um quadrado geral para marcar ou desmarcar todos os blocos, que funcione conforme o filtro (age no que está aparecendo), com símbolo próprio quando só parte está marcada, desenhado segundo as práticas mais comuns e intuitivas. Pergunta do autor: com 4 de 10 marcados e um filtro que mostra 6 (2 deles marcados), o que o clique faz, e o que acontece com os 2 marcados que o filtro escondeu?
@@ -117,6 +118,7 @@ Pergunta do autor. *Sugestão do assistente:* nesse caso, **desabilitar** a edi�
 
 ## ✅ Concluídas
 
+- **Reordenação por número de versão (empurrão)** — v13.3 / DEC-015, DEC-021. Fecha a F6.
 - **Legibilidade: contraste WCAG AA e piso de 11px** — v13.2 / DEC-018.
 - **Painel do editor ajustável e maximizar** — v13.2 / DEC-019.
 - **Controle geral de tamanho das caixas dos blocos** — v13.2 / DEC-020.

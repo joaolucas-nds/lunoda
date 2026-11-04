@@ -33,9 +33,9 @@
 **Objetivo:** propagar/travar propriedades entre todas as versões de um mesmo subtítulo (a "herança" antiga, agora restrita a versões).
 - Maior risco de complexidade (conflito C3 no IDEAS). Tratar isolada, com protótipo antes de integrar.
 
-## 🔵 F6 — Reordenação por número de versão *(futuro, sem data)*
+## 🟢 F6 — Reordenação por número de versão *(entregue — v13.3; falta conferir no navegador)*
 **Objetivo:** mudar o número de versão de um bloco empurrando os demais.
-- **Desbloqueada:** regras fechadas na DEC-015 (Q1) — o empurrão ignora a seleção, age só no grupo de mesmo subtítulo e só muda números, não posições.
+- [x] Empurrão no campo de versão e nos −/+ (DEC-015, DEC-021), v13.3 — ignora a seleção, age só no grupo de mesmo subtítulo e só muda números, não posições.
 
 ## 🔵 F7 — Melhorias adiadas da v12 *(futuro, sem data)*
 - Drag-and-drop de blocos (alternativa ao mover por botões).

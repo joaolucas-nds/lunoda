@@ -1657,7 +1657,7 @@ function updateHistoryButtons() {
 ['addBlock', 'removeBlock', 'moveBlock', 'jumpBlockTo',
  'moveSelectedBlocks', 'duplicateBlock', 'duplicateSelectedBlocks',
  'deleteSelectedBlocks', 'toggleEntryPropAuto', 'toggleBlockPropOpt',
- 'disableAutoFromBlock', 'applyPropToSelectedBlocks'].forEach(name => {
+ 'disableAutoFromBlock', 'applyPropToSelectedBlocks', 'setBlockVersion'].forEach(name => {
   const original = window[name];
   if (typeof original !== 'function') return;   // tolera renomeação futura
   window[name] = function (...args) {
@@ -2030,16 +2030,46 @@ function syncSub(bid, val) {
   showSugDrop(bid);
 }
 function syncVer(bid, val) {
-  const b = editBlocks.find(x=>x.id===bid); if (b) b.version = val;
+  setBlockVersion(bid, val);   // número ocupado no mesmo subtítulo empurra os vizinhos (DEC-015)
 }
 function syncContent(bid, val) {
   const b = editBlocks.find(x=>x.id===bid); if (b) b.content = val;
 }
 function adjVer(bid, delta) {
   const b = editBlocks.find(x=>x.id===bid); if (!b) return;
-  b.version = Math.max(1, (b.version||1) + delta);
-  const inp = document.querySelector(`.ver-num[onchange*="${bid}"]`);
-  if (inp) inp.value = b.version;
+  setBlockVersion(bid, (b.version||1) + delta);   // −/+ num número ocupado = troca com o vizinho
+}
+
+/* Muda a versão de um bloco — o empurrão da F6 (DEC-015, detalhes na DEC-021).
+   Se o número novo já está ocupado por OUTRO bloco do mesmo subtítulo (sem diferença de
+   maiúsculas e espaços nas pontas), é um MOVER: os do intervalo andam uma casa
+   (v5→v3: v3→v4 e v4→v5; v2→v4: v3→v2 e v4→v3); duplicatas andam juntas. Número livre só é gravado.
+   Só números mudam — a posição dos blocos na lista fica. Ignora a seleção.
+   Bloco sem subtítulo não forma grupo: não empurra ninguém.
+   Coberta pelo undo: o nome está na lista do embrulho. */
+function setBlockVersion(bid, val) {
+  const b = editBlocks.find(x => x.id === bid); if (!b) return;
+  const from = b.version || 1;
+  const to   = Math.max(1, parseInt(val, 10) || 1);
+  const key  = (b.subtitle || '').trim().toLowerCase();
+  const group = key
+    ? editBlocks.filter(x => x.id !== bid && (x.subtitle || '').trim().toLowerCase() === key)
+    : [];
+  const shifted = [];
+  if (to !== from && group.some(x => (x.version || 1) === to)) {
+    group.forEach(x => {
+      const v = x.version || 1;
+      if (to < from && v >= to && v < from)      { x.version = v + 1; shifted.push(x.id); }
+      else if (to > from && v > from && v <= to) { x.version = v - 1; shifted.push(x.id); }
+    });
+  }
+  b.version = to;
+  // Atualiza só os campos que mudaram (sem redesenhar a lista: o foco e as alturas ficam)
+  [bid, ...shifted].forEach(id => {
+    const inp = document.querySelector(`.ver-num[onchange*="${id}"]`);
+    if (inp) inp.value = editBlocks.find(x => x.id === id).version;
+  });
+  if (shifted.length) showToast(`v${from} → v${to} · ${shifted.length} versão(ões) renumerada(s)`);
 }
 
 function toggleCollapse(bid) {

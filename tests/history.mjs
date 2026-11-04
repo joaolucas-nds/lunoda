@@ -254,6 +254,71 @@ const check = (n, c, d = '') => c
   }
 }
 
+// 13. Empurrão de versão (DEC-015, DEC-021) — função REAL do index.html.
+//     Cinco blocos «A» v1..v5 (um deles «a », para provar que caixa e espaço não separam o grupo)
+//     e um «B» v3, que nunca pode ser tocado.
+{
+  const a0 = html.indexOf('function setBlockVersion(');
+  check('setBlockVersion existe no index.html', a0 !== -1);
+  if (a0 !== -1) {
+    const src = html.slice(a0, html.indexOf('\n}\n', a0) + 2);
+    const blocos = specs => specs.map(([s, v], i) => ({ id: 'b' + (i + 1), subtitle: s, version: v, content: '', blockProps: {} }));
+    const base = () => blocos([['A', 1], ['A', 2], ['A', 3], ['a ', 4], ['A', 5], ['B', 3]]);
+    const montar = (bs, comHistorico) => {
+      if (comHistorico) {
+        const ed = novoEditor(ctx => {
+          ctx.editBlocks = bs;
+          ctx.document.querySelector = () => null;
+          ctx.window.setBlockVersion = new Function('ctx', `with (ctx) { ${src}; return setBlockVersion; }`)(ctx);
+        });
+        return { ctx: ed.ctx, api: ed.api, set: ed.ctx.window.setBlockVersion };
+      }
+      const ctx = { editBlocks: bs, document: { querySelector: () => null }, showToast: () => {} };
+      return { ctx, set: new Function('ctx', `with (ctx) { ${src}; return setBlockVersion; }`)(ctx) };
+    };
+    const vs  = ctx => ctx.editBlocks.map(b => b.version).join(',');
+    const ids = ctx => ctx.editBlocks.map(b => b.id).join(',');
+
+    let { ctx, set } = montar(base());
+    set('b5', 3);
+    check('v5->v3 (ocupado): v3->v4 e v4->v5', vs(ctx) === '1,2,4,5,3,3', vs(ctx));
+    check('grupo ignora caixa e espacos ("a " anda junto com "A")', ctx.editBlocks[3].version === 5);
+    check('outro subtitulo intocado', ctx.editBlocks[5].version === 3);
+    check('so numeros mudam: a ordem da lista fica', ids(ctx) === 'b1,b2,b3,b4,b5,b6', ids(ctx));
+
+    ({ ctx, set } = montar(base()));
+    set('b2', 4);
+    check('v2->v4 (subindo): v3->v2 e v4->v3', vs(ctx) === '1,4,2,3,5,3', vs(ctx));
+
+    ({ ctx, set } = montar(base()));
+    set('b5', 9);
+    check('numero livre so grava', vs(ctx) === '1,2,3,4,9,3', vs(ctx));
+
+    ({ ctx, set } = montar(base()));
+    set('b3', 4);
+    check('+1 num numero ocupado troca com o vizinho', vs(ctx) === '1,2,4,3,5,3', vs(ctx));
+
+    ({ ctx, set } = montar(blocos([['A', 1], ['A', 2], ['A', 2], ['A', 3]])));
+    set('b4', 1);
+    check('duplicatas andam juntas', vs(ctx) === '2,3,3,1', vs(ctx));
+
+    ({ ctx, set } = montar(base()));
+    set('b1', 0);
+    check('minimo 1', ctx.editBlocks[0].version === 1);
+
+    ({ ctx, set } = montar(blocos([['', 1], ['', 2]])));
+    set('b2', 1);
+    check('sem subtitulo nao empurra', vs(ctx) === '1,1', vs(ctx));
+
+    let api;
+    ({ ctx, api, set } = montar(base(), true));
+    set('b5', 3);
+    check('empurrao empilha undo (nome esta na lista do embrulho)', api.undoLen() === 1, `len=${api.undoLen()}`);
+    api.undoEditor();
+    check('undo desfaz o empurrao inteiro', vs(ctx) === '1,2,3,4,5,3', vs(ctx));
+  }
+}
+
 console.log('\nLunoda — teste do historico (undo/redo)\n');
 console.log(out.join('\n'));
 console.log(`\n  ${pass} ok, ${fail} falha(s)\n`);

@@ -18,7 +18,7 @@
 - **Caixas (controle geral)** — (v13.2, DEC-020) «Caixas: Auto · P · M · G» no cabeçalho da lista de blocos; aplica o tamanho a todos os blocos.
 - **Alça / maximizar** — (v13.2, DEC-019) borda esquerda do painel do editor que ajusta a largura; o botão ao lado do fechar abre o painel em tela inteira.
 - **Auto (caixa de texto)** — (v13.1, DEC-017) modo em que a caixa cresce com o conteúdo, sem rolagem interna. Os outros: Mín (só descrição), P, M, G.
-- **Empurrão de versão** — (F6, DEC-015) trocar o número de versão de um bloco para um número já ocupado no mesmo subtítulo renumera os vizinhos; só números, não posições.
+- **Empurrão de versão** — (v13.3, DEC-015, DEC-021) trocar o número de versão de um bloco para um número já ocupado no mesmo subtítulo renumera os vizinhos; só números, não posições.
 - **Herança entre versões** — (ideia v13) propagar/travar uma propriedade em todas as versões de um mesmo subtítulo de bloco.
 
 ## Arquiteturas / módulos

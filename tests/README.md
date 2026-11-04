@@ -52,7 +52,7 @@ O `extractFunction` varre chaves balanceadas ignorando string, comentário **e l
 
 ## `history.mjs` — undo/redo
 
-Monta um **editor de mentira** (dublês de DOM e mutadores) e recorta o bloco de histórico do `index.html` para exercitá-lo. 39 asserções, incluindo:
+Monta um **editor de mentira** (dublês de DOM e mutadores) e recorta o bloco de histórico do `index.html` para exercitá-lo. 52 asserções, incluindo:
 
 - ação sem efeito não suja o histórico (o caso do `confirm` cancelado);
 - ramo novo invalida o refazer;
@@ -61,6 +61,7 @@ Monta um **editor de mentira** (dublês de DOM e mutadores) e recorta o bloco de
 - abrir outra entrada zera o histórico.
 - **uniformizar nos blocos selecionados** (DEC-013), com a função REAL recortada do `index.html`: misto → todos recebem, todos têm → todos perdem, bloco não selecionado intocado, e o nome na lista do embrulho (undo).
 - **quadrado geral de seleção com filtro** (DEC-016), com as funções REAIS: misto → marca todos os visíveis e mantém o oculto; todos → desmarca só os visíveis; o contador de ocultos ignora id que não existe mais.
+- **empurrão de versão** (DEC-015, DEC-021), com a função REAL: descendo e subindo, número livre, troca pelo −/+, duplicatas juntas, grupo sem diferença de caixa, sem subtítulo não empurra, ordem da lista intacta e undo.
 
 Rode ao mexer nos mutadores estruturais ou na lista de nomes embrulhados (DEC-010).
 
