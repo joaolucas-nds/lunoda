@@ -23,6 +23,12 @@
 
 > Nada aqui altera o `index.html` — são mudanças de documentação e processo.
 
+## [13.4.1] — 2026-11-04
+
+### Modificado
+- Arquivos exportados com prefixo **`lunoda_`** (`lunoda_backup_`, `lunoda_notas_`, `lunoda_selecionados_`) no lugar do antigo `base_`. A importação lê o conteúdo, não o nome: arquivos antigos seguem importando. A chave `base_v4` do `localStorage` não muda.
+- `README.md` do produto atualizado para a v13 (estava na v12, com estrutura e fluxo antigos).
+
 ## [13.4.0] — 2026-11-04
 
 ### Adicionado

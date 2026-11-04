@@ -21,7 +21,7 @@
 **Critério de conclusão:** seleção, reordenar em grupo, duplicar, excluir, mover/copiar para entrada existente/nova, filtro interno E/OU.
 - Entregue na v12 (ver DEC-004, DEC-005).
 
-## 🟢 F4 — UX de propriedades avançada + conforto de edição *(entregue — v13.0 e v13.1; v13.1 falta conferir no navegador)*
+## 🟢 F4 — UX de propriedades avançada + conforto de edição *(concluída — v13.0 e v13.1)*
 **Objetivo:** tornar a marcação de propriedades mais rápida (seleção em massa, botões do mouse) e a edição de texto mais confortável (tamanho das caixas).
 **Critério de conclusão:** marcação em massa e botão direito funcionando (parte 1) + caixas de texto com tamanho controlável (parte 2).
 - [x] Propriedades em blocos selecionados — **uniformizar** (DEC-013), v13.0. Conferida no navegador pelo autor.
@@ -34,7 +34,7 @@
 - Maior risco de complexidade (conflito C3 no IDEAS). Tratar isolada, com protótipo antes de integrar.
 > **Adiada por decisão do autor (2026-11-04)** — gatilho em IDEAS, «Adiadas».
 
-## 🟢 F6 — Reordenação por número de versão *(entregue — v13.3; falta conferir no navegador)*
+## 🟢 F6 — Reordenação por número de versão *(concluída — v13.3)*
 **Objetivo:** mudar o número de versão de um bloco empurrando os demais.
 - [x] Empurrão no campo de versão e nos −/+ (DEC-015, DEC-021), v13.3 — ignora a seleção, age só no grupo de mesmo subtítulo e só muda números, não posições.
 
@@ -53,7 +53,7 @@
 - [x] Undo/redo no editor (Ctrl+Z / Ctrl+Y) sobre snapshots do estado — v12.2, ver DEC-010.
 > Fase fechada. O acervo agora está protegido contra os dois modos de perda que existiam: estouro silencioso de armazenamento e exclusão em massa sem volta.
 
-## 🟡 F9 — Interoperabilidade do export *(parte 1 entregue na v12.3)*
+## 🟡 F9 — Interoperabilidade do export *(partes 1 e 2 entregues — v12.3 e v13.4; resta o `.zip`)*
 **Objetivo:** o arquivo exportado deixar de ser só legível e passar a ser **importável por outras ferramentas**.
 - [x] Markdown com **YAML frontmatter** — v12.3, ver DEC-011.
 - [x] Seletor "MD simples / MD com frontmatter" na exportação — v12.3.
@@ -71,7 +71,7 @@
 **Gatilho:** só iniciar quando o indicador da F8 mostrar uso real perto do teto — não antes.
 - Muda `save`/`load` para assíncrono; é a mudança estrutural mais séria já cogitada. Exige plano de migração e backup obrigatório antes.
 
-## 🟢 F12 — Legibilidade e ergonomia do editor *(entregue — v13.2; falta conferir no navegador)*
+## 🟢 F12 — Legibilidade e ergonomia do editor *(concluída — v13.2)*
 **Objetivo:** a interface nítida e confortável em telas de uso real.
 **Critério de conclusão:** texto secundário ≥ 4,5:1, nada abaixo de 11px, painel com largura ajustável, controle geral das caixas.
 - [x] Contraste WCAG AA e piso de 11px (DEC-018).

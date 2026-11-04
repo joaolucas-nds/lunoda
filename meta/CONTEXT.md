@@ -126,7 +126,7 @@ db = {
 - **Texto livre interpolado em formato estruturado precisa de delimitador explícito** (FIX-002) — vale para descrição, conteúdo de bloco e qualquer campo novo no export.
 - **O formato do `.md` exportado é contrato do leitor** (DEC-022) — mudar marcador, ordem dos campos ou o separador ` · ` em `entryToMD` quebra a reimportação em silêncio. Mudou o export? Rode o smoke: a seção de ida e volta compara campo a campo.
 - **Cor nova de texto: medir antes** — contraste ≥ 4,5:1 contra o `--surface2` (o fundo mais claro) e nada abaixo de 11px (DEC-018). Opacidade baixa num texto conta: `.48` sobre um chip já claro o derrubava para ilegível.
-- **Prefixos de exportação** — arquivos exportados usam prefixo `base_` no nome (`base_backup_`, `base_notas_`, `base_selecionados_`) — resquício do nome antigo. Ver IDEAS (renomear para `lunoda_`).
+- **Prefixos de exportação** — desde a v13.4.1 os arquivos saem como `lunoda_backup_`, `lunoda_notas_`, `lunoda_selecionados_`; exports antigos têm `base_`. O nome do arquivo não importa para a importação (que lê o conteúdo) e o `.gitignore` cobre os dois. A chave `base_v4` do `localStorage` **não** mudou (ver acima).
 
 ## 📁 Arquivos Críticos (não mexer sem contexto)
 

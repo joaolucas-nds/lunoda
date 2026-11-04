@@ -8,7 +8,7 @@
 
 ## Versão Atual
 
-**Lunoda v13.4** — 2026-11-04 — reimportar o Markdown exportado (F9 parte 2). Arquivo canônico `index.html`. Testes: `smoke` 46/46 e `history` 52/52 (rodada da wo0006).
+**Lunoda v13.4.1** — 2026-11-04 — reimportar o Markdown exportado (F9 parte 2) + faxina (prefixos `lunoda_`, README). Arquivo canônico `index.html`. Testes: `smoke` 46/46 e `history` 52/52 (rodada da wo0007).
 
 ## ✅ Funcionando
 
@@ -47,13 +47,11 @@
 - [ ] **Conferir o frontmatter no Obsidian** (nunca testado em navegador) — exportar UMA entrada pelo botão MD do editor, jogar num vault e ver as propriedades como campos; depois desmarcar o checkbox no modal e confirmar que volta ao Markdown simples.
 - [ ] **Conferir o undo/redo no navegador** — excluir blocos em massa e `Ctrl+Z`; `Ctrl+Z` dentro de campo de texto desfaz a digitação, não a estrutura; botões esmaecidos sem histórico; abrir outra entrada zera o histórico.
 - [ ] **Prints para o README** — cabeçalho do editor com Desfazer/Refazer; modal de exportação com o checkbox de frontmatter; propriedades renderizadas no Obsidian.
-- [ ] **Higiene do IDEAS** — ideias já implementadas (teto do `localStorage`, frontmatter, undo/redo) seguem também em «Ideias Ativas — Assistente», e três ideias ativas (reimportar `.md`, estender o smoke, exportar `.zip`) estão fora da seção delas (sob «Descartadas» e «Feedback para o Kit»). Curadoria por WO própria.
 - [ ] **Conferir a v13.4 no navegador** (roteiro na conversa de 2026-11-04).
-- [ ] **Faxina** — `base_` → `lunoda_` nos arquivos exportados, títulos defasados do ROADMAP, higiene do IDEAS: wo0007, já escrita.
 - [ ] **Lembrete de backup JSON** — «último backup há N dias» + botão rápido (IDEAS, 2026-11-04).
 
 ## 💬 Última conversa
 
 **2026-11-04** — v13.2 e v13.3 conferidas pelo autor. Entregue a F6 (empurrão de versão, DEC-021) como v13.3 (`e40b37a`). Análise da F9 parte 2 medida e decidida (opção B, DEC-022); entregue como **v13.4** pela wo0006. F5 adiada pelo autor. Histórico da véspera (migração para o KCM v1.133.0, v13.0–v13.2) no log de 2026-11-03.
 
-**Próximo passo óbvio:** conferir a v13.4 no navegador; aplicar a wo0007 (faxina); depois o lembrete de backup JSON.
+**Próximo passo óbvio:** conferir a v13.4 no navegador; depois o lembrete de backup JSON.

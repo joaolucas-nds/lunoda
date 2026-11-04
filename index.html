@@ -1523,14 +1523,14 @@ function massDelete() {
 
 function massExportJSON() {
   const sel = { properties: db.properties, entries: db.entries.filter(e=>selectedIds.has(e.id)) };
-  dl(JSON.stringify(sel,null,2), 'base_selecionados_'+dateSlug()+'.json', 'application/json');
+  dl(JSON.stringify(sel,null,2), 'lunoda_selecionados_'+dateSlug()+'.json', 'application/json');
 }
 
 function massExportMD() {
   const sel  = db.entries.filter(e=>selectedIds.has(e.id));
   const corpo = sel.map(e => entryToMD(e)).join('');
   const head  = mdFrontmatterOn() ? docFrontmatter(sel.length) : '';
-  dl(head + corpo, 'base_selecionados_'+dateSlug()+'.md', 'text/markdown');
+  dl(head + corpo, 'lunoda_selecionados_'+dateSlug()+'.md', 'text/markdown');
 
 }
 
@@ -3191,14 +3191,14 @@ if (document.readyState === 'loading') {
   syncFrontmatterUI();
 }
 function exportAllJSON() {
-  dl(JSON.stringify(db,null,2), 'base_backup_'+dateSlug()+'.json', 'application/json');
+  dl(JSON.stringify(db,null,2), 'lunoda_backup_'+dateSlug()+'.json', 'application/json');
   closeModal('exportModal'); showToast('JSON exportado');
 }
 
 function exportAllMD() {
   const corpo = db.entries.map(e => entryToMD(e)).join('');
   const head  = mdFrontmatterOn() ? docFrontmatter(db.entries.length) : '';
-  dl(head + corpo, 'base_notas_'+dateSlug()+'.md', 'text/markdown');
+  dl(head + corpo, 'lunoda_notas_'+dateSlug()+'.md', 'text/markdown');
   closeModal('exportModal'); showToast('Markdown exportado');
 
 }
@@ -3240,7 +3240,7 @@ function exportCurrentHTML() {
 function exportAllHTML() {
   const allBlocks = db.entries.map(e => buildEntryHTMLBody(e)).join('\n<hr>\n');
   const html = wrapHTMLDoc('Base de Notas — '+dateSlug(), allBlocks, true);
-  dl(html, 'base_notas_'+dateSlug()+'.html', 'text/html');
+  dl(html, 'lunoda_notas_'+dateSlug()+'.html', 'text/html');
   closeModal('exportModal');
   showToast('HTML exportado — abra no navegador e use Ctrl+P para PDF');
 }

@@ -57,17 +57,21 @@ Algumas coisas não estão nítidas; usar mais UX/UI. Medido pelo assistente: co
 ## 🤖 Ideias Ativas — Assistente
 
 ### 2026-07-05 — Renomear prefixos de exportação de `base_` para `lunoda_`
+> **Status (2026-11-04):** implementada na v13.4.1 — ver Concluídas.
 Os arquivos exportados ainda saem como `base_backup_`, `base_notas_`, `base_selecionados_` — resquício do nome antigo. Trocar para `lunoda_` deixa a saída coerente com o produto. Mudança trivial e isolada; não afeta importação (que lê o conteúdo, não o nome).
 
 ### 2026-07-05 — Migrar `STORAGE_KEY` com cuidado (ou deixar como está)
+> **Status (2026-11-04):** mantida como está — risco de perder dados sem ganho para o usuário.
 `STORAGE_KEY='base_v4'` destoa do nome. Renomear exige rotina de migração (ler chave antiga, gravar na nova) para não "perder" os dados do usuário. Custo-benefício baixo: talvez não valha mexer. Registrado para decisão consciente, não como pendência.
 
 ### 2026-07-05 — Sugestões de resolução dos conflitos das ideias da v13 (abaixo)
+> **Status (2026-11-03):** C1, C2 e Q1 resolvidos (DEC-013/014/015); C3 adiada com a F5.
 Ver seção «Análise de conflitos e questões abertas — v13».
 
 ---
 
 ### 2026-07-19 — Teto do `localStorage` (~5 MB): medir agora, migrar depois *(fundamentada em pesquisa)*
+> **Status:** passos 1 e 2 na v12.1 (aviso aos 80%, cota no `saveDB`, `persist()`); passo 3 (IndexedDB) adiado — ver Adiadas e ROADMAP F11.
 O `localStorage` é limitado a **~5 MB por origem** e estoura com `QuotaExceededError`; é síncrono e bloqueia a thread principal. O `IndexedDB` oferece de centenas de MB a vários GB (variando por navegador; Safari é o mais restrito e pode expurgar dados sob pressão de disco). Como o Lunoda guarda conteúdo de conversas inteiras, o teto é atingível.
 **Proposta em três passos, do barato ao caro:**
 1. **Medir e avisar** — `navigator.storage.estimate()` mostra uso/quota; exibir um indicador discreto e alertar acima de ~80%. Barato, resolve o pior cenário (perda silenciosa).
@@ -76,6 +80,7 @@ O `localStorage` é limitado a **~5 MB por origem** e estoura com `QuotaExceeded
 > Também vale pedir `navigator.storage.persist()` para reduzir o risco de expurgo automático.
 
 ### 2026-07-19 — Exportar Markdown com YAML frontmatter *(fundamentada em pesquisa)*
+> **Status:** implementada na v12.3 (DEC-011) — ver Concluídas.
 Hoje o MD identifica os metadados em negrito (`**ID:**`, `**Tags:**`). Isso é ótimo para leitura humana, mas **nenhuma ferramenta lê como dado**. O padrão de fato para metadados em Markdown é o **YAML frontmatter** (bloco entre `---` no topo do arquivo), usado por Obsidian, Hugo, Jekyll e afins — e é o que torna as notas consultáveis (ex.: Dataview no Obsidian).
 **Proposta:** manter o corpo como está e **acrescentar** um frontmatter no topo — `title`, `id`, `created`, `updated`, `blocks` e as propriedades como listas YAML. Custo baixo, ganho grande: o export deixa de ser só legível e passa a ser **importável por outras ferramentas**, o que reforça exatamente o objetivo original do projeto ("exportar bem identificado").
 > Cuidado: manter os nomes de campo consistentes e escapar aspas — YAML inválido quebra o parse do outro lado. Um seletor "MD simples / MD com frontmatter" na hora de exportar evita forçar o formato em quem não quer.
@@ -84,6 +89,7 @@ Hoje o MD identifica os metadados em negrito (`**ID:**`, `**Tags:**`). Isso é �
 Os dados vivem só no `localStorage` de um navegador: limpar o navegador apaga tudo. Mostrar «último backup JSON há N dias» e um botão de backup rápido ataca esse risco com custo baixo (opção D da análise da F9 parte 2). Aprovado pelo autor para o backlog.
 
 ### 2026-07-19 — Undo/redo no editor
+> **Status:** implementada na v12.2 (DEC-010) — ver Concluídas.
 Não há como desfazer uma exclusão de bloco ou uma ação em massa (a v12 trouxe excluir/mover/transferir em lote — o estrago possível cresceu). Uma pilha de snapshots do estado do editor (o `getEditorSnapshot()` já existe) com Ctrl+Z/Ctrl+Y cobriria o caso. Prioridade sobe junto com o poder das ações em massa.
 
 ### 2026-07-19 — Busca full-text dentro do conteúdo dos blocos
@@ -91,6 +97,23 @@ A busca da tabela hoje alcança título e metadados; conteúdo de bloco é onde 
 
 ### 2026-07-19 — Atalhos de teclado
 `Ctrl+S` já salva. Faltam: novo bloco, próximo/anterior bloco, foco na busca, fechar editor. Barato e melhora muito o uso diário.
+
+### 2026-07-19 — Reimportar `.md` (não só JSON)
+> **Status (2026-11-04):** implementada na v13.4 (DEC-022) — ver Concluídas.
+Com os delimitadores da DEC-008, o `.md` exportado passou a ser **parseável**: dá para reconstruir entradas, blocos e propriedades a partir dele. Hoje só o JSON reimporta. Seria a rede de segurança definitiva — o usuário poderia recuperar o acervo a partir do arquivo que ele de fato guarda e lê. Depende da F9 (frontmatter) para recuperar os metadados com fidelidade.
+
+### 2026-07-19 — Estender o smoke conforme o risco crescer
+> **Status (2026-11-04):** em parte — o smoke cobre export e reimportação; o `history.mjs` cobre uniformizar, quadrado geral e empurrão. Seguem sem teste `calcPropertyValues`, `migrateOptionModes` e `loadDB`.
+O `tests/smoke.mjs` cobre só `entryToMD`. Candidatas naturais, por ordem de risco: `calcPropertyValues` (núcleo do modelo), `migrateOptionModes` e `loadDB` (migração de formatos antigos — quebrar ali inutiliza backups), `moveSelectedBlocks` (algoritmo com caso de borda). Todas são puras ou quase.
+
+### 2026-07-19 — Exportar um arquivo por entrada (`.zip`)
+> **Status (2026-11-04):** aberta — único item restante da F9.
+O frontmatter da v12.3 só é lido como metadado num arquivo que contenha **uma** entrada. Para jogar o acervo inteiro num vault do Obsidian, o usuário precisaria exportar entrada por entrada. Um `.zip` com um `.md` por entrada resolveria — mas exige biblioteca de compressão, o que contraria o zero-dependência da DEC-001.
+Alternativas a avaliar: (a) escrever um zip mínimo à mão (formato *stored*, sem compressão, é simples o bastante); (b) disparar vários downloads em sequência; (c) aceitar a limitação e documentar. A opção (a) é a única que mantém o zero-dependência **e** entrega o resultado.
+
+### 2026-07-19 — Embrulho de funções: registrar como padrão do projeto?
+> **Status (2026-11-04):** o padrão se repetiu duas vezes depois da DEC-010 (`applyPropToSelectedBlocks` na DEC-013, `setBlockVersion` na DEC-021), sem atrito: basta o nome na lista. O CONTEXT cita a lista no empurrão e nos «Arquivos Críticos» (`tests/history.mjs`). Promover a convenção escrita fica para o próximo caso.
+A DEC-010 embrulhou 11 mutadores em vez de editá-los um a um. Funcionou bem e o diff ficou minúsculo. Se o padrão se repetir (ex.: para telemetria de uso, ou para marcar "sujo" no editor), vale promovê-lo a convenção no CONTEXT — com a ressalva de que depende de declaração de função no topo do script.
 
 ---
 
@@ -122,6 +145,7 @@ Pergunta do autor. *Sugestão do assistente:* nesse caso, **desabilitar** a edi�
 
 ## ✅ Concluídas
 
+- **Prefixos de exportação `lunoda_`** — v13.4.1.
 - **Reimportar o `.md` exportado** — v13.4 / DEC-022. Fecha a F9 parte 2.
 - **Reordenação por número de versão (empurrão)** — v13.3 / DEC-015, DEC-021. Fecha a F6.
 - **Legibilidade: contraste WCAG AA e piso de 11px** — v13.2 / DEC-018.
@@ -160,14 +184,6 @@ Pergunta do autor. *Sugestão do assistente:* nesse caso, **desabilitar** a edi�
 - **Herança opaca de propriedades (v9)** — descartada porque não identificava, na exportação, QUAL opção o bloco herdava. Substituída pelo modelo bloco-como-fonte-de-verdade (DEC-003).
 - **Filtro/seleção/duplicação/transferência DENTRO das entradas na v11** — adiado à época por ser "avançado demais"; **depois implementado na v12**, então saiu de descartadas para concluídas.
 
----
-
-### 2026-07-19 — Reimportar `.md` (não só JSON)
-Com os delimitadores da DEC-008, o `.md` exportado passou a ser **parseável**: dá para reconstruir entradas, blocos e propriedades a partir dele. Hoje só o JSON reimporta. Seria a rede de segurança definitiva — o usuário poderia recuperar o acervo a partir do arquivo que ele de fato guarda e lê. Depende da F9 (frontmatter) para recuperar os metadados com fidelidade.
-
-### 2026-07-19 — Estender o smoke conforme o risco crescer
-O `tests/smoke.mjs` cobre só `entryToMD`. Candidatas naturais, por ordem de risco: `calcPropertyValues` (núcleo do modelo), `migrateOptionModes` e `loadDB` (migração de formatos antigos — quebrar ali inutiliza backups), `moveSelectedBlocks` (algoritmo com caso de borda). Todas são puras ou quase.
-
 ## 🛠 Feedback para o Kit
 > Observações sobre o próprio sistema de documentação / kit de contexto.
 
@@ -195,13 +211,6 @@ Gerada a `260719-asu0001.yaml` com `replace_context_block` (função inteira) e 
 ### 2026-07-19 — O teste pegou a fixture, não o código (e isso é bom sinal)
 Ao testar o undo/redo, a asserção "mutação nova limpa o redo" falhou. A causa não era o código: o `moveBlock` de mentira invertia a lista e, com **um bloco só**, inverter não muda nada — o embrulho corretamente não registrou histórico. O defeito estava no teste.
 Vale como lembrete de duas coisas: (1) quando um teste falha, investigar antes de "consertar" o código — quase se mexeu no que estava certo; (2) fixture com um único elemento esconde bug de ordenação e finge bug onde não há. As fixtures novas devem ter pelo menos 2–3 blocos quando a asserção envolve ordem.
-
-### 2026-07-19 — Embrulho de funções: registrar como padrão do projeto?
-A DEC-010 embrulhou 11 mutadores em vez de editá-los um a um. Funcionou bem e o diff ficou minúsculo. Se o padrão se repetir (ex.: para telemetria de uso, ou para marcar "sujo" no editor), vale promovê-lo a convenção no CONTEXT — com a ressalva de que depende de declaração de função no topo do script.
-
-### 2026-07-19 — Exportar um arquivo por entrada (`.zip`)
-O frontmatter da v12.3 só é lido como metadado num arquivo que contenha **uma** entrada. Para jogar o acervo inteiro num vault do Obsidian, o usuário precisaria exportar entrada por entrada. Um `.zip` com um `.md` por entrada resolveria — mas exige biblioteca de compressão, o que contraria o zero-dependência da DEC-001.
-Alternativas a avaliar: (a) escrever um zip mínimo à mão (formato *stored*, sem compressão, é simples o bastante); (b) disparar vários downloads em sequência; (c) aceitar a limitação e documentar. A opção (a) é a única que mantém o zero-dependência **e** entrega o resultado.
 
 ### 2026-07-19 — Segunda vez que um teste apontou para o lugar errado
 Na sessão 3 a fixture tinha um bloco só e fingiu um bug; nesta, o extrator do smoke não entendia regex e acusou "chaves desbalanceadas" como se o código de produção estivesse quebrado (FIX-003). Nos dois casos o código estava certo e a ferramenta de teste, errada.

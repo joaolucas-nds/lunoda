@@ -23,7 +23,6 @@ Confirme em uma frase o que entendeu da tarefa antes de executar. Se houver ambi
 - `STORAGE_KEY = 'base_v4'` — não renomeie sem migração: eu perderia os dados salvos.
 - `editProps` é **legado**. Fonte de verdade das propriedades é o bloco (`blockProps`); a entrada é calculada por `calcPropertyValues()`.
 - **Nunca deixe uma entrada com 0 blocos** — recrie um bloco vazio.
-- Exportações ainda usam prefixo `base_` (nome antigo). Ao renomear, confira concordância no entorno.
 - Validação: `node tests/smoke.mjs` e `node tests/history.mjs`. Mais armadilhas: CEREBRO, «Técnicas específicas».
 
 ## Como trabalhar comigo
