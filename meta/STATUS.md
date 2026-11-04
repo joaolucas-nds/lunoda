@@ -52,6 +52,6 @@
 
 ## 💬 Última conversa
 
-**2026-11-04** — Conferida a v13.2 (wo0004, `9fa7c5c`; roteiro do autor ok). Entregue a **F6 — empurrão de versão** (DEC-021) como **v13.3** pela wo0005. Histórico da véspera (migração para o KCM v1.133.0, v13.0–v13.2) no log de 2026-11-03.
+**2026-11-04** — Conferida a v13.2 (wo0004, `9fa7c5c`; roteiro do autor ok). Entregue a **F6 — empurrão de versão** (DEC-021) como **v13.3** pela wo0005 (`e40b37a`). Histórico da véspera (migração para o KCM v1.133.0, v13.0–v13.2) no log de 2026-11-03.
 
 **Próximo passo óbvio:** conferir a v13.3 no navegador; depois a análise da F9 parte 2.
