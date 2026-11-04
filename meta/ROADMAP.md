@@ -32,6 +32,7 @@
 ## 🔵 F5 — Herança entre versões de um mesmo nome de bloco *(futuro, sem data)*
 **Objetivo:** propagar/travar propriedades entre todas as versões de um mesmo subtítulo (a "herança" antiga, agora restrita a versões).
 - Maior risco de complexidade (conflito C3 no IDEAS). Tratar isolada, com protótipo antes de integrar.
+> **Adiada por decisão do autor (2026-11-04)** — gatilho em IDEAS, «Adiadas».
 
 ## 🟢 F6 — Reordenação por número de versão *(entregue — v13.3; falta conferir no navegador)*
 **Objetivo:** mudar o número de versão de um bloco empurrando os demais.
@@ -57,7 +58,7 @@
 - [x] Markdown com **YAML frontmatter** — v12.3, ver DEC-011.
 - [x] Seletor "MD simples / MD com frontmatter" na exportação — v12.3.
 - [ ] Exportar uma entrada por arquivo (`.zip`) — o que um vault realmente quer; esbarra no zero-dependência (ver IDEAS).
-- [ ] **Reimportar `.md`** (hoje só o JSON reimporta) — único item grande restante da fase; viável agora que o conteúdo é delimitado (DEC-008) e os metadados vão em YAML (DEC-011).
+- [x] **Reimportar `.md`** — v13.4 (DEC-022): leitor pelos marcadores, linha `DADOS`, prévia, só mesclar.
 > Cumpre o objetivo fundador do projeto ("exportar bem identificado") num nível que hoje só existe para olho humano. A delimitação do conteúdo (v12.1) era o pré-requisito estrutural.
 
 ## 🔵 F10 — Navegação em acervo grande *(futuro)*

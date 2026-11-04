@@ -438,3 +438,27 @@ A DEC-015 fixou as regras do empurrão. Ao implementar, apareceram três pontos 
 
 ### Consequências
 Implementado em `setBlockVersion()`, chamado por `syncVer` (campo) e `adjVer` (−/+), na lista do embrulho do undo. Coberto pela seção 13 do `tests/history.mjs`.
+
+---
+
+## DEC-022 — Reimportar o `.md`: leitor pelos marcadores, linha DADOS no export, prévia, só mesclar
+**Data:** 2026-11-04 · **Status:** aceita · análise: `meta/analises/261104-ANALISE-reimportar-md.md`
+
+### Contexto
+Só o JSON reimportava. A análise mediu, com um leitor-protótipo sobre o export real da fixture hostil, que o formato da DEC-008 já devolve título, descrição, ID, blocos, subtítulo, versão e conteúdo exatos; perdiam-se a data (o corpo tem minuto e fuso local), as cores e a adição automática. Achou também que uma propriedade com nome de campo do formato (ex.: «ID») colide no corpo, e mediu que o export real do autor de 05/07 (pré-v12.1) não tem delimitadores.
+
+### Decisão
+Opção B da análise, aprovada pelo autor:
+- **Leitor pelos marcadores** (`parseLunodaMD`, pura): campo de formato vale pela posição (o primeiro é o campo); conteúdo é o que está entre os delimitadores; entrada com total de blocos divergente ou bloco sem fim é recusada inteira.
+- **Linha `<!-- DADOS {json} -->`** depois de `<!-- ENTRADA -->` (id e datas ISO) e de cada `<!-- BLOCO n -->` (id) — comentário, invisível no render; nenhum marcador existente mudou. Sem ela (exports v12.1–v13.3), a data cai para o frontmatter de entrada única ou para o texto do corpo.
+- **Prévia antes de gravar** (entradas, blocos, propriedades e opções novas, avisos) e **só mesclar**. Entrada que já existe (mesmo ID): **a prévia pergunta** — pular (padrão) ou importar como cópia nova, com «(cópia)» no título.
+- Propriedades e opções **por nome**; as que faltam são criadas com cor nova.
+- **Pré-v12.1 é recusado** com mensagem: reexportar pelo app resolve.
+
+### Alternativas consideradas
+- **A (sem a linha DADOS)** — perderia segundos e fuso da data e os ids de bloco.
+- **C (JSON completo no comentário)** — dobra o arquivo e polui o modo edição do Obsidian; o JSON já é o backup completo.
+- **E (leitor heurístico pré-v12.1)** — o arquivo real tem `#` e `---` dentro do conteúdo; reexportar resolve sem risco.
+
+### Consequências
+O `.md` vira caminho de recuperação e de volta do Obsidian. Continuam fora do `.md`: cores e adição automática (vêm do JSON). O formato do export agora é contrato do leitor: mudar marcador ou campo exige mudar `parseLunodaMD` e o teste de ida e volta do smoke.

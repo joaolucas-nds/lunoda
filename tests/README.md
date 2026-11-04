@@ -27,6 +27,8 @@ Isso permite testar as funções **puras** sem tocar no arquivo único.
 
 `entryToMD()` — a geração do Markdown exportado — e, desde a v12.3, o **frontmatter YAML**. Foi escolhida primeiro porque é onde o defeito é mais caro e menos visível: um export corrompido só aparece quando o usuário vai reler o arquivo, possivelmente meses depois.
 
+Desde a v13.4, a **ida e volta do Markdown** (DEC-022): o smoke exporta a fixture hostil com o `entryToMD` real, relê com o `parseLunodaMD` real e compara campo a campo (título, descrição, IDs, datas, blocos, conteúdo, propriedades por nome); cobre também o export sem a linha `DADOS` (v12.1–v13.3), CRLF, as recusas (pré-v12.1, arquivo estranho, total de blocos divergente) e pular × cópia. 46 asserções no total.
+
 As asserções incluem duas **regressões** do FIX-002:
 - toda linha da descrição precisa começar com `>`;
 - todo bloco precisa ter os delimitadores `<!-- CONTEUDO:INICIO/FIM -->`.

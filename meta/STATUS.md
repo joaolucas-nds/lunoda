@@ -8,7 +8,7 @@
 
 ## Versão Atual
 
-**Lunoda v13.3** — 2026-11-04 — empurrão de versão (F6). Arquivo canônico `index.html`. Testes: `smoke` 28/28 e `history` 52/52 (rodada da wo0005).
+**Lunoda v13.4** — 2026-11-04 — reimportar o Markdown exportado (F9 parte 2). Arquivo canônico `index.html`. Testes: `smoke` 46/46 e `history` 52/52 (rodada da wo0006).
 
 ## ✅ Funcionando
 
@@ -29,11 +29,12 @@
 - Controle geral «Caixas: Auto · P · M · G» no cabeçalho dos blocos (v13.2).
 - Texto secundário com contraste ≥ 4,5:1 e nada abaixo de 11px (v13.2).
 - Empurrão de versão: número ocupado no mesmo subtítulo renumera os vizinhos; −/+ troca; coberto pelo undo (v13.3).
+- Importar `.md` exportado pelo app: prévia, só mescla, pular ou copiar o que já existe; recusa exports pré-v12.1 (v13.4).
 - Verificação automática: `node tests/smoke.mjs` e `node tests/history.mjs`.
 
 ## 🔧 Em Progresso
 
-- **v13.3 aplicada; falta a conferência no navegador** — roteiro na conversa de 2026-11-04. v13.0, v13.1 e v13.2 já conferidas pelo autor (todos os itens ok).
+- **v13.4 aplicada; falta a conferência no navegador** — roteiro na conversa de 2026-11-04. v13.0 a v13.3 já conferidas pelo autor.
 
 ## ❌ Quebrado / Com Problema
 
@@ -47,11 +48,12 @@
 - [ ] **Conferir o undo/redo no navegador** — excluir blocos em massa e `Ctrl+Z`; `Ctrl+Z` dentro de campo de texto desfaz a digitação, não a estrutura; botões esmaecidos sem histórico; abrir outra entrada zera o histórico.
 - [ ] **Prints para o README** — cabeçalho do editor com Desfazer/Refazer; modal de exportação com o checkbox de frontmatter; propriedades renderizadas no Obsidian.
 - [ ] **Higiene do IDEAS** — ideias já implementadas (teto do `localStorage`, frontmatter, undo/redo) seguem também em «Ideias Ativas — Assistente», e três ideias ativas (reimportar `.md`, estender o smoke, exportar `.zip`) estão fora da seção delas (sob «Descartadas» e «Feedback para o Kit»). Curadoria por WO própria.
-- [ ] **Conferir a v13.3 no navegador** (roteiro na conversa de 2026-11-04).
-- [ ] **F9 parte 2 — reimportar `.md`**: começar pela **análise escrita** (`meta/analises/`) — próxima pela ordem combinada.
+- [ ] **Conferir a v13.4 no navegador** (roteiro na conversa de 2026-11-04).
+- [ ] **Faxina** — `base_` → `lunoda_` nos arquivos exportados, títulos defasados do ROADMAP, higiene do IDEAS: wo0007, já escrita.
+- [ ] **Lembrete de backup JSON** — «último backup há N dias» + botão rápido (IDEAS, 2026-11-04).
 
 ## 💬 Última conversa
 
-**2026-11-04** — Conferida a v13.2 (wo0004, `9fa7c5c`; roteiro do autor ok). Entregue a **F6 — empurrão de versão** (DEC-021) como **v13.3** pela wo0005 (`e40b37a`). Histórico da véspera (migração para o KCM v1.133.0, v13.0–v13.2) no log de 2026-11-03.
+**2026-11-04** — v13.2 e v13.3 conferidas pelo autor. Entregue a F6 (empurrão de versão, DEC-021) como v13.3 (`e40b37a`). Análise da F9 parte 2 medida e decidida (opção B, DEC-022); entregue como **v13.4** pela wo0006. F5 adiada pelo autor. Histórico da véspera (migração para o KCM v1.133.0, v13.0–v13.2) no log de 2026-11-03.
 
-**Próximo passo óbvio:** conferir a v13.3 no navegador; depois a análise da F9 parte 2.
+**Próximo passo óbvio:** conferir a v13.4 no navegador; aplicar a wo0007 (faxina); depois o lembrete de backup JSON.

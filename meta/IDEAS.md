@@ -80,6 +80,9 @@ Hoje o MD identifica os metadados em negrito (`**ID:**`, `**Tags:**`). Isso é �
 **Proposta:** manter o corpo como está e **acrescentar** um frontmatter no topo — `title`, `id`, `created`, `updated`, `blocks` e as propriedades como listas YAML. Custo baixo, ganho grande: o export deixa de ser só legível e passa a ser **importável por outras ferramentas**, o que reforça exatamente o objetivo original do projeto ("exportar bem identificado").
 > Cuidado: manter os nomes de campo consistentes e escapar aspas — YAML inválido quebra o parse do outro lado. Um seletor "MD simples / MD com frontmatter" na hora de exportar evita forçar o formato em quem não quer.
 
+### 2026-11-04 — Lembrete de backup JSON
+Os dados vivem só no `localStorage` de um navegador: limpar o navegador apaga tudo. Mostrar «último backup JSON há N dias» e um botão de backup rápido ataca esse risco com custo baixo (opção D da análise da F9 parte 2). Aprovado pelo autor para o backlog.
+
 ### 2026-07-19 — Undo/redo no editor
 Não há como desfazer uma exclusão de bloco ou uma ação em massa (a v12 trouxe excluir/mover/transferir em lote — o estrago possível cresceu). Uma pilha de snapshots do estado do editor (o `getEditorSnapshot()` já existe) com Ctrl+Z/Ctrl+Y cobriria o caso. Prioridade sobe junto com o poder das ações em massa.
 
@@ -113,11 +116,13 @@ Pergunta do autor. *Sugestão do assistente:* nesse caso, **desabilitar** a edi�
 > Decisão consciente de não fazer agora. Cada item com **o gatilho que a traz de volta**: ideia adiada sem gatilho é ideia perdida.
 - **Migração para IndexedDB** — adiada porque o uso real não se aproxima do teto de ~5 MB — **volta quando** o aviso dos 80% (`warnIfStorageTight()`) disparar em uso real. Plano em ROADMAP, F11.
 - **Esquerdo sem seleção = marcar em todos os blocos da entrada** (opção (c) da C2) — adiada porque, no hábito antigo, o clique que ligava o automático viraria marcação em massa — **volta quando** o autor notar que, mesmo com o quadrado geral da v13.1 (DEC-016), ainda marca todos os blocos com frequência só para aplicar uma propriedade.
+- **Herança entre versões + botão do meio (F5, conflito C3)** — adiada por decisão do autor em 2026-11-04: é a de maior risco e reintroduz estado por nome de bloco (DEC-003) — **volta quando** aparecer um caso concreto em que propagar uma propriedade entre versões à mão custe tempo de verdade.
 
 ---
 
 ## ✅ Concluídas
 
+- **Reimportar o `.md` exportado** — v13.4 / DEC-022. Fecha a F9 parte 2.
 - **Reordenação por número de versão (empurrão)** — v13.3 / DEC-015, DEC-021. Fecha a F6.
 - **Legibilidade: contraste WCAG AA e piso de 11px** — v13.2 / DEC-018.
 - **Painel do editor ajustável e maximizar** — v13.2 / DEC-019.

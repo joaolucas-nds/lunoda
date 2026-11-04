@@ -87,7 +87,8 @@ function extractFunction(src, name) {
 /* ── Montagem do ambiente ───────────────────────────────────── */
 
 const html = readFileSync(APP, 'utf8');
-const NEEDED = ['fmtDate', 'getBlockEffectivePropsSaved', 'entryToMD'];
+// mdDados: desde a v13.4 o entryToMD escreve a linha <!-- DADOS … --> (DEC-022).
+const NEEDED = ['fmtDate', 'getBlockEffectivePropsSaved', 'mdDados', 'entryToMD'];
 // Funcoes da F9: ainda podem nao existir em versoes anteriores a v12.3.
 const OPCIONAIS = ['yamlKey', 'yamlStr', 'entryFrontmatter', 'docFrontmatter'];
 const presentes = OPCIONAIS.filter(n => html.includes(`function ${n}(`));
@@ -214,6 +215,89 @@ if (presentes.length < OPCIONAIS.length) {
   const doc = docFrontmatter(7);
   check('frontmatter de documento tem a contagem', doc.includes('entries: 7'));
   check('frontmatter de documento identifica a origem', doc.includes('source: "Lunoda"'));
+}
+
+/* ── Reimportar Markdown: ida e volta (F9 parte 2, DEC-022) ─── */
+
+{
+  const F9B = ['mdDateToISO', 'parseLunodaMD', 'planMdImport', 'applyMdImport'];
+  if (!F9B.every(n => html.includes(`function ${n}(`))) {
+    skipped('reimportar Markdown', 'v13.4 ainda nao aplicada');
+  } else {
+    const src = F9B.map(n => extractFunction(html, n)).join('\n\n');
+    let seq = 0;
+    const mk = new Function('db', 'uid', 'randColor',
+      `${code}\n${src}\nreturn { entryToMD, entryFrontmatter, docFrontmatter, parseLunodaMD, planMdImport, applyMdImport };`);
+    const fresco = () => JSON.parse(readFileSync(join(HERE, 'fixtures', 'sample-db.json'), 'utf8'));
+    const ida = fresco();
+    const A = mk(ida, () => 'novo' + (++seq), () => 'c1');
+    const doc = A.docFrontmatter(ida.entries.length) + ida.entries.map(e => A.entryToMD(e)).join('');
+    const r = A.parseLunodaMD(doc);
+
+    check('md: le todas as entradas do documento', r.entries.length === ida.entries.length && !r.erro,
+      `lidas ${r.entries.length}, erro ${r.erro}`);
+    const campos = (o, p) => ({
+      titulo: p.title === o.title, descricao: p.description === (o.description || ''), id: p.id === o.id,
+      blocos: p.blocks.length === o.blocks.length,
+      subtitulo: o.blocks.every((b, j) => p.blocks[j].subtitle === (b.subtitle || '')),
+      versao: o.blocks.every((b, j) => p.blocks[j].version === (b.version || 1)),
+      conteudo: o.blocks.every((b, j) => p.blocks[j].content === (b.content || '')),
+      idBloco: o.blocks.every((b, j) => p.blocks[j].id === b.id),
+      datas: p.criado === o.createdAt && p.modificado === o.updatedAt,
+    });
+    ida.entries.forEach((o, k) => {
+      const c = campos(o, r.entries[k]);
+      const ruins = Object.keys(c).filter(x => !c[x]);
+      check(`md ida e volta exata: «${o.title.slice(0, 18)}…»`, ruins.length === 0, 'falhou: ' + ruins.join(', '));
+    });
+    check('md: propriedade chamada «ID» nao troca o ID da entrada', r.entries[1].id === ida.entries[1].id, r.entries[1].id);
+    check('md: conteudo que imita o export volta inteiro',
+      r.entries[0].blocks.some(b => b.content.includes('## [Bloco 99] Falso') && b.content.includes('<!-- ENTRADA -->')));
+    check('md: bloco vazio volta vazio', r.entries[0].blocks.some(b => b.content === ''));
+    check('md: CRLF (Windows/Obsidian) le igual', A.parseLunodaMD(doc.replace(/\n/g, '\r\n')).entries.length === ida.entries.length);
+
+    // Sem a linha DADOS (export v12.1–v13.3): data cai para o texto do corpo, sem segundos
+    const semDados = doc.replace(/^<!-- DADOS .* -->\n/gm, '');
+    const r2 = A.parseLunodaMD(semDados);
+    check('md sem DADOS (export antigo v12.1+): ainda le', r2.entries.length === ida.entries.length && r2.entries[0].id === ida.entries[0].id);
+    check('md sem DADOS: data vem do corpo, com minuto', r2.entries[0].criado !== '' &&
+      Math.abs(new Date(r2.entries[0].criado) - new Date(ida.entries[0].createdAt)) < 60000, r2.entries[0].criado);
+
+    // Recusas
+    check('md pre-v12.1 (sem delimitadores) e recusado',
+      /antes da v12\.1/.test(A.parseLunodaMD('# T\n\n<!-- ENTRADA -->\n**ID:** `x`  \n**Total de blocos:** 1  \n').erro || ''));
+    check('arquivo que nao e do Lunoda e recusado', /não parece/.test(A.parseLunodaMD('# Uma nota qualquer\n\ntexto').erro || ''));
+    const cortado = doc.replace('**Total de blocos:** 3', '**Total de blocos:** 4');
+    const r3 = A.parseLunodaMD(cortado);
+    check('md: total de blocos divergente recusa so aquela entrada', r3.entries.length === ida.entries.length - 1 && r3.invalidas === 1,
+      `lidas ${r3.entries.length}, invalidas ${r3.invalidas}`);
+
+    // Plano e gravação sobre um db vazio: propriedades recriadas por nome
+    const vazio = { properties: [], entries: [] };
+    const B = mk(vazio, () => 'n' + (++seq), () => 'c9');
+    const plan = B.planMdImport(r);
+    check('plano: entradas novas = todas (db vazio)', plan.novas.length === ida.entries.length && plan.existentes.length === 0);
+    check('plano: propriedades recriadas por nome', ida.properties.filter(p => ida.entries.some(e => e.blocks.some(b => (b.blockProps || {})[p.id]?.length))).every(p => plan.props.some(q => q.name === p.name)),
+      plan.props.map(q => q.name).join(', '));
+    B.applyMdImport(plan, 'pular');
+    const nomeOpt = (base, pid, oid) => { const p = base.properties.find(x => x.id === pid); return p ? p.name + '=' + (p.options.find(o => o.id === oid) || {}).name : '?'; };
+    const assin = base => base.entries.map(e => e.blocks.map(b => Object.entries(b.blockProps || {})
+      .flatMap(([pid, oids]) => oids.map(oid => nomeOpt(base, pid, oid))).sort().join('|')).join('/')).join(' ; ');
+    check('gravacao: propriedades de cada bloco voltam pelos nomes', assin(vazio) === assin(ida), assin(vazio) + ' <> ' + assin(ida));
+
+    // Entrada que ja existe: pular x copia
+    const cheio = fresco();
+    const C = mk(cheio, () => 'k' + (++seq), () => 'c1');
+    const pl2 = C.planMdImport(r);
+    check('plano: entradas com o mesmo ID vao para «ja existem»', pl2.existentes.length === ida.entries.length && pl2.novas.length === 0);
+    const antes = cheio.entries.length;
+    const res2 = C.applyMdImport(pl2, 'copia');
+    check('copia: entra com ID novo e «(cópia)» no titulo',
+      cheio.entries.length === antes * 2 && res2.copias === antes && cheio.entries.slice(antes).every(e => e.title.endsWith(' (cópia)') && !ida.entries.some(o => o.id === e.id)));
+    const cheio2 = fresco(); const D = mk(cheio2, () => 'p' + (++seq), () => 'c1');
+    D.applyMdImport(D.planMdImport(r), 'pular');
+    check('pular: nada muda no que ja existe', JSON.stringify(cheio2.entries) === JSON.stringify(fresco().entries));
+  }
 }
 
 /* ── Relatório ──────────────────────────────────────────────── */

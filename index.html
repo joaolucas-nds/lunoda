@@ -304,6 +304,14 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 /* Controle geral (DEC-020): no cabeçalho, sempre visível — não é sobreposto ao texto */
 .ta-size.ta-size-all { position: static; opacity: 1; pointer-events: auto; align-items: center; gap: 3px; margin-right: 4px; }
 .ta-all-lbl { font-family: var(--mono); font-size: 11px; color: var(--text-muted); margin-right: 3px; }
+/* Prévia do import de Markdown (DEC-022) */
+.md-imp-body { font-size: 13px; color: var(--text); line-height: 1.6; margin-bottom: 6px; }
+.md-imp-body p { margin-bottom: 8px; }
+.md-imp-lista, .md-imp-avisos { margin: 0 0 10px 18px; }
+.md-imp-avisos li, .md-imp-aviso, .md-imp-erro { color: var(--yellow); }
+.md-imp-dup { border: 1px solid var(--border); border-radius: var(--rs); padding: 8px 10px; margin-bottom: 10px; }
+.md-imp-dup label { display: block; cursor: pointer; margin-top: 4px; }
+.md-imp-nota { font-size: 12px; color: var(--text-muted); }
 .ta-def-dot { display: inline-block; width: 3px; height: 3px; border-radius: 50%;
   background: currentColor; margin-left: 3px; vertical-align: middle; }
 .meta-row { display: flex; gap: 14px; flex-wrap: wrap; font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
@@ -956,6 +964,18 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 </div>
 
 <!-- Add Property Modal -->
+<!-- Prévia da importação de Markdown (DEC-022): nada é gravado antes do «Importar» -->
+<div class="modal-bg" id="mdImportModal">
+  <div class="modal" style="width:540px;max-width:95vw">
+    <h3>Importar Markdown</h3>
+    <div id="mdImportBody" class="md-imp-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('mdImportModal')">Cancelar</button>
+      <button class="btn btn-primary" id="mdImportGo" onclick="confirmMdImport()">Importar</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="addPropModal">
   <div class="modal">
     <h3 id="addPropModalTitle">Nova propriedade</h3>
@@ -971,7 +991,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
   </div>
 </div>
 
-<input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+<input type="file" id="importFile" accept=".json,.md,.markdown" style="display:none" onchange="handleImport(event)">
 <div class="toast" id="toast"><div class="toast-dot"></div><span id="toastMsg"></span></div>
 
 <!-- ════════════════════════════════════════════
@@ -3004,6 +3024,9 @@ function entryToMD(e) {
 
   // ── Metadados da entrada ──
   md += `<!-- ENTRADA -->\n`;
+  // Dados exatos para a reimportação (DEC-022): comentário, invisível no render.
+  // Fecha o que o corpo perde (data com segundos e fuso). Nenhum marcador existente muda.
+  md += `<!-- DADOS ${mdDados({ id: e.id || '', criado: e.createdAt || '', modificado: e.updatedAt || '' })} -->\n`;
   md += `**ID:** \`${e.id || '—'}\`  \n`;
   md += `**Criado em:** ${fmtDate(e.createdAt)}  \n`;
   md += `**Modificado em:** ${fmtDate(e.updatedAt)}  \n`;
@@ -3033,6 +3056,7 @@ function entryToMD(e) {
     // Marcador de bloco, par do <!-- ENTRADA --> : torna o arquivo
     // percorrível por máquina sem depender do texto do cabeçalho.
     md += `<!-- BLOCO ${num} -->\n`;
+    md += `<!-- DADOS ${mdDados({ id: b.id || '' })} -->\n`;
 
     // Metadados do bloco
     if (b.subtitle) md += `**Subtítulo:** ${b.subtitle}  \n`;
@@ -3311,12 +3335,214 @@ ${bodyContent}
 </html>`;
 }
 
+/* ──────────────────────────────
+   REIMPORTAR MARKDOWN (F9 parte 2 — DEC-022; análise em meta/analises/261104-ANALISE-reimportar-md.md)
+   Lê o .md que o próprio app exporta (v12.1+), pelos marcadores — nunca pelo texto livre.
+   Só MESCLA: o .md não leva cores nem a adição automática; o backup completo é o JSON.
+────────────────────────────── */
+
+/* Objeto -> JSON seguro dentro de comentário HTML (um "-->" no valor fecharia o comentário). */
+function mdDados(o) {
+  return JSON.stringify(o).replace(/-->/g, '--\\u003e');
+}
+
+/* "22/05/26 13:24" (fmtDate, hora local) -> ISO. Cai aqui só quando falta a linha DADOS. */
+function mdDateToISO(txt) {
+  const m = String(txt || '').match(/^(\d{2})\/(\d{2})\/(\d{2,4})\s+(\d{2}):(\d{2})/);
+  if (!m) return '';
+  const ano = m[3].length === 2 ? 2000 + parseInt(m[3], 10) : parseInt(m[3], 10);
+  const d = new Date(ano, parseInt(m[2], 10) - 1, parseInt(m[1], 10), parseInt(m[4], 10), parseInt(m[5], 10));
+  return isNaN(d) ? '' : d.toISOString();
+}
+
+/* Lê o texto do .md e devolve { erro, entries, invalidas, avisos } — PURA, sem db nem DOM.
+   Regras: marcadores mandam; campo de formato vale pela POSIÇÃO (o primeiro é o campo,
+   um repetido é propriedade com o mesmo nome — ex.: uma propriedade chamada «ID»);
+   conteúdo é o que está entre os delimitadores, byte a byte; entrada cujo nº de blocos
+   não bate com «Total de blocos», ou com bloco sem fim, é recusada inteira. */
+function parseLunodaMD(txt) {
+  const L = String(txt).replace(/\r\n?/g, '\n').split('\n');
+  const res = { erro: null, entries: [], invalidas: 0, avisos: [] };
+  let i = 0;
+  const fm = {};
+  if (L[0] === '---') {   // frontmatter: só pares simples; usado para as datas do export de UMA entrada
+    for (i = 1; i < L.length && L[i] !== '---'; i++) {
+      const m = L[i].match(/^([a-z0-9_]+):\s*"?(.*?)"?\s*$/); if (m) fm[m[1]] = m[2];
+    }
+    i++;
+  }
+  if (!L.includes('<!-- ENTRADA -->')) {
+    res.erro = 'Este arquivo não parece um Markdown exportado pelo Lunoda (falta o marcador <!-- ENTRADA -->).';
+    return res;
+  }
+  if (!L.some(l => l.startsWith('<!-- CONTEUDO:INICIO'))) {
+    res.erro = 'Markdown exportado antes da v12.1: sem os delimitadores de conteúdo não dá para separar o texto da estrutura com segurança. Reexporte pelo app (os dados ainda estão nele) ou use o JSON.';
+    return res;
+  }
+  const campo = l => { const m = l.match(/^\*\*(.+?):\*\* (.*?)\s*$/); return m ? [m[1], m[2]] : null; };
+  const dados = l => { const m = l.match(/^<!-- DADOS (.*) -->$/); if (!m) return null; try { return JSON.parse(m[1]); } catch (_) { return null; } };
+  let titulo = null, desc = [];
+  for (; i < L.length; i++) {
+    const l = L[i];
+    if (l.startsWith('# ')) { titulo = l.slice(2); desc = []; continue; }
+    if (l.startsWith('> ') || l === '>') { desc.push(l.replace(/^> ?/, '')); continue; }
+    if (l === '<!-- ENTRADA -->') {
+      const e = { title: titulo ?? '', description: '', id: '', criado: '', modificado: '',
+                  criadoTxt: '', modificadoTxt: '', total: null, blocks: [], quebrada: false };
+      if (desc.length) { desc[0] = desc[0].replace(/^\*\*Descrição\/Resumo:\*\* ?/, ''); e.description = desc.join('\n'); }
+      let viuDados = false, viuId = false, viuC = false, viuM = false;
+      for (i++; i < L.length && !L[i].startsWith('━'); i++) {
+        const d = dados(L[i]);
+        if (d && !viuDados) { viuDados = true; e.id = d.id || ''; e.criado = d.criado || ''; e.modificado = d.modificado || ''; continue; }
+        const c = campo(L[i]); if (!c) continue;
+        if (c[0] === 'ID' && !viuId) { viuId = true; if (!e.id) e.id = c[1].replace(/^`|`$/g, ''); }   // DADOS manda; **ID:** é a reserva
+        else if (c[0] === 'Criado em' && !viuC) { viuC = true; e.criadoTxt = c[1]; }
+        else if (c[0] === 'Modificado em' && !viuM) { viuM = true; e.modificadoTxt = c[1]; }
+        else if (c[0] === 'Total de blocos' && e.total === null) e.total = parseInt(c[1], 10);
+      }
+      if (e.id === '—') e.id = '';
+      res.entries.push(e); titulo = null; desc = []; continue;
+    }
+    const bm = l.match(/^<!-- BLOCO (\d+) -->$/);
+    if (bm && res.entries.length) {
+      const n = bm[1], e = res.entries[res.entries.length - 1];
+      const b = { id: '', subtitle: '', version: 1, props: {}, content: '' };
+      let viuS = false, viuV = false, fechou = false;
+      for (i++; i < L.length && L[i] !== `<!-- CONTEUDO:INICIO bloco=${n} -->`; i++) {
+        const d = dados(L[i]); if (d && !b.id) { b.id = d.id || ''; continue; }
+        const c = campo(L[i]); if (!c) continue;
+        // Subtítulo só vale antes da Versão: depois dela, é propriedade com esse nome
+        if (c[0] === 'Subtítulo' && !viuS && !viuV) { viuS = true; b.subtitle = c[1]; }
+        else if (c[0] === 'Versão' && !viuV) { viuV = true; b.version = parseInt(c[1].replace(/^v/, ''), 10) || 1; }
+        else b.props[c[0]] = c[1].split(' · ').map(x => x.trim()).filter(Boolean);
+      }
+      const corpo = [];
+      for (i++; i < L.length; i++) {
+        if (L[i] === `<!-- CONTEUDO:FIM bloco=${n} -->`) { fechou = true; break; }
+        corpo.push(L[i]);
+      }
+      if (!fechou) { e.quebrada = true; res.avisos.push(`«${e.title}», bloco ${n}: falta o fim do conteúdo.`); continue; }
+      b.content = corpo.join('\n');
+      if (b.content === '*(vazio)*') b.content = '';
+      e.blocks.push(b);
+    }
+  }
+  const unica = res.entries.length === 1;
+  res.entries = res.entries.filter(e => {
+    if (e.quebrada || e.total !== e.blocks.length) {
+      res.invalidas++;
+      if (!e.quebrada) res.avisos.push(`«${e.title}»: o arquivo declara ${e.total} bloco(s) e foram lidos ${e.blocks.length} — entrada recusada.`);
+      return false;
+    }
+    // Datas: linha DADOS > frontmatter (export de uma entrada) > texto do corpo (perde segundos)
+    if (!e.criado) e.criado = (unica && fm.created && (!fm.id || fm.id === e.id)) ? fm.created : mdDateToISO(e.criadoTxt);
+    if (!e.modificado) e.modificado = (unica && fm.updated && (!fm.id || fm.id === e.id)) ? fm.updated : mdDateToISO(e.modificadoTxt);
+    return true;
+  });
+  return res;
+}
+
+/* Monta o plano de importação sobre o db atual, SEM gravar: propriedades e opções por NOME
+   (cria as que faltam, com cor nova), entradas no formato do db, e separa as que já existem. */
+function planMdImport(parsed) {
+  const props = JSON.parse(JSON.stringify(db.properties));
+  const propsNovas = [], optsNovas = [];
+  const optId = (pNome, oNome) => {
+    let p = props.find(x => x.name.trim() === pNome.trim());
+    if (!p) { p = { id: uid(), name: pNome.trim(), options: [] }; props.push(p); propsNovas.push(p.name); }
+    let o = p.options.find(x => x.name.trim() === oNome.trim());
+    if (!o) { o = { id: uid(), name: oNome.trim(), colorId: randColor() }; p.options.push(o); optsNovas.push(`${p.name}: ${o.name}`); }
+    return [p.id, o.id];
+  };
+  const existe = new Set(db.entries.map(e => e.id));
+  const novas = [], existentes = [];
+  let blocos = 0;
+  parsed.entries.forEach(pe => {
+    const blocks = pe.blocks.map(pb => {
+      const bp = {};
+      Object.entries(pb.props).forEach(([pn, ons]) => ons.forEach(on => {
+        const [pid, oid] = optId(pn, on);
+        (bp[pid] = bp[pid] || []).includes(oid) || bp[pid].push(oid);
+      }));
+      return { id: pb.id || uid(), subtitle: pb.subtitle, version: pb.version, content: pb.content, blockProps: bp };
+    });
+    blocos += blocks.length;
+    const pv = {};
+    blocks.forEach(b => Object.entries(b.blockProps).forEach(([pid, oids]) =>
+      oids.forEach(oid => { (pv[pid] = pv[pid] || []).includes(oid) || pv[pid].push(oid); })));
+    const agora = new Date().toISOString();
+    const ent = { id: pe.id || uid(), title: pe.title, description: pe.description,
+      propertyValues: pv, propertyAutoFlags: {}, blocks,
+      createdAt: pe.criado || agora, updatedAt: pe.modificado || pe.criado || agora };
+    (existe.has(ent.id) ? existentes : novas).push(ent);
+  });
+  return { props, propsNovas, optsNovas, novas, existentes, blocos };
+}
+
+/* Grava o plano. modo para as que já existem: 'pular' | 'copia' (ids novos e « (cópia)» no título). */
+function applyMdImport(plan, modo) {
+  const copias = modo === 'copia' ? plan.existentes.map(e => ({
+    ...e, id: uid(), title: `${e.title} (cópia)`,
+    blocks: e.blocks.map(b => ({ ...b, id: uid() })) })) : [];
+  db.properties = plan.props;
+  db.entries = [...db.entries, ...plan.novas, ...copias];
+  return { novas: plan.novas.length, copias: copias.length, puladas: modo === 'copia' ? 0 : plan.existentes.length };
+}
+
+let mdImportPlan = null;
+
+/* Lê o arquivo e abre a prévia. Nada é gravado aqui. */
+function startMdImport(txt, nome) {
+  const parsed = parseLunodaMD(txt);
+  const body = document.getElementById('mdImportBody');
+  const go = document.getElementById('mdImportGo');
+  mdImportPlan = null;
+  if (parsed.erro || parsed.entries.length === 0) {
+    body.innerHTML = `<p class="md-imp-erro">${esc(parsed.erro || 'Nenhuma entrada válida no arquivo.')}</p>`
+      + (parsed.avisos.length ? `<ul class="md-imp-avisos">${parsed.avisos.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : '');
+    go.style.display = 'none';
+    openModal('mdImportModal'); return;
+  }
+  const plan = planMdImport(parsed);
+  mdImportPlan = plan;
+  const n = parsed.entries.length;
+  let html = `<p><b>${esc(nome)}</b>: ${n} entrada(s), ${plan.blocos} bloco(s).</p><ul class="md-imp-lista">`;
+  html += `<li>${plan.novas.length} entrada(s) nova(s)</li>`;
+  if (plan.propsNovas.length) html += `<li>Propriedade(s) nova(s): ${plan.propsNovas.map(esc).join(', ')}</li>`;
+  if (plan.optsNovas.length) html += `<li>Opção(ões) nova(s), com cor nova: ${plan.optsNovas.map(esc).join(', ')}</li>`;
+  if (parsed.invalidas) html += `<li class="md-imp-aviso">${parsed.invalidas} entrada(s) recusada(s) — ver abaixo</li>`;
+  html += `</ul>`;
+  if (plan.existentes.length) {
+    html += `<div class="md-imp-dup"><p>${plan.existentes.length} entrada(s) já existe(m) no app (mesmo ID): `
+      + plan.existentes.slice(0, 5).map(e => `«${esc(e.title)}»`).join(', ') + (plan.existentes.length > 5 ? '…' : '') + `</p>`
+      + `<label><input type="radio" name="mdDup" value="pular" checked> Pular — manter a do app como está</label>`
+      + `<label><input type="radio" name="mdDup" value="copia"> Importar como cópia nova — «(cópia)» no título</label></div>`;
+  }
+  if (parsed.avisos.length) html += `<ul class="md-imp-avisos">${parsed.avisos.map(a => `<li>${esc(a)}</li>`).join('')}</ul>`;
+  html += `<p class="md-imp-nota">Só mescla — nada do que já existe é apagado. O Markdown não leva cores nem a adição automática; para um backup completo, use o JSON.</p>`;
+  body.innerHTML = html;
+  go.style.display = '';
+  openModal('mdImportModal');
+}
+
+function confirmMdImport() {
+  if (!mdImportPlan) { closeModal('mdImportModal'); return; }
+  const modo = (document.querySelector('input[name="mdDup"]:checked') || {}).value || 'pular';
+  const r = applyMdImport(mdImportPlan, modo);
+  mdImportPlan = null;
+  closeModal('mdImportModal');
+  saveDB(); renderSidebar(); renderTableHead(); renderTable();
+  showToast(`${r.novas + r.copias} entrada(s) importada(s)` + (r.copias ? ` (${r.copias} como cópia)` : '') + (r.puladas ? ` · ${r.puladas} pulada(s)` : ''));
+}
+
 function openImport() { document.getElementById('importFile').click(); }
 
 function handleImport(ev) {
   const file = ev.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
+    // .md exportado pelo Lunoda: leitor próprio, com prévia e só mesclar (DEC-022)
+    if (/\.(md|markdown)$/i.test(file.name)) { startMdImport(e.target.result, file.name); return; }
     try {
       let data = JSON.parse(e.target.result);
       if (!data.entries) throw new Error('Formato inválido');
@@ -3364,7 +3590,7 @@ function handleImport(ev) {
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-['exportModal','addPropModal','unsavedModal','blockTransferModal'].forEach(id => {
+['exportModal','addPropModal','unsavedModal','blockTransferModal','mdImportModal'].forEach(id => {
   document.getElementById(id).addEventListener('click', e => {
     if (e.target === document.getElementById(id)) {
       if (id === 'unsavedModal') return; // Don't close on overlay for unsaved

@@ -113,6 +113,7 @@ db = {
 - **Filtros da tabela:** por texto, por data (Criado/Alterado, com intervalo De/Até) e por propriedade+opções. Independentes entre si.
 - **Exportação:** JSON (reimportável), Markdown (documento único; a partir da v12.1 a descrição é citada linha a linha e o conteúdo de cada bloco vai entre `<!-- CONTEUDO:INICIO/FIM -->`, de modo que texto livre não se confunda com a estrutura — ver DEC-008/FIX-002; blocos e metadados bem identificados com `**ID:**`, `**Criado em:**`, `**Tags:**`, divisores `━━━`) e HTML (abrível/imprimível como PDF). Exporta tudo, seleção em massa, ou entrada única.
 - **Importação (`handleImport`):** normaliza formatos antigos, migra `inheritProps`→`blockProps` e `propertyOptionModes`→`propertyAutoFlags` (via `migrateOptionModes`). Mesclar ou substituir.
+- **Reimportar `.md` (`parseLunodaMD` → `planMdImport` → `applyMdImport`):** `handleImport` desvia `.md`/`.markdown` para `startMdImport`, que abre a prévia (`#mdImportModal`) sem gravar nada. O leitor é PURO e anda pelos marcadores (`<!-- ENTRADA -->`, `<!-- DADOS {json} -->`, `<!-- BLOCO n -->`, `<!-- CONTEUDO:INICIO/FIM bloco=n -->`); campo de formato vale pela posição. Só mescla; propriedades e opções por nome (DEC-022).
 
 ## Armadilhas conhecidas
 
@@ -123,6 +124,7 @@ db = {
 - **`saveDB` pode falhar por cota** — desde a v12.1 ele **retorna `false`** e avisa em vez de estourar. Quem chamar em fluxo crítico deve considerar o retorno.
 - **`.map(entryToMD)` passa o índice como 2º argumento** — um parâmetro opcional novo em `entryToMD` receberia `0, 1, 2…` em silêncio. Não acrescente parâmetro sem trocar os call sites (por isso o frontmatter é montado nos pontos de exportação, não dentro dela).
 - **Texto livre interpolado em formato estruturado precisa de delimitador explícito** (FIX-002) — vale para descrição, conteúdo de bloco e qualquer campo novo no export.
+- **O formato do `.md` exportado é contrato do leitor** (DEC-022) — mudar marcador, ordem dos campos ou o separador ` · ` em `entryToMD` quebra a reimportação em silêncio. Mudou o export? Rode o smoke: a seção de ida e volta compara campo a campo.
 - **Cor nova de texto: medir antes** — contraste ≥ 4,5:1 contra o `--surface2` (o fundo mais claro) e nada abaixo de 11px (DEC-018). Opacidade baixa num texto conta: `.48` sobre um chip já claro o derrubava para ilegível.
 - **Prefixos de exportação** — arquivos exportados usam prefixo `base_` no nome (`base_backup_`, `base_notas_`, `base_selecionados_`) — resquício do nome antigo. Ver IDEAS (renomear para `lunoda_`).
 

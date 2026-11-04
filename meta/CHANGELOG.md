@@ -23,6 +23,13 @@
 
 > Nada aqui altera o `index.html` — são mudanças de documentação e processo.
 
+## [13.4.0] — 2026-11-04
+
+### Adicionado
+- **Reimportar o Markdown exportado** (F9 parte 2, DEC-022): o botão Importar aceita `.md`. Uma **prévia** mostra entradas, blocos, propriedades e opções novas e avisos antes de gravar; só mescla; entrada que já existe pode ser pulada ou importada como cópia. Exports anteriores à v12.1 são recusados com explicação.
+- Linha `<!-- DADOS … -->` no Markdown exportado (invisível no render), com IDs e datas exatas para a reimportação.
+- `tests/smoke.mjs` cobre a ida e volta do Markdown (18 asserções novas, 46 no total).
+
 ## [13.3.0] — 2026-11-04
 
 ### Adicionado
