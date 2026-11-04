@@ -34,7 +34,7 @@
 
 ## 🔧 Em Progresso
 
-- **v13.4 aplicada; falta a conferência no navegador** — roteiro na conversa de 2026-11-04. v13.0 a v13.3 já conferidas pelo autor.
+- **v13.4 e v13.4.1 aplicadas (`8274e0c`, `d779c80`); falta a conferência no navegador** — roteiro na conversa de 2026-11-04; na v13.4.1, conferir o nome `lunoda_backup_AAAA-MM-DD.json` ao exportar. v13.0 a v13.3 já conferidas pelo autor.
 
 ## ❌ Quebrado / Com Problema
 
@@ -47,11 +47,12 @@
 - [ ] **Conferir o frontmatter no Obsidian** (nunca testado em navegador) — exportar UMA entrada pelo botão MD do editor, jogar num vault e ver as propriedades como campos; depois desmarcar o checkbox no modal e confirmar que volta ao Markdown simples.
 - [ ] **Conferir o undo/redo no navegador** — excluir blocos em massa e `Ctrl+Z`; `Ctrl+Z` dentro de campo de texto desfaz a digitação, não a estrutura; botões esmaecidos sem histórico; abrir outra entrada zera o histórico.
 - [ ] **Prints para o README** — cabeçalho do editor com Desfazer/Refazer; modal de exportação com o checkbox de frontmatter; propriedades renderizadas no Obsidian.
-- [ ] **Conferir a v13.4 no navegador** (roteiro na conversa de 2026-11-04).
+- [ ] **Conferir a v13.4 e a v13.4.1 no navegador** (roteiro na conversa de 2026-11-04).
+- [ ] **Colar `INSTRUCOES-DO-PROJETO.md` no painel do Projeto** (arquivo novo, versionado em `d779c80`).
 - [ ] **Lembrete de backup JSON** — «último backup há N dias» + botão rápido (IDEAS, 2026-11-04).
 
 ## 💬 Última conversa
 
-**2026-11-04** — v13.2 e v13.3 conferidas pelo autor. Entregue a F6 (empurrão de versão, DEC-021) como v13.3 (`e40b37a`). Análise da F9 parte 2 medida e decidida (opção B, DEC-022); entregue como **v13.4** pela wo0006. F5 adiada pelo autor. Histórico da véspera (migração para o KCM v1.133.0, v13.0–v13.2) no log de 2026-11-03.
+**2026-11-04** — v13.2 e v13.3 conferidas pelo autor. Entregue a F6 (empurrão de versão, DEC-021) como v13.3 (`e40b37a`). Análise da F9 parte 2 medida e decidida (opção B, DEC-022); entregue como **v13.4** pela wo0006 (`8274e0c`); faxina (prefixos `lunoda_`, README, ROADMAP, IDEAS) como **v13.4.1** pela wo0007 (`d779c80`). F5 adiada pelo autor. Histórico da véspera (migração para o KCM v1.133.0, v13.0–v13.2) no log de 2026-11-03.
 
 **Próximo passo óbvio:** conferir a v13.4 no navegador; depois o lembrete de backup JSON.
