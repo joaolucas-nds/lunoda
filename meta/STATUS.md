@@ -35,7 +35,7 @@
 
 ## 🔧 Em Progresso
 
-- **v13.5 aplicada pela wo0008; falta a conferência no navegador** — roteiro na conversa de 2026-11-04. v13.0 a v13.4.1 já conferidas pelo autor.
+- **v13.5 aplicada pela wo0008 (`a718916`); falta a conferência no navegador** — roteiro na conversa de 2026-11-04. v13.0 a v13.4.1 já conferidas pelo autor.
 
 ## ❌ Quebrado / Com Problema
 
@@ -52,6 +52,6 @@
 
 ## 💬 Última conversa
 
-**2026-11-04** — v13.2 e v13.3 conferidas pelo autor. Entregue a F6 (empurrão de versão, DEC-021) como v13.3 (`e40b37a`). Análise da F9 parte 2 medida e decidida (opção B, DEC-022); entregue como **v13.4** pela wo0006 (`8274e0c`); faxina (prefixos `lunoda_`, README, ROADMAP, IDEAS) como **v13.4.1** pela wo0007 (`d779c80`). F5 adiada pelo autor. Histórico da véspera (migração para o KCM v1.133.0, v13.0–v13.2) no log de 2026-11-03. v13.4 e v13.4.1 conferidas pelo autor; Instruções coladas no painel; entregue o **lembrete de backup JSON** (DEC-023) como **v13.5** pela wo0008.
+**2026-11-04** — v13.2 e v13.3 conferidas pelo autor. Entregue a F6 (empurrão de versão, DEC-021) como v13.3 (`e40b37a`). Análise da F9 parte 2 medida e decidida (opção B, DEC-022); entregue como **v13.4** pela wo0006 (`8274e0c`); faxina (prefixos `lunoda_`, README, ROADMAP, IDEAS) como **v13.4.1** pela wo0007 (`d779c80`). F5 adiada pelo autor. Histórico da véspera (migração para o KCM v1.133.0, v13.0–v13.2) no log de 2026-11-03. v13.4 e v13.4.1 conferidas pelo autor; Instruções coladas no painel; entregue o **lembrete de backup JSON** (DEC-023) como **v13.5** pela wo0008 (`a718916`).
 
 **Próximo passo óbvio:** conferir a v13.5 no navegador; depois escolher a próxima frente (F9 `.zip`, F10 busca no conteúdo, ou testes de `calcPropertyValues`/`migrateOptionModes`/`loadDB`).
