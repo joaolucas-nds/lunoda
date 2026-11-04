@@ -17,7 +17,7 @@ Público: uso próprio do autor. Sem multiusuário, sem servidor, sem nuvem.
 ## Stack
 
 - **Arquivo único `.html`** — HTML + CSS + JavaScript vanilla, sem build, sem dependências, sem framework.
-- Persistência local via **`localStorage`** (chave `base_v4`). Preferências de interface ficam em chaves próprias, fora do `db` (DEC-011): `lunoda_md_frontmatter`, `lunoda_ta_size` (padrão de tamanho das caixas, DEC-017) e `lunoda_editor_w` (largura do painel e maximizado, DEC-019).
+- Persistência local via **`localStorage`** (chave `base_v4`). Preferências de interface ficam em chaves próprias, fora do `db` (DEC-011): `lunoda_md_frontmatter`, `lunoda_ta_size` (padrão de tamanho das caixas, DEC-017) `lunoda_editor_w` (largura do painel e maximizado, DEC-019) e `lunoda_last_backup` (data ISO do último backup JSON completo, DEC-023).
 - Fonte web: IBM Plex Sans / IBM Plex Mono (Google Fonts).
 - Hospedado no **GitHub** (upload por arrastar arquivo). Favicon `favicon.png` na raiz do repositório.
 - Roda direto no navegador, offline. Não precisa de servidor.
@@ -114,6 +114,7 @@ db = {
 - **Exportação:** JSON (reimportável), Markdown (documento único; a partir da v12.1 a descrição é citada linha a linha e o conteúdo de cada bloco vai entre `<!-- CONTEUDO:INICIO/FIM -->`, de modo que texto livre não se confunda com a estrutura — ver DEC-008/FIX-002; blocos e metadados bem identificados com `**ID:**`, `**Criado em:**`, `**Tags:**`, divisores `━━━`) e HTML (abrível/imprimível como PDF). Exporta tudo, seleção em massa, ou entrada única.
 - **Importação (`handleImport`):** normaliza formatos antigos, migra `inheritProps`→`blockProps` e `propertyOptionModes`→`propertyAutoFlags` (via `migrateOptionModes`). Mesclar ou substituir.
 - **Reimportar `.md` (`parseLunodaMD` → `planMdImport` → `applyMdImport`):** `handleImport` desvia `.md`/`.markdown` para `startMdImport`, que abre a prévia (`#mdImportModal`) sem gravar nada. O leitor é PURO e anda pelos marcadores (`<!-- ENTRADA -->`, `<!-- DADOS {json} -->`, `<!-- BLOCO n -->`, `<!-- CONTEUDO:INICIO/FIM bloco=n -->`); campo de formato vale pela posição. Só mescla; propriedades e opções por nome (DEC-022).
+- **Lembrete de backup JSON (`backupStatus` → `renderBackupPill`):** indicador no topo (`#backupPill`). `backupStatus` é PURA: compara `updatedAt`/`createdAt` das entradas com `lunoda_last_backup` — nada mudou = em dia, sem contar dias; mudou e ≥ 7 dias = atrasado (amarelo + aviso uma vez por abertura). Só `exportAllJSON` chama `markBackup`; `renderTable` redesenha o indicador (DEC-023).
 
 ## Armadilhas conhecidas
 

@@ -462,3 +462,26 @@ Opção B da análise, aprovada pelo autor:
 
 ### Consequências
 O `.md` vira caminho de recuperação e de volta do Obsidian. Continuam fora do `.md`: cores e adição automática (vêm do JSON). O formato do export agora é contrato do leitor: mudar marcador ou campo exige mudar `parseLunodaMD` e o teste de ida e volta do smoke.
+
+---
+
+## DEC-023 — Lembrete de backup JSON no topo, pelo que mudou desde o último backup
+**Data:** 2026-11-04 · **Status:** aceita · origem: opção D da análise da F9 parte 2
+
+### Contexto
+Os dados vivem só no `localStorage` de um navegador; limpar os dados do navegador apaga o acervo. O JSON é o backup completo, mas nada lembrava de fazê-lo. O autor aprovou o lembrete para o backlog.
+
+### Decisão
+- Indicador no topo, ao lado de «Importar»: **«Backup em dia»** (discreto) quando nenhuma entrada mudou depois do último backup — **não importa há quantos dias** —; **«Backup há N dias» / «hoje»** quando houve mudança; em **amarelo** quando nunca houve backup ou quando houve mudança e já passaram **7 dias**. Some sem entradas.
+- **Um clique** baixa o mesmo JSON completo do «Exportar tudo → JSON».
+- Só o **JSON completo** registra backup (JSON de uma entrada, de seleção, Markdown e HTML não contam). Data em `localStorage['lunoda_last_backup']`, fora do `db` (DEC-011).
+- Se estiver amarelo, um **aviso** aparece uma vez por abertura do app.
+- O estado é calculado por uma função pura (`backupStatus`), coberta pelo smoke.
+
+### Alternativas consideradas
+- **Só por dias desde o backup** — avisaria quem não mexeu em nada; o que importa é o que mudou desde então.
+- **Backup automático** (baixar sozinho) — o navegador pediria permissão de download a cada vez, ou encheria a pasta de Downloads.
+- **Modal bloqueante** — insistente demais para uma ferramenta pessoal.
+
+### Consequências
+O risco principal do projeto fica visível o tempo todo, sem interromper. O limite de 7 dias é um padrão (`backupStatus(…, limite)`), mudável num ponto só. O registro é por navegador: outro navegador mostra «nunca» até o primeiro backup nele.

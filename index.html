@@ -63,6 +63,9 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 .topbar-sep  { width: 1px; height: 18px; background: var(--border); }
 .topbar-count { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
 .topbar-sp { flex: 1; }
+/* Lembrete de backup (DEC-023): discreto quando em dia; amarelo quando nunca ou atrasado */
+.backup-pill { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+.backup-pill.warn { color: var(--yellow); border: 1px solid rgba(245,197,66,.45); }
 
 /* ════════════════════════════════════════════
    BUTTONS
@@ -654,6 +657,8 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
   <div class="topbar-sep"></div>
   <span class="topbar-count" id="topbar-count">0 entradas</span>
   <div class="topbar-sp"></div>
+  <!-- Lembrete de backup JSON (DEC-023): texto e cor por renderBackupPill; clique baixa o backup -->
+  <button class="btn btn-ghost backup-pill" id="backupPill" onclick="quickBackup()" style="display:none"></button>
   <button class="btn btn-ghost" onclick="openImport()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     Importar
@@ -970,7 +975,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
     <h3>Importar Markdown</h3>
     <div id="mdImportBody" class="md-imp-body"></div>
     <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('mdImportModal')">Cancelar</button>
+      <button class="btn btn-ghost" id="mdImportCancel" onclick="closeModal('mdImportModal')">Cancelar</button>
       <button class="btn btn-primary" id="mdImportGo" onclick="confirmMdImport()">Importar</button>
     </div>
   </div>
@@ -1447,6 +1452,7 @@ function renderTable() {
 
   document.getElementById('topbar-count').textContent =
     db.entries.length + (db.entries.length === 1 ? ' entrada' : ' entradas');
+  renderBackupPill();   // o lembrete acompanha toda mudança na tabela (DEC-023)
   document.getElementById('filterInfo').textContent =
     list.length < db.entries.length ? `${list.length} de ${db.entries.length}` : '';
 
@@ -3192,6 +3198,7 @@ if (document.readyState === 'loading') {
 }
 function exportAllJSON() {
   dl(JSON.stringify(db,null,2), 'lunoda_backup_'+dateSlug()+'.json', 'application/json');
+  markBackup();   // só o JSON COMPLETO conta como backup (DEC-023)
   closeModal('exportModal'); showToast('JSON exportado');
 }
 
@@ -3501,6 +3508,7 @@ function startMdImport(txt, nome) {
     body.innerHTML = `<p class="md-imp-erro">${esc(parsed.erro || 'Nenhuma entrada válida no arquivo.')}</p>`
       + (parsed.avisos.length ? `<ul class="md-imp-avisos">${parsed.avisos.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : '');
     go.style.display = 'none';
+    document.getElementById('mdImportCancel').textContent = 'Fechar';   // sem nada a importar, não há o que cancelar
     openModal('mdImportModal'); return;
   }
   const plan = planMdImport(parsed);
@@ -3522,6 +3530,7 @@ function startMdImport(txt, nome) {
   html += `<p class="md-imp-nota">Só mescla — nada do que já existe é apagado. O Markdown não leva cores nem a adição automática; para um backup completo, use o JSON.</p>`;
   body.innerHTML = html;
   go.style.display = '';
+  document.getElementById('mdImportCancel').textContent = 'Cancelar';
   openModal('mdImportModal');
 }
 
@@ -3534,6 +3543,63 @@ function confirmMdImport() {
   saveDB(); renderSidebar(); renderTableHead(); renderTable();
   showToast(`${r.novas + r.copias} entrada(s) importada(s)` + (r.copias ? ` (${r.copias} como cópia)` : '') + (r.puladas ? ` · ${r.puladas} pulada(s)` : ''));
 }
+
+/* ──────────────────────────────
+   LEMBRETE DE BACKUP JSON (DEC-023)
+   Os dados vivem só no localStorage de um navegador: limpar o navegador apaga tudo.
+   O indicador no topo diz quando foi o último backup JSON completo e baixa um com um clique.
+   Data em chave própria, fora do db (DEC-011).
+────────────────────────────── */
+const BACKUP_KEY = 'lunoda_last_backup';
+let backupAvisado = false;   // o aviso de atraso sai uma vez por abertura do app
+
+/* PURA. Estado do lembrete: 'vazio' (sem entradas) · 'nunca' · 'em-dia' (nada mudou desde o
+   último backup, não importa há quantos dias) · 'recente' (mudou, há menos de `limite` dias) ·
+   'atrasado' (mudou e já passou do limite). `dias` = dias inteiros desde o último backup. */
+function backupStatus(ultimoIso, entries, agoraMs, limite = 7) {
+  if (!entries || entries.length === 0) return { estado: 'vazio', dias: null };
+  const ult = ultimoIso ? Date.parse(ultimoIso) : NaN;
+  if (isNaN(ult)) return { estado: 'nunca', dias: null };
+  const dias = Math.max(0, Math.floor((agoraMs - ult) / 86400000));
+  const mudou = entries.some(e => (Date.parse(e.updatedAt || e.createdAt || '') || 0) > ult);
+  if (!mudou) return { estado: 'em-dia', dias };
+  return { estado: dias >= limite ? 'atrasado' : 'recente', dias };
+}
+
+function lastBackup() {
+  try { return localStorage.getItem(BACKUP_KEY) || ''; } catch (_) { return ''; }
+}
+function markBackup() {
+  try { localStorage.setItem(BACKUP_KEY, new Date().toISOString()); } catch (_) {}
+  renderBackupPill();
+}
+
+/* Desenha o indicador do topo a partir do estado. */
+function renderBackupPill() {
+  const el = document.getElementById('backupPill'); if (!el) return;
+  const st = backupStatus(lastBackup(), db.entries, Date.now());
+  if (st.estado === 'vazio') { el.style.display = 'none'; return; }
+  const quando = st.dias === 0 ? 'hoje' : (st.dias === 1 ? 'há 1 dia' : `há ${st.dias} dias`);
+  const txt = { 'nunca': 'Backup: nunca', 'em-dia': 'Backup em dia',
+                'recente': `Backup ${quando}`, 'atrasado': `Backup ${quando}` }[st.estado];
+  el.textContent = txt;
+  el.classList.toggle('warn', st.estado === 'nunca' || st.estado === 'atrasado');
+  el.title = (st.estado === 'em-dia'
+      ? `Último backup JSON ${quando}; nada mudou desde então.`
+      : st.estado === 'nunca' ? 'Nenhum backup JSON registrado neste navegador.'
+      : `Último backup JSON ${quando}, e houve mudanças desde então.`)
+    + ' Clique para baixar um backup JSON completo agora.';
+  el.style.display = '';
+  if (!backupAvisado && (st.estado === 'nunca' || st.estado === 'atrasado')) {
+    backupAvisado = true;
+    setTimeout(() => showToast(st.estado === 'nunca'
+      ? 'Nenhum backup JSON ainda — clique em «Backup» no topo'
+      : `Último backup JSON ${quando} — clique em «Backup» no topo`), 1200);
+  }
+}
+
+/* Clique no indicador: o mesmo backup completo do «Exportar tudo → JSON». */
+function quickBackup() { exportAllJSON(); }
 
 function openImport() { document.getElementById('importFile').click(); }
 

@@ -86,6 +86,7 @@ Hoje o MD identifica os metadados em negrito (`**ID:**`, `**Tags:**`). Isso é �
 > Cuidado: manter os nomes de campo consistentes e escapar aspas — YAML inválido quebra o parse do outro lado. Um seletor "MD simples / MD com frontmatter" na hora de exportar evita forçar o formato em quem não quer.
 
 ### 2026-11-04 — Lembrete de backup JSON
+> **Status (2026-11-04):** implementada na v13.5 (DEC-023) — ver Concluídas.
 Os dados vivem só no `localStorage` de um navegador: limpar o navegador apaga tudo. Mostrar «último backup JSON há N dias» e um botão de backup rápido ataca esse risco com custo baixo (opção D da análise da F9 parte 2). Aprovado pelo autor para o backlog.
 
 ### 2026-07-19 — Undo/redo no editor
@@ -145,6 +146,7 @@ Pergunta do autor. *Sugestão do assistente:* nesse caso, **desabilitar** a edi�
 
 ## ✅ Concluídas
 
+- **Lembrete de backup JSON no topo** — v13.5 / DEC-023.
 - **Prefixos de exportação `lunoda_`** — v13.4.1.
 - **Reimportar o `.md` exportado** — v13.4 / DEC-022. Fecha a F9 parte 2.
 - **Reordenação por número de versão (empurrão)** — v13.3 / DEC-015, DEC-021. Fecha a F6.

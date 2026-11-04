@@ -20,6 +20,7 @@
 - **Auto (caixa de texto)** — (v13.1, DEC-017) modo em que a caixa cresce com o conteúdo, sem rolagem interna. Os outros: Mín (só descrição), P, M, G.
 - **Linha DADOS** — (v13.4, DEC-022) `<!-- DADOS {json} -->` no `.md` exportado, logo depois de `<!-- ENTRADA -->` (id e datas ISO) e de cada `<!-- BLOCO n -->` (id); invisível no render, lida pela reimportação.
 - **Prévia do import** — (v13.4) janela que mostra o que um `.md` vai trazer antes de gravar; pergunta o que fazer com entradas que já existem (pular ou cópia).
+- **Lembrete de backup** — (v13.5, DEC-023) indicador no topo, ao lado de «Importar», que diz se há mudanças sem backup JSON e há quantos dias; amarelo quando nunca houve backup ou há 7 dias ou mais; um clique baixa o backup.
 - **Empurrão de versão** — (v13.3, DEC-015, DEC-021) trocar o número de versão de um bloco para um número já ocupado no mesmo subtítulo renumera os vizinhos; só números, não posições.
 - **Herança entre versões** — (ideia v13) propagar/travar uma propriedade em todas as versões de um mesmo subtítulo de bloco.
 

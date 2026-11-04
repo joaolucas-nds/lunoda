@@ -23,6 +23,15 @@
 
 > Nada aqui altera o `index.html` — são mudanças de documentação e processo.
 
+## [13.5.0] — 2026-11-04
+
+### Adicionado
+- **Lembrete de backup JSON** (DEC-023): indicador no topo — «Backup em dia», «Backup há N dias», amarelo quando nunca houve backup ou quando há mudanças há 7 dias ou mais — e um clique baixa o backup JSON completo. Aviso uma vez por abertura quando atrasado.
+- `tests/smoke.mjs` cobre o estado do lembrete (8 asserções novas, 54 no total).
+
+### Modificado
+- Na prévia do import de Markdown, quando não há nada a importar (arquivo recusado), o botão diz «Fechar» em vez de «Cancelar».
+
 ## [13.4.1] — 2026-11-04
 
 ### Modificado

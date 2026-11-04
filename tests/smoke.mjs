@@ -300,6 +300,29 @@ if (presentes.length < OPCIONAIS.length) {
   }
 }
 
+/* ── Lembrete de backup JSON (DEC-023) ────────────────────────── */
+
+if (!html.includes('function backupStatus(')) {
+  skipped('lembrete de backup', 'v13.5 ainda nao aplicada');
+} else {
+  const backupStatus = new Function(`${extractFunction(html, 'backupStatus')}\nreturn backupStatus;`)();
+  const DIA = 86400000, agora = Date.parse('2026-11-04T12:00:00Z');
+  const ents = up => [{ createdAt: '2026-10-01T00:00:00Z', updatedAt: up }];
+  check('backup: sem entradas = vazio', backupStatus('', [], agora).estado === 'vazio');
+  check('backup: sem registro = nunca', backupStatus('', ents('2026-10-01T00:00:00Z'), agora).estado === 'nunca');
+  check('backup: data ilegivel = nunca', backupStatus('lixo', ents('2026-10-01T00:00:00Z'), agora).estado === 'nunca');
+  const st1 = backupStatus(new Date(agora - 30 * DIA).toISOString(), ents('2026-10-01T00:00:00Z'), agora);
+  check('backup: nada mudou desde o backup = em dia (mesmo 30 dias depois)', st1.estado === 'em-dia' && st1.dias === 30, JSON.stringify(st1));
+  const st2 = backupStatus(new Date(agora - 2 * DIA).toISOString(), ents(new Date(agora - DIA).toISOString()), agora);
+  check('backup: mudou ha pouco = recente', st2.estado === 'recente' && st2.dias === 2, JSON.stringify(st2));
+  const st3 = backupStatus(new Date(agora - 7 * DIA).toISOString(), ents(new Date(agora - DIA).toISOString()), agora);
+  check('backup: mudou e passou de 7 dias = atrasado (limite inclusivo)', st3.estado === 'atrasado' && st3.dias === 7, JSON.stringify(st3));
+  const st4 = backupStatus(new Date(agora - 7 * DIA).toISOString(), ents(new Date(agora - DIA).toISOString()), agora, 10);
+  check('backup: limite configuravel', st4.estado === 'recente');
+  check('backup: entrada sem updatedAt usa createdAt',
+    backupStatus(new Date(agora - 9 * DIA).toISOString(), [{ createdAt: new Date(agora - DIA).toISOString() }], agora).estado === 'atrasado');
+}
+
 /* ── Relatório ──────────────────────────────────────────────── */
 
 console.log('\nLunoda — smoke test (entryToMD)\n');
