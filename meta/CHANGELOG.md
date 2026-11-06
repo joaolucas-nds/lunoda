@@ -23,6 +23,18 @@
 
 > Nada aqui altera o `index.html` — são mudanças de documentação e processo.
 
+## [13.5.1] — 2026-11-06
+
+### Corrigido
+- Entrada sem blocos (ou com a lista vazia) num backup JSON ou no dado salvo abria com 0 blocos; agora ganha um bloco vazio (FIX-004).
+- Mesclar um backup JSON de outro navegador perdia as opções novas de propriedades que já existiam (Tags, IA Utilizada…); agora elas entram, e o aviso diz quantas (FIX-005).
+
+### Adicionado
+- `tests/smoke.mjs` cobre o núcleo: cálculo das propriedades da entrada, migração de modos, carga do `localStorage`, normalização e mescla do backup JSON (26 asserções novas, 80 no total).
+
+### Modificado
+- A normalização do import JSON saiu de dentro do `handleImport` para `normalizeImportedDB`, sem mudar o comportamento, para poder ser testada.
+
 ## [13.5.0] — 2026-11-04
 
 ### Adicionado

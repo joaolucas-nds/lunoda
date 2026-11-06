@@ -112,7 +112,7 @@ db = {
 - **Filtro interno de blocos:** por subtítulo, versão e propriedade+opções, com modo **E**/**OU** entre critérios. Só oculta (não remove de `editBlocks`).
 - **Filtros da tabela:** por texto, por data (Criado/Alterado, com intervalo De/Até) e por propriedade+opções. Independentes entre si.
 - **Exportação:** JSON (reimportável), Markdown (documento único; a partir da v12.1 a descrição é citada linha a linha e o conteúdo de cada bloco vai entre `<!-- CONTEUDO:INICIO/FIM -->`, de modo que texto livre não se confunda com a estrutura — ver DEC-008/FIX-002; blocos e metadados bem identificados com `**ID:**`, `**Criado em:**`, `**Tags:**`, divisores `━━━`) e HTML (abrível/imprimível como PDF). Exporta tudo, seleção em massa, ou entrada única.
-- **Importação (`handleImport`):** normaliza formatos antigos, migra `inheritProps`→`blockProps` e `propertyOptionModes`→`propertyAutoFlags` (via `migrateOptionModes`). Mesclar ou substituir.
+- **Importação (`handleImport` → `normalizeImportedDB` → `mergeImportedProperties`):** `normalizeImportedDB` normaliza formatos antigos, migra `inheritProps`→`blockProps` e `propertyOptionModes`→`propertyAutoFlags` (via `migrateOptionModes`) e dá um bloco vazio a entrada sem blocos (FIX-004). Mesclar (entradas novas por id; propriedades por id, e propriedade existente recebe as opções que faltam — FIX-005) ou substituir. O `loadDB` tem normalização própria, parecida, para o que está salvo no navegador.
 - **Reimportar `.md` (`parseLunodaMD` → `planMdImport` → `applyMdImport`):** `handleImport` desvia `.md`/`.markdown` para `startMdImport`, que abre a prévia (`#mdImportModal`) sem gravar nada. O leitor é PURO e anda pelos marcadores (`<!-- ENTRADA -->`, `<!-- DADOS {json} -->`, `<!-- BLOCO n -->`, `<!-- CONTEUDO:INICIO/FIM bloco=n -->`); campo de formato vale pela posição. Só mescla; propriedades e opções por nome (DEC-022).
 - **Lembrete de backup JSON (`backupStatus` → `renderBackupPill`):** indicador no topo (`#backupPill`). `backupStatus` é PURA: compara `updatedAt`/`createdAt` das entradas com `lunoda_last_backup` — nada mudou = em dia, sem contar dias; mudou e ≥ 7 dias = atrasado (amarelo + aviso uma vez por abertura). Só `exportAllJSON` chama `markBackup`; `renderTable` redesenha o indicador (DEC-023).
 
@@ -120,7 +120,8 @@ db = {
 
 - **`STORAGE_KEY = 'base_v4'`** — a chave do localStorage é `base_v4`, não muda com a versão do app. Alterá-la faz o app "perder" os dados salvos do usuário. `loadDB` também tenta chaves legadas (`base_notas_v3`, etc.) para migração.
 - **`editProps` legado** — a variável ainda existe no estado do editor mas **não é mais a fonte de verdade** da entrada; quem manda é `calcPropertyValues()` (union dos blocos). Não voltar a usá-la para decidir o que a entrada "tem".
-- **Nunca deixar entrada com 0 blocos** — ao mover/excluir todos os blocos, o sistema recria um bloco vazio. Manter essa invariante.
+- **Nunca deixar entrada com 0 blocos** — ao mover/excluir todos os blocos, o sistema recria um bloco vazio. Manter essa invariante. Vale também para dado que **entra** (`loadDB`, `normalizeImportedDB`): lista vazia de blocos conta como «sem blocos» (FIX-004).
+- **Ids das propriedades padrão são iguais em todo navegador** (`p-tags`, `p-ia`, opções `o1`…`o6`) — qualquer mescla «por id» tem de descer até as opções, senão descarta as criadas em outro lugar (FIX-005).
 - **CMD do Windows** — o autor usa Windows/CMD; comandos numa linha só, sem `\`, `-m` repetido no commit, mensagens de commit **sem acento** (o CMD corrompe).
 - **`saveDB` pode falhar por cota** — desde a v12.1 ele **retorna `false`** e avisa em vez de estourar. Quem chamar em fluxo crítico deve considerar o retorno.
 - **`.map(entryToMD)` passa o índice como 2º argumento** — um parâmetro opcional novo em `entryToMD` receberia `0, 1, 2…` em silêncio. Não acrescente parâmetro sem trocar os call sites (por isso o frontmatter é montado nos pontos de exportação, não dentro dela).
@@ -134,7 +135,7 @@ db = {
 | Arquivo | Por quê |
 |---|---|
 | `index.html` | É o produto inteiro. Não editar às cegas; ver as armadilhas acima. |
-| `tests/smoke.mjs` | Verifica o export. Rode antes de fechar qualquer mudança em `entryToMD`. |
+| `tests/smoke.mjs` | Verifica o export e a reimportação do `.md`, o lembrete de backup e o núcleo (cálculo das propriedades, migração, `loadDB`, normalização e mescla do backup JSON). Rode antes de fechar qualquer mudança nessas funções. |
 | `tests/history.mjs` | Verifica o undo/redo. Rode ao mexer nos mutadores estruturais ou na lista de embrulho. |
 | `STORAGE_KEY = 'base_v4'` (dentro do HTML) | Renomear sem migração **apaga os dados do usuário**. |
 | `calcPropertyValues()` / `blockProps` | Núcleo do modelo de propriedades (DEC-003). Mudança aqui afeta exportação e filtros. |

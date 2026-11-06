@@ -1070,7 +1070,9 @@ function loadDB() {
           options: []
         }));
         d.entries = (d.entries || []).map(e => {
-          const blocks = e.blocks || [{ id: uid(), subtitle: '', version: 1, content: e.content || '' }];
+          // Lista vazia também conta como «sem blocos»: nunca entrada com 0 blocos (FIX-004)
+          const blocks = (e.blocks && e.blocks.length) ? e.blocks
+            : [{ id: uid(), subtitle: '', version: 1, content: e.content || '' }];
           const pv = {};
           if (e.tags && e.tags.length) pv[e.tags[0]] = (e.tags || []);
           return { id: e.id, title: e.title || '', description: '', propertyValues: pv,
@@ -1091,7 +1093,8 @@ function loadDB() {
           description: e.description || '',
           propertyValues: e.propertyValues || {},
           propertyAutoFlags: e.propertyAutoFlags || migrateOptionModes(e.propertyOptionModes),
-          blocks: (e.blocks || []).map(b => ({
+          // Sem blocos (ou lista vazia): um bloco vazio, preenchido pelo map abaixo (FIX-004)
+          blocks: ((e.blocks && e.blocks.length) ? e.blocks : [{}]).map(b => ({
             id: b.id || uid(), subtitle: b.subtitle || '',
             version: b.version || 1, content: b.content || '',
             blockProps: b.blockProps || b.inheritProps || {}
@@ -3603,6 +3606,52 @@ function quickBackup() { exportAllJSON(); }
 
 function openImport() { document.getElementById('importFile').click(); }
 
+/* Normaliza um backup JSON para o formato atual antes de importar: opções em
+   texto viram objetos, propertyOptionModes vira propertyAutoFlags, inheritProps
+   vira blockProps, campos ausentes ganham padrão. Entrada sem blocos (ou com a
+   lista vazia) ganha um bloco vazio — nunca entrada com 0 blocos (FIX-004).
+   Pura, salvo uid()/randColor() para dado que não tem id ou cor.
+   Lança 'Formato inválido' se não houver lista de entradas. Testada no smoke. */
+function normalizeImportedDB(data) {
+  if (!data || !Array.isArray(data.entries)) throw new Error('Formato inválido');
+  data.properties = (data.properties||[]).map(p => ({
+    ...p, options: (p.options||[]).map(o =>
+      typeof o==='string' ? {id:uid(),name:o,colorId:randColor()} : o)
+  }));
+  data.entries = data.entries.map(e2 => ({
+    id: e2.id||uid(), title: e2.title||'', description: e2.description||'',
+    propertyValues:   e2.propertyValues||{},
+    propertyAutoFlags:e2.propertyAutoFlags||migrateOptionModes(e2.propertyOptionModes),
+    blocks: ((e2.blocks && e2.blocks.length) ? e2.blocks : [{ content: e2.content||'' }])
+            .map(b=>({
+              id: b.id||uid(), subtitle: b.subtitle||'',
+              version: b.version||1, content: b.content||'',
+              blockProps: b.blockProps||b.inheritProps||{}
+            })),
+    createdAt: e2.createdAt, updatedAt: e2.updatedAt
+  }));
+  return data;
+}
+
+/* Mescla as propriedades de um backup nas existentes, por id (FIX-005).
+   Propriedade nova entra inteira; propriedade que já existe ganha só as opções
+   que faltam (por id) — nome e cor do que já existe não mudam. Sem isto, as
+   entradas importadas apontavam para opções que não existiam no destino.
+   Muta `target`; devolve quantas opções entraram em propriedades existentes. */
+function mergeImportedProperties(target, incoming) {
+  let added = 0;
+  (incoming || []).forEach(p => {
+    const cur = target.find(x => x.id === p.id);
+    if (!cur) { target.push(p); return; }
+    if (!Array.isArray(cur.options)) cur.options = [];
+    const have = new Set(cur.options.map(o => o.id));
+    (p.options || []).forEach(o => {
+      if (!have.has(o.id)) { cur.options.push(o); have.add(o.id); added++; }
+    });
+  });
+  return added;
+}
+
 function handleImport(ev) {
   const file = ev.target.files[0]; if (!file) return;
   const reader = new FileReader();
@@ -3610,35 +3659,18 @@ function handleImport(ev) {
     // .md exportado pelo Lunoda: leitor próprio, com prévia e só mesclar (DEC-022)
     if (/\.(md|markdown)$/i.test(file.name)) { startMdImport(e.target.result, file.name); return; }
     try {
-      let data = JSON.parse(e.target.result);
-      if (!data.entries) throw new Error('Formato inválido');
-
-      // Normalize
-      data.properties = (data.properties||[]).map(p => ({
-        ...p, options: (p.options||[]).map(o =>
-          typeof o==='string' ? {id:uid(),name:o,colorId:randColor()} : o)
-      }));
-      data.entries = data.entries.map(e2 => ({
-        id: e2.id||uid(), title: e2.title||'', description: e2.description||'',
-        propertyValues:   e2.propertyValues||{},
-        propertyAutoFlags:e2.propertyAutoFlags||migrateOptionModes(e2.propertyOptionModes),
-        blocks: (e2.blocks||[{id:uid(),subtitle:'',version:1,content:e2.content||'',blockProps:{}}])
-                .map(b=>({
-                  id: b.id||uid(), subtitle: b.subtitle||'',
-                  version: b.version||1, content: b.content||'',
-                  blockProps: b.blockProps||b.inheritProps||{}
-                })),
-        createdAt: e2.createdAt, updatedAt: e2.updatedAt
-      }));
+      // Normalização em função própria, testada no smoke (FIX-004)
+      const data = normalizeImportedDB(JSON.parse(e.target.result));
 
       const merge = confirm(`Importar ${data.entries.length} entrada(s)?\n\nOK = Mesclar\nCancelar = Substituir tudo`);
       if (merge) {
         const existIds = new Set(db.entries.map(e=>e.id));
         const newE = data.entries.filter(e=>!existIds.has(e.id));
         db.entries = [...db.entries, ...newE];
-        const existPids = new Set(db.properties.map(p=>p.id));
-        (data.properties||[]).filter(p=>!existPids.has(p.id)).forEach(p=>db.properties.push(p));
-        showToast(`${newE.length} entradas importadas (mesclado)`);
+        // Propriedade que já existe também recebe as opções que faltam (FIX-005)
+        const novasOpcoes = mergeImportedProperties(db.properties, data.properties);
+        showToast(`${newE.length} entradas importadas (mesclado)`
+          + (novasOpcoes ? ` · ${novasOpcoes} opção(ões) nova(s)` : ''));
       } else {
         db = data;
         showToast(`${data.entries.length} entradas importadas`);

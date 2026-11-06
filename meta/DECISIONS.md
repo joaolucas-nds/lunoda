@@ -485,3 +485,24 @@ Os dados vivem só no `localStorage` de um navegador; limpar os dados do navegad
 
 ### Consequências
 O risco principal do projeto fica visível o tempo todo, sem interromper. O limite de 7 dias é um padrão (`backupStatus(…, limite)`), mudável num ponto só. O registro é por navegador: outro navegador mostra «nunca» até o primeiro backup nele.
+
+---
+
+## FIX-004 — Backup ou dado salvo com entrada sem blocos abria com 0 blocos
+**Data:** 2026-11-06 · **Corrigido em:** `index.html` (`loadDB`, nos dois ramos; `normalizeImportedDB`, nova) · achado ao escrever os testes do núcleo
+
+- **Sintoma:** uma entrada sem `blocks`, ou com `blocks: []`, carregava e abria no editor com **0 blocos** — a invariante «nunca entrada com 0 blocos» do CONTEXT, quebrada. Medido no Chromium: `editBlocks.length === 0`.
+- **Causa raiz:** `loadDB` usava `(e.blocks || [])` e a importação usava `(e2.blocks || [padrão])`: lista vazia é verdadeira em JS, então passava direto; e no `loadDB` a falta de blocos virava lista vazia. A invariante era mantida só por quem move ou exclui blocos, não por quem lê dado de fora.
+- **Solução:** nos três pontos, «sem blocos» = ausente **ou** vazio, e ganha um bloco vazio (na importação, com o `content` antigo, como já fazia). A normalização da importação saiu de dentro do `handleImport` para `normalizeImportedDB`, sem mudar o que faz, para poder ser testada.
+- **Lição:** invariante vale na **entrada** de dados, não só nas operações. Quem só testa o caminho feliz (o backup que o próprio app gera) nunca vê a borda: o backup do app nunca tem entrada sem blocos; um JSON editado à mão ou de outra ferramenta, sim.
+
+---
+
+## FIX-005 — Mesclar backup JSON perdia as opções novas de propriedades existentes
+**Data:** 2026-11-06 · **Corrigido em:** `index.html` (`mergeImportedProperties`, nova; `handleImport`) · achado ao escrever os testes do núcleo
+
+- **Sintoma:** ao mesclar um backup de outro navegador, uma opção criada lá (ex.: «Trabalho» em Tags) não aparecia aqui, e as entradas importadas ficavam apontando para um id de opção que não existia. Medido no Chromium: opções de Tags depois da mescla = só as que já existiam.
+- **Causa raiz:** a mescla juntava propriedades **inteiras** por id — se o id já existia, a propriedade de fora era descartada com todas as opções. As propriedades padrão (`p-tags`, `p-ia`) têm o **mesmo id em todo navegador**, então o caso é o comum, não o raro.
+- **Solução:** propriedade nova entra inteira; propriedade que já existe recebe só as opções que faltam, por id. Nome e cor do que já existe não mudam. O aviso da mescla diz quantas opções novas entraram.
+- **Consequência aceita:** duas opções criadas separadamente com o mesmo nome em navegadores diferentes têm ids diferentes e passam a aparecer as duas. Juntar por nome exigiria remapear os ids nas entradas — é o que o import de `.md` faz (DEC-022), porque lá não há id de opção; no JSON há.
+- **Lição:** id fixo de dado padrão é compartilhado entre instalações; mescla «por id» tem de descer até o nível das opções.

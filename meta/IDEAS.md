@@ -104,8 +104,12 @@ A busca da tabela hoje alcança título e metadados; conteúdo de bloco é onde 
 Com os delimitadores da DEC-008, o `.md` exportado passou a ser **parseável**: dá para reconstruir entradas, blocos e propriedades a partir dele. Hoje só o JSON reimporta. Seria a rede de segurança definitiva — o usuário poderia recuperar o acervo a partir do arquivo que ele de fato guarda e lê. Depende da F9 (frontmatter) para recuperar os metadados com fidelidade.
 
 ### 2026-07-19 — Estender o smoke conforme o risco crescer
-> **Status (2026-11-04):** em parte — o smoke cobre export e reimportação; o `history.mjs` cobre uniformizar, quadrado geral e empurrão. Seguem sem teste `calcPropertyValues`, `migrateOptionModes` e `loadDB`.
+> **Status (2026-11-06):** feita na v13.5.1 — o smoke cobre `calcPropertyValues` (as três variantes), `migrateOptionModes`, `loadDB`, `normalizeImportedDB` e `mergeImportedProperties`, e achou dois defeitos (FIX-004, FIX-005); `moveSelectedBlocks` já é exercitada pelo `history.mjs`. Ver Concluídas. Daqui em diante, teste novo entra com a mudança que o pede.
 O `tests/smoke.mjs` cobre só `entryToMD`. Candidatas naturais, por ordem de risco: `calcPropertyValues` (núcleo do modelo), `migrateOptionModes` e `loadDB` (migração de formatos antigos — quebrar ali inutiliza backups), `moveSelectedBlocks` (algoritmo com caso de borda). Todas são puras ou quase.
+
+### 2026-11-06 — Chave `base_v4` ilegível não deveria cair para a chave legada
+> **Status:** aberta — achado medido ao escrever os testes do núcleo; não corrigido (raro e pede decisão).
+Se o texto salvo em `base_v4` não for JSON válido, o `loadDB` segue para as chaves antigas (`base_notas_v3`…): se alguma existir, o app abre com o acervo **antigo**, avisa «Dados anteriores migrados ✓» e o próximo salvamento **sobrescreve** a `base_v4` ilegível — que talvez fosse recuperável à mão. Sem chave antiga, abre o banco padrão e também sobrescreve. Proposta: com `base_v4` presente e ilegível, guardar o texto cru numa chave à parte (`base_v4_ilegivel`), avisar e não migrar. É raro (o `setItem` grava inteiro), por isso fica como ideia.
 
 ### 2026-07-19 — Exportar um arquivo por entrada (`.zip`)
 > **Status (2026-11-04):** aberta — único item restante da F9.
@@ -146,6 +150,7 @@ Pergunta do autor. *Sugestão do assistente:* nesse caso, **desabilitar** a edi�
 
 ## ✅ Concluídas
 
+- **Testes do núcleo no smoke** — v13.5.1 / FIX-004, FIX-005.
 - **Lembrete de backup JSON no topo** — v13.5 / DEC-023.
 - **Prefixos de exportação `lunoda_`** — v13.4.1.
 - **Reimportar o `.md` exportado** — v13.4 / DEC-022. Fecha a F9 parte 2.

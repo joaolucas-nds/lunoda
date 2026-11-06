@@ -52,6 +52,7 @@
 - [x] `navigator.storage.persist()` — `requestPersistence()`, v12.1.
 - [x] Undo/redo no editor (Ctrl+Z / Ctrl+Y) sobre snapshots do estado — v12.2, ver DEC-010.
 - [x] Lembrete de backup JSON no topo, pelo que mudou desde o último backup — v13.5, ver DEC-023 (acrescentado depois de a fase fechar).
+- [x] Testes do núcleo (carga, migração, importação e mescla do backup) e as duas correções que eles acharam — v13.5.1, ver FIX-004 e FIX-005.
 > Fase fechada. O acervo agora está protegido contra os dois modos de perda que existiam: estouro silencioso de armazenamento e exclusão em massa sem volta.
 
 ## 🟡 F9 — Interoperabilidade do export *(partes 1 e 2 entregues — v12.3 e v13.4; resta o `.zip`)*

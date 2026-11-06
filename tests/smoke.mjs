@@ -323,6 +323,121 @@ if (!html.includes('function backupStatus(')) {
     backupStatus(new Date(agora - 9 * DIA).toISOString(), [{ createdAt: new Date(agora - DIA).toISOString() }], agora).estado === 'atrasado');
 }
 
+/* ── Núcleo: propriedades, migração, carga e importação (FIX-004, FIX-005) ── */
+// Cobre o que, se quebrar, inutiliza backups ou corrompe propriedades sem aviso.
+// As funções leem globais (db, editBlocks, localStorage, uid…): entram como parâmetros.
+{
+  const CORE = ['calcPropertyValues', 'calcPropertyValuesFor', 'calcPropertyValuesForBlocks',
+                'migrateOptionModes', 'loadDB', 'normalizeImportedDB', 'mergeImportedProperties'];
+  const coreSrc = CORE.map(n => extractFunction(html, n)).join('\n\n');
+  const J = x => JSON.stringify(x);
+  // Ambiente novo a cada chamada: localStorage falso, uid previsível, toasts anotados.
+  const core = (store = {}, dbProps = [], blocks = [], blockProps = {}) => {
+    let n = 0; const toasts = [];
+    const ls = { getItem: k => (k in store ? store[k] : null) };
+    const api = new Function('db', 'editBlocks', 'editBlockProps', 'localStorage', 'uid', 'randColor',
+      'showToast', 'STORAGE_KEY', `${coreSrc}\nreturn { ${CORE.join(', ')} };`)(
+      { properties: dbProps, entries: [] }, blocks, blockProps, ls,
+      () => 'u' + (++n), () => 'slate', t => toasts.push(t), 'base_v4');
+    api.toasts = toasts; return api;
+  };
+
+  // calcPropertyValues e variantes: união das opções dos blocos, por propriedade de db.properties
+  const props = [{ id: 'pA', options: [] }, { id: 'pB', options: [] }];
+  const blocos = [
+    { id: 'b1', blockProps: { pA: ['o2', 'o1'] } },
+    { id: 'b2', blockProps: { pA: ['o1', 'o3'], pX: ['zz'] } },
+    { id: 'b3' },
+  ];
+  const esperado = J({ pA: ['o2', 'o1', 'o3'], pB: [] });
+  const c1 = core({}, props);
+  check('nucleo: calcPropertyValuesForBlocks = uniao sem repetir, na ordem; propriedade sem opcao = []',
+    J(c1.calcPropertyValuesForBlocks(blocos)) === esperado, J(c1.calcPropertyValuesForBlocks(blocos)));
+  check('nucleo: propriedade fora de db.properties e ignorada; bloco sem blockProps nao quebra',
+    !('pX' in c1.calcPropertyValuesForBlocks(blocos)));
+  check('nucleo: calcPropertyValuesFor da o mesmo que ForBlocks',
+    J(c1.calcPropertyValuesFor({ blocks: blocos })) === esperado);
+  check('nucleo: calcPropertyValuesFor de entrada sem blocos = tudo vazio',
+    J(c1.calcPropertyValuesFor({})) === J({ pA: [], pB: [] }));
+  const ebp = Object.fromEntries(blocos.map(b => [b.id, b.blockProps || {}]));
+  check('nucleo: calcPropertyValues (editor) da o mesmo que ForBlocks',
+    J(core({}, props, blocos, ebp).calcPropertyValues()) === esperado);
+
+  // migrateOptionModes (v10 -> v11): so o modo 'all' vira adicao automatica
+  const m = core().migrateOptionModes;
+  check('nucleo: migrateOptionModes sem dado = {}', J(m(undefined)) === '{}' && J(m(null)) === '{}');
+  check('nucleo: migrateOptionModes leva so o modo all, na ordem; propriedade sem all fica de fora',
+    J(m({ pA: { o1: 'all', o2: 'one', o3: 'all' }, pB: { o4: 'one' } })) === J({ pA: ['o1', 'o3'] }),
+    J(m({ pA: { o1: 'all', o2: 'one', o3: 'all' }, pB: { o4: 'one' } })));
+
+  // loadDB: o que o app le ao abrir
+  const vazio = core().loadDB();
+  check('nucleo: loadDB sem nada salvo = propriedades padrao e nenhuma entrada',
+    J(vazio.properties.map(p => p.id)) === J(['p-tags', 'p-ia']) && vazio.entries.length === 0);
+  const atual = { properties: [{ id: 'pA', name: 'A', options: ['texto', { id: 'oK', name: 'K', colorId: 'red' }] }],
+    entries: [{ id: 'e1', title: 'T', extra: 42, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-02T00:00:00Z',
+      propertyOptionModes: { pA: { oK: 'all' } },
+      blocks: [{ id: 'b1', content: 'c', inheritProps: { pA: ['oK'] } }] }] };
+  const legado = { categories: [{ id: 'c1', name: 'Cat' }], entries: [{ id: 'old', title: 'velho' }] };
+  const c2 = core({ base_v4: J(atual), base_notas_v3: J(legado) });
+  const l1 = c2.loadDB();
+  check('nucleo: loadDB le a chave base_v4 antes das legadas', l1.entries[0].id === 'e1' && l1.entries.length === 1);
+  check('nucleo: loadDB converte opcao em texto para {id, name, colorId}',
+    J(l1.properties[0].options[0]) === J({ id: 'u1', name: 'texto', colorId: 'slate' }), J(l1.properties[0].options[0]));
+  const b1 = l1.entries[0].blocks[0];
+  check('nucleo: loadDB migra inheritProps -> blockProps e completa o bloco (versao 1, subtitulo vazio)',
+    J(b1) === J({ id: 'b1', subtitle: '', version: 1, content: 'c', blockProps: { pA: ['oK'] } }), J(b1));
+  check('nucleo: loadDB migra propertyOptionModes -> propertyAutoFlags',
+    J(l1.entries[0].propertyAutoFlags) === J({ pA: ['oK'] }));
+  check('nucleo: loadDB preserva datas e campos que nao conhece',
+    l1.entries[0].createdAt === '2026-01-01T00:00:00Z' && l1.entries[0].updatedAt === '2026-01-02T00:00:00Z'
+    && l1.entries[0].extra === 42);
+  check('nucleo: loadDB nao mostra o aviso de migracao ao ler a chave atual', !c2.toasts.some(t => t));
+  const sem = core({ base_v4: J({ properties: [], entries: [{ id: 'a' }, { id: 'b', blocks: [] }] }) }).loadDB();
+  check('nucleo: loadDB nunca deixa entrada com 0 blocos (sem blocos e lista vazia) (FIX-004)',
+    sem.entries.every(e => e.blocks.length === 1 && e.blocks[0].content === '' && J(e.blocks[0].blockProps) === '{}'),
+    J(sem.entries.map(e => e.blocks)));
+  const c3 = core({ base_notas_v3: J({ ...legado, entries: [{ id: 'old', title: 'velho' }, { id: 'old2', blocks: [] }] }) });
+  const l3 = c3.loadDB();
+  check('nucleo: loadDB legado (v3) vira properties, avisa a migracao e nao deixa 0 blocos',
+    J(l3.properties.map(p => p.name)) === J(['Cat']) && !('categories' in l3)
+    && l3.entries.every(e => e.blocks.length === 1) && c3.toasts.includes('Dados anteriores migrados ✓'),
+    J(l3.entries.map(e => e.blocks.length)));
+
+  // normalizeImportedDB: o caminho de restaurar um backup JSON
+  const nz = core().normalizeImportedDB;
+  const copia = () => JSON.parse(readFileSync(join(HERE, 'fixtures', 'sample-db.json'), 'utf8'));
+  check('nucleo: backup do formato atual volta identico ao importar', J(nz(copia())) === J(copia()));
+  check('nucleo: importar duas vezes = importar uma (idempotente)', J(nz(nz(copia()))) === J(nz(copia())));
+  let msg = '';
+  try { nz({ properties: [] }); } catch (err) { msg = err.message; }
+  check('nucleo: arquivo sem lista de entradas = Formato invalido', msg === 'Formato inválido', msg);
+  const imp = core().normalizeImportedDB({ entries: [
+    { title: 'sem id', content: 'antigo' }, { id: 'v', blocks: [] },
+    { id: 'w', propertyOptionModes: { pA: { o1: 'all' } }, blocks: [{ id: 'bw', inheritProps: { pA: ['o1'] } }] }] });
+  check('nucleo: importar entrada sem id ganha id; sem blocos usa o content antigo como bloco (FIX-004)',
+    imp.entries[0].id === 'u1' && imp.entries[0].blocks.length === 1 && imp.entries[0].blocks[0].content === 'antigo',
+    J(imp.entries[0]));
+  check('nucleo: importar entrada com lista de blocos vazia ganha um bloco vazio (FIX-004)',
+    imp.entries[1].blocks.length === 1 && imp.entries[1].blocks[0].content === '', J(imp.entries[1].blocks));
+  check('nucleo: importar migra inheritProps e propertyOptionModes',
+    J(imp.entries[2].blocks[0].blockProps) === J({ pA: ['o1'] }) && J(imp.entries[2].propertyAutoFlags) === J({ pA: ['o1'] }));
+
+  // mergeImportedProperties: mesclar um backup de outro navegador (FIX-005)
+  const mg = core().mergeImportedProperties;
+  const destino = [{ id: 'p-tags', name: 'Tags', options: [{ id: 'o1', name: 'Ideia', colorId: 'yellow' }] }];
+  const chegando = [
+    { id: 'p-tags', name: 'Outro nome', options: [{ id: 'o1', name: 'Mudou', colorId: 'red' }, { id: 'oN', name: 'Trabalho', colorId: 'blue' }] },
+    { id: 'pNova', name: 'Nova', options: [{ id: 'oZ', name: 'Z', colorId: 'slate' }] }];
+  const nAdd = mg(destino, chegando);
+  check('nucleo: mesclar traz a opcao que falta numa propriedade que ja existe (FIX-005)',
+    nAdd === 1 && J(destino[0].options.map(o => o.id)) === J(['o1', 'oN']), J(destino[0].options));
+  check('nucleo: mesclar nao muda nome nem cor do que ja existe',
+    destino[0].name === 'Tags' && destino[0].options[0].name === 'Ideia' && destino[0].options[0].colorId === 'yellow');
+  check('nucleo: mesclar traz a propriedade nova inteira', destino.length === 2 && destino[1].id === 'pNova');
+  check('nucleo: mesclar o mesmo backup de novo nao acrescenta nada', mg(destino, chegando) === 0 && destino.length === 2);
+}
+
 /* ── Relatório ──────────────────────────────────────────────── */
 
 console.log('\nLunoda — smoke test (entryToMD)\n');

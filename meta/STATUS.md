@@ -8,7 +8,7 @@
 
 ## Versão Atual
 
-**Lunoda v13.5** — 2026-11-04 — lembrete de backup JSON no topo. Arquivo canônico `index.html`. Testes: `smoke` 54/54 e `history` 52/52 (rodada da wo0008).
+**Lunoda v13.5.1** — 2026-11-06 — testes do núcleo + duas correções da importação (FIX-004, FIX-005). Arquivo canônico `index.html`. Testes: `smoke` 80/80 e `history` 52/52 (rodada da wo0009).
 
 ## ✅ Funcionando
 
@@ -31,11 +31,12 @@
 - Empurrão de versão: número ocupado no mesmo subtítulo renumera os vizinhos; −/+ troca; coberto pelo undo (v13.3).
 - Importar `.md` exportado pelo app: prévia, só mescla, pular ou copiar o que já existe; recusa exports pré-v12.1 (v13.4).
 - Lembrete de backup JSON no topo: em dia / há N dias / amarelo quando nunca ou atrasado; um clique baixa o backup (v13.5).
+- Importar backup JSON: entrada sem blocos ganha um bloco vazio; mesclar traz as opções novas de propriedades existentes (v13.5.1).
 - Verificação automática: `node tests/smoke.mjs` e `node tests/history.mjs`.
 
 ## 🔧 Em Progresso
 
-- **v13.5 aplicada pela wo0008 (`a718916`); falta a conferência no navegador** — roteiro na conversa de 2026-11-04. v13.0 a v13.4.1 já conferidas pelo autor.
+- **v13.5.1 aplicada pela wo0009; falta a conferência no navegador** — roteiro na conversa de 2026-11-06. v13.0 a v13.5 já conferidas pelo autor.
 
 ## ❌ Quebrado / Com Problema
 
@@ -48,10 +49,10 @@
 - [ ] **Conferir o frontmatter no Obsidian** (nunca testado em navegador) — exportar UMA entrada pelo botão MD do editor, jogar num vault e ver as propriedades como campos; depois desmarcar o checkbox no modal e confirmar que volta ao Markdown simples.
 - [ ] **Conferir o undo/redo no navegador** — excluir blocos em massa e `Ctrl+Z`; `Ctrl+Z` dentro de campo de texto desfaz a digitação, não a estrutura; botões esmaecidos sem histórico; abrir outra entrada zera o histórico.
 - [ ] **Prints para o README** — cabeçalho do editor com Desfazer/Refazer; modal de exportação com o checkbox de frontmatter; propriedades renderizadas no Obsidian.
-- [ ] **Conferir a v13.5 no navegador** (roteiro na conversa de 2026-11-04).
+- [ ] **Conferir a v13.5.1 no navegador** (roteiro na conversa de 2026-11-06).
 
 ## 💬 Última conversa
 
-**2026-11-04** — v13.2 e v13.3 conferidas pelo autor. Entregue a F6 (empurrão de versão, DEC-021) como v13.3 (`e40b37a`). Análise da F9 parte 2 medida e decidida (opção B, DEC-022); entregue como **v13.4** pela wo0006 (`8274e0c`); faxina (prefixos `lunoda_`, README, ROADMAP, IDEAS) como **v13.4.1** pela wo0007 (`d779c80`). F5 adiada pelo autor. Histórico da véspera (migração para o KCM v1.133.0, v13.0–v13.2) no log de 2026-11-03. v13.4 e v13.4.1 conferidas pelo autor; Instruções coladas no painel; entregue o **lembrete de backup JSON** (DEC-023) como **v13.5** pela wo0008 (`a718916`).
+**2026-11-06** — v13.5 conferida pelo autor. Frente escolhida: testes do núcleo. Entregues 26 asserções no smoke e duas correções que elas acharam (FIX-004: entrada sem blocos; FIX-005: mescla perdia opções), como **v13.5.1** pela wo0009. Achado registrado sem corrigir: `base_v4` ilegível cai para a chave legada (IDEAS).
 
-**Próximo passo óbvio:** conferir a v13.5 no navegador; depois escolher a próxima frente (F9 `.zip`, F10 busca no conteúdo, ou testes de `calcPropertyValues`/`migrateOptionModes`/`loadDB`).
+**Próximo passo óbvio:** conferir a v13.5.1 no navegador; depois a próxima frente — C (busca no conteúdo dos blocos, com análise curta) com B (atalhos de teclado) junto.
