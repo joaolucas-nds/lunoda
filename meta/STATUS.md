@@ -36,7 +36,7 @@
 
 ## 🔧 Em Progresso
 
-- **v13.5.1 aplicada pela wo0009; falta a conferência no navegador** — roteiro na conversa de 2026-11-06. v13.0 a v13.5 já conferidas pelo autor.
+- **v13.5.1 aplicada pela wo0009 (`a51ac58`); falta a conferência no navegador** — roteiro na conversa de 2026-11-06. v13.0 a v13.5 já conferidas pelo autor.
 
 ## ❌ Quebrado / Com Problema
 
