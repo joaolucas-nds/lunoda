@@ -52,6 +52,10 @@ Poder expandir o painel da direita para a esquerda, ou abri-lo completo: o espa�
 Algumas coisas não estão nítidas; usar mais UX/UI. Medido pelo assistente: contraste do texto secundário de 1,7:1 (mínimo recomendado 4,5:1) e 22 textos em 9–10px.
 > Fonte: conversa de 2026-11-03. **Status:** primeira passada na v13.2 (DEC-018) — ver Concluídas. Novas observações de nitidez entram aqui.
 
+### 2026-11 — Arrastar o JSON para a tela para importar
+Poder arrastar o arquivo (por exemplo o `.json`) para a janela em vez de passar pelo botão Importar.
+> Fonte: conversa de 2026-11-06. **Status:** implementada na v13.6 (DEC-024) — vale para `.json` e `.md` — ver Concluídas.
+
 ---
 
 ## 🤖 Ideias Ativas — Assistente
@@ -94,9 +98,11 @@ Os dados vivem só no `localStorage` de um navegador: limpar o navegador apaga t
 Não há como desfazer uma exclusão de bloco ou uma ação em massa (a v12 trouxe excluir/mover/transferir em lote — o estrago possível cresceu). Uma pilha de snapshots do estado do editor (o `getEditorSnapshot()` já existe) com Ctrl+Z/Ctrl+Y cobriria o caso. Prioridade sobe junto com o poder das ações em massa.
 
 ### 2026-07-19 — Busca full-text dentro do conteúdo dos blocos
+> **Status (2026-11-06):** implementada na v13.6 (DEC-024). A medição mostrou que a busca já alcançava o conteúdo; a v13.6 tirou o acento, mostra o trecho e leva o termo ao editor — ver Concluídas.
 A busca da tabela hoje alcança título e metadados; conteúdo de bloco é onde está o volume real de texto. Uma busca que varra `content` e mostre o trecho com destaque tornaria o acervo navegável. Combina com o filtro interno de blocos já existente.
 
 ### 2026-07-19 — Atalhos de teclado
+> **Status (2026-11-06):** implementada na v13.6 (DEC-024), com `/`, `N`, `?`, `Alt+↓/↑`, `Alt+Enter`; `Ctrl+N` (morto) saiu e o `P` deixou de capturar o `Ctrl+P` — ver Concluídas.
 `Ctrl+S` já salva. Faltam: novo bloco, próximo/anterior bloco, foco na busca, fechar editor. Barato e melhora muito o uso diário.
 
 ### 2026-07-19 — Reimportar `.md` (não só JSON)
@@ -110,6 +116,10 @@ O `tests/smoke.mjs` cobre só `entryToMD`. Candidatas naturais, por ordem de ris
 ### 2026-11-06 — Chave `base_v4` ilegível não deveria cair para a chave legada
 > **Status:** aberta — achado medido ao escrever os testes do núcleo; não corrigido (raro e pede decisão).
 Se o texto salvo em `base_v4` não for JSON válido, o `loadDB` segue para as chaves antigas (`base_notas_v3`…): se alguma existir, o app abre com o acervo **antigo**, avisa «Dados anteriores migrados ✓» e o próximo salvamento **sobrescreve** a `base_v4` ilegível — que talvez fosse recuperável à mão. Sem chave antiga, abre o banco padrão e também sobrescreve. Proposta: com `base_v4` presente e ilegível, guardar o texto cru numa chave à parte (`base_v4_ilegivel`), avisar e não migrar. É raro (o `setItem` grava inteiro), por isso fica como ideia.
+
+### 2026-11-06 — Tabela com centenas de entradas redesenha tudo a cada tecla
+> **Status:** aberta — medido ao fazer a busca da v13.6; não pesa no acervo real.
+`renderTable` refaz o `innerHTML` de todas as linhas a cada mudança: medido no Chromium, ~170–200 ms com 775 entradas (o teto do `localStorage`), **sem** busca. Se o acervo chegar a centenas de entradas, digitar na busca vai arrastar. Caminhos, do barato ao caro: espera curta entre teclas (debounce); desenhar só as primeiras ~200 linhas com «mostrar mais»; virtualizar a lista. Gatilho: o próprio autor sentir a busca lenta.
 
 ### 2026-07-19 — Exportar um arquivo por entrada (`.zip`)
 > **Status (2026-11-04):** aberta — único item restante da F9.
@@ -150,6 +160,9 @@ Pergunta do autor. *Sugestão do assistente:* nesse caso, **desabilitar** a edi�
 
 ## ✅ Concluídas
 
+- **Busca sem acento, com trecho e levando o termo ao editor** — v13.6 / DEC-024.
+- **Atalhos de teclado** (`/`, `N`, `?`, `Alt+↓/↑`, `Alt+Enter`) — v13.6 / DEC-024.
+- **Arrastar `.json`/`.md` para importar** — v13.6 / DEC-024.
 - **Testes do núcleo no smoke** — v13.5.1 / FIX-004, FIX-005.
 - **Lembrete de backup JSON no topo** — v13.5 / DEC-023.
 - **Prefixos de exportação `lunoda_`** — v13.4.1.

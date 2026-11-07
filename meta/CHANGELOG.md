@@ -23,6 +23,24 @@
 
 > Nada aqui altera o `index.html` — são mudanças de documentação e processo.
 
+## [13.6.0] — 2026-11-06
+
+### Adicionado
+- **Busca sem acento e por palavras** (DEC-024): `funcao modelo` acha «Modelo … função», em qualquer ordem e em qualquer campo. Na tabela, o título destaca as palavras e, quando um bloco casa, aparece o **trecho** destacado e «em N blocos».
+- **Abrir pela busca leva o termo**: o filtro de blocos já vem com ele e mostra só os blocos que casam.
+- **Atalhos**: `/` busca · `Esc` na busca limpa · `N` nova entrada · `?` lista de atalhos · `Alt+↓/↑` bloco vizinho · `Alt+Enter` novo bloco. Botão `?` no topo.
+- **Arrastar um `.json` ou `.md` para a janela** importa, pelo mesmo caminho do botão Importar.
+- `tests/smoke.mjs` cobre a busca (21 asserções novas, 101 no total).
+
+### Modificado
+- O filtro de blocos procura no subtítulo **e** no conteúdo, sem acento (campo «Texto»).
+- Adicionar um bloco com o filtro ativo limpa o filtro, para o bloco novo não nascer escondido.
+
+### Corrigido
+- `Ctrl+N` nunca funcionava (é reservado pelo navegador): nova entrada agora é `N`.
+- `P` capturava o `Ctrl+P` e impedia imprimir.
+- Soltar um arquivo na janela fazia o navegador trocar o app pelo arquivo.
+
 ## [13.5.1] — 2026-11-06
 
 ### Corrigido

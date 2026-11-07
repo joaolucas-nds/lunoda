@@ -63,10 +63,12 @@
 - [x] **Reimportar `.md`** — v13.4 (DEC-022): leitor pelos marcadores, linha `DADOS`, prévia, só mesclar.
 > Cumpre o objetivo fundador do projeto ("exportar bem identificado") num nível que hoje só existe para olho humano. A delimitação do conteúdo (v12.1) era o pré-requisito estrutural.
 
-## 🔵 F10 — Navegação em acervo grande *(futuro)*
+## 🟢 F10 — Navegação em acervo grande *(concluída — v13.6)*
 **Objetivo:** manter a ferramenta usável quando houver centenas de entradas.
-- [ ] Busca full-text no conteúdo dos blocos, com destaque do trecho.
-- [ ] Atalhos de teclado (novo bloco, navegar entre blocos, foco na busca, fechar editor).
+- [x] Busca no conteúdo dos blocos com destaque do trecho — v13.6, ver DEC-024. (A busca já alcançava o conteúdo; a v13.6 tirou o acento, separou as palavras, mostra o trecho e leva o termo ao filtro de blocos.)
+- [x] Atalhos de teclado (`/`, `N`, `?`, `Alt+↓/↑`, `Alt+Enter`; `Esc` já fechava) — v13.6, ver DEC-024.
+- [x] Arrastar `.json`/`.md` para a janela para importar — v13.6 (ideia do autor, acrescentada à fase).
+> Fica em aberto, como ideia: a tabela redesenha todas as linhas a cada tecla (~200 ms com 775 entradas) — ver IDEAS.
 
 ## 🔵 F11 — Migração para IndexedDB *(futuro, condicionada)*
 **Objetivo:** remover o teto de ~5 MB do `localStorage`.

@@ -438,6 +438,59 @@ if (!html.includes('function backupStatus(')) {
   check('nucleo: mesclar o mesmo backup de novo nao acrescenta nada', mg(destino, chegando) === 0 && destino.length === 2);
 }
 
+/* ── Busca sem acento, por palavras, e trecho destacado (DEC-024) ── */
+{
+  const BUSCA = ['esc', 'foldText', 'searchTokens', 'foldOf', 'blockFold', 'entryMatches', 'blockMatches',
+                 'searchSnippet', 'searchHit', 'siblingBlockIndex'];
+  // foldMemo é uma constante do script (não função): declarada aqui para as funções extraídas
+  const b = new Function(`const foldMemo = new WeakMap();\n${BUSCA.map(n => extractFunction(html, n)).join('\n\n')}\nreturn { ${BUSCA.join(', ')} };`)();
+  const T = b.searchTokens, J = x => JSON.stringify(x);
+
+  check('busca: foldText tira acento e maiuscula', b.foldText('Ação ÉÇ Über') === 'acao ec uber', b.foldText('Ação ÉÇ Über'));
+  check('busca: palavras separadas por qualquer espaco; vazio = nenhuma',
+    J(T('  Função\tModelo  ')) === J(['funcao', 'modelo']) && J(T('   ')) === '[]');
+  const ent = { title: 'Modelo novo', description: '', blocks: [{ subtitle: 'Claude', content: 'uma função útil' }, { content: 'outra coisa' }] };
+  check('busca: sem acento acha texto com acento (e vice-versa)',
+    b.entryMatches(ent, T('funcao')) && b.entryMatches({ title: 'funcao' }, T('função')));
+  check('busca: todas as palavras, em qualquer ordem e em qualquer campo', b.entryMatches(ent, T('util MODELO claude')));
+  check('busca: falta uma palavra = nao casa', !b.entryMatches(ent, T('funcao gemini')));
+  check('busca: sem palavras casa tudo', b.entryMatches({}, []) && b.blockMatches({}, []));
+  const blk = { subtitle: '', content: 'antes' };
+  const antes = b.blockMatches(blk, T('antes'));
+  blk.content = 'depois';
+  check('busca: a memoria do texto dobrado acompanha a edicao do bloco (nunca fica velha)',
+    antes && b.blockMatches(blk, T('depois')) && !b.blockMatches(blk, T('antes')));
+  check('busca: bloco casa so com as palavras NELE (subtitulo ou conteudo)',
+    b.blockMatches(ent.blocks[0], T('claude funcao')) && !b.blockMatches(ent.blocks[1], T('funcao')));
+
+  const s1 = b.searchSnippet('Uma função útil e outra Função', T('funcao'));
+  check('trecho: destaca todas as ocorrencias, com o acento original', s1 === 'Uma <mark>função</mark> útil e outra <mark>Função</mark>', s1);
+  const s2 = b.searchSnippet('<script>alert(1)</script> função', T('funcao'));
+  check('trecho: escapa o HTML do conteudo', !s2.includes('<script') && s2.includes('&lt;script&gt;') && s2.includes('<mark>função</mark>'), s2);
+  const longo = 'x'.repeat(200) + ' alvo ' + 'y'.repeat(200);
+  const s3 = b.searchSnippet(longo, T('alvo'), 10);
+  check('trecho: recorta em volta, com reticencias dos dois lados',
+    s3.startsWith('…') && s3.endsWith('…') && s3.includes('<mark>alvo</mark>') && s3.length < 60, s3);
+  check('trecho: raio infinito devolve o texto inteiro (titulo destacado)',
+    b.searchSnippet('Função no título', T('funcao titulo'), Infinity) === '<mark>Função</mark> no <mark>título</mark>');
+  check('trecho: sem ocorrencia = vazio', b.searchSnippet('nada aqui', T('zzz')) === '' && b.searchSnippet('', T('a')) === '');
+  check('trecho: acento decomposto fica dentro da marca', b.searchSnippet('cafe\u0301 bom', T('cafe')) === '<mark>cafe\u0301</mark> bom');
+  check('trecho: quebras de linha viram espaco', b.searchSnippet('linha1\n\nlinha\tdois', T('dois')) === 'linha1 linha <mark>dois</mark>');
+  check('trecho: palavras sobrepostas viram uma marca so', b.searchSnippet('funcionalidade', T('func funcional')) === '<mark>funcional</mark>idade');
+
+  const h = b.searchHit({ blocks: [{ subtitle: 'Claude', content: 'a função' }, { content: 'outra função' }, { content: 'nada' }] }, T('funcao'));
+  check('trecho da entrada: conta os blocos e recorta o primeiro (com subtitulo)',
+    h && h.count === 2 && h.html === 'Claude: a <mark>função</mark>', J(h));
+  check('trecho da entrada: casou so pelo titulo = sem trecho', b.searchHit({ title: 'função', blocks: [{ content: 'x' }] }, T('funcao')) === null);
+  check('trecho da entrada: palavras espalhadas em blocos diferentes = sem trecho',
+    b.searchHit({ blocks: [{ content: 'funcao' }, { content: 'modelo' }] }, T('funcao modelo')) === null);
+
+  const si = b.siblingBlockIndex;
+  check('Alt+setas: fora de bloco vai ao primeiro (desce) ou ao ultimo (sobe)', si(-1, 1, 3) === 0 && si(-1, -1, 3) === 2);
+  check('Alt+setas: anda um; nas pontas e sem blocos fica onde esta',
+    si(1, 1, 3) === 2 && si(1, -1, 3) === 0 && si(2, 1, 3) === -1 && si(0, -1, 3) === -1 && si(-1, 1, 0) === -1);
+}
+
 /* ── Relatório ──────────────────────────────────────────────── */
 
 console.log('\nLunoda — smoke test (entryToMD)\n');

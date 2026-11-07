@@ -8,7 +8,7 @@
 
 ## Versão Atual
 
-**Lunoda v13.5.1** — 2026-11-06 — testes do núcleo + duas correções da importação (FIX-004, FIX-005). Arquivo canônico `index.html`. Testes: `smoke` 80/80 e `history` 52/52 (rodada da wo0009).
+**Lunoda v13.6** — 2026-11-06 — busca sem acento com trecho, atalhos de teclado e arrastar para importar (DEC-024). Arquivo canônico `index.html`. Testes: `smoke` 101/101 e `history` 52/52 (rodada da wo0010).
 
 ## ✅ Funcionando
 
@@ -18,7 +18,7 @@
 - Chip `●auto` clicável dentro do bloco (remove do bloco + desliga flag na entrada).
 - Seleção interna de blocos + barra de ações (Subir/Descer em grupo, Duplicar, Excluir, Mover para, Copiar para).
 - Duplicar bloco individual; transferência/cópia de blocos para entrada existente ou nova (4 modos).
-- Filtro interno de blocos (subtítulo, versão, propriedade+opções) com modo E/OU.
+- Filtro interno de blocos (texto no subtítulo e no conteúdo, versão, propriedade+opções) com modo E/OU.
 - Filtros da tabela: texto, data (Criado/Alterado, De/Até) e propriedade — independentes.
 - Exportação JSON / Markdown (conteúdo delimitado, v12.1; frontmatter YAML opcional, v12.3) / HTML-PDF; importação com migração de formatos antigos.
 - Rede de segurança: tratamento de cota no `saveDB`, `persist()`, aviso aos 80% (v12.1); undo/redo estrutural (v12.2).
@@ -32,11 +32,14 @@
 - Importar `.md` exportado pelo app: prévia, só mescla, pular ou copiar o que já existe; recusa exports pré-v12.1 (v13.4).
 - Lembrete de backup JSON no topo: em dia / há N dias / amarelo quando nunca ou atrasado; um clique baixa o backup (v13.5).
 - Importar backup JSON: entrada sem blocos ganha um bloco vazio; mesclar traz as opções novas de propriedades existentes (v13.5.1).
+- Busca sem acento e por palavras, com trecho destacado; abrir pela busca leva o termo ao filtro de blocos (v13.6).
+- Atalhos `/` `N` `P` `?` fora de campo; `Alt+↓/↑` e `Alt+Enter` no editor; lista no botão `?` (v13.6).
+- Arrastar `.json`/`.md` para a janela importa (v13.6).
 - Verificação automática: `node tests/smoke.mjs` e `node tests/history.mjs`.
 
 ## 🔧 Em Progresso
 
-- **v13.5.1 aplicada pela wo0009 (`a51ac58`); falta a conferência no navegador** — roteiro na conversa de 2026-11-06. v13.0 a v13.5 já conferidas pelo autor.
+- **v13.6 aplicada pela wo0010; falta a conferência no navegador** — roteiro na conversa de 2026-11-06. v13.0 a v13.5.1 já conferidas pelo autor.
 
 ## ❌ Quebrado / Com Problema
 
@@ -49,10 +52,10 @@
 - [ ] **Conferir o frontmatter no Obsidian** (nunca testado em navegador) — exportar UMA entrada pelo botão MD do editor, jogar num vault e ver as propriedades como campos; depois desmarcar o checkbox no modal e confirmar que volta ao Markdown simples.
 - [ ] **Conferir o undo/redo no navegador** — excluir blocos em massa e `Ctrl+Z`; `Ctrl+Z` dentro de campo de texto desfaz a digitação, não a estrutura; botões esmaecidos sem histórico; abrir outra entrada zera o histórico.
 - [ ] **Prints para o README** — cabeçalho do editor com Desfazer/Refazer; modal de exportação com o checkbox de frontmatter; propriedades renderizadas no Obsidian.
-- [ ] **Conferir a v13.5.1 no navegador** (roteiro na conversa de 2026-11-06).
+- [ ] **Conferir a v13.6 no navegador** (roteiro na conversa de 2026-11-06) — em especial `Alt+↓/↑` e `Alt+Enter` no Chrome do Windows, que o Chromium do container não reproduz.
 
 ## 💬 Última conversa
 
-**2026-11-06** — v13.5 conferida pelo autor. Frente escolhida: testes do núcleo. Entregues 26 asserções no smoke e duas correções que elas acharam (FIX-004: entrada sem blocos; FIX-005: mescla perdia opções), como **v13.5.1** pela wo0009. Achado registrado sem corrigir: `base_v4` ilegível cai para a chave legada (IDEAS).
+**2026-11-06** — v13.5 conferida pelo autor. Frente escolhida: testes do núcleo. Entregues 26 asserções no smoke e duas correções que elas acharam (FIX-004: entrada sem blocos; FIX-005: mescla perdia opções), como **v13.5.1** pela wo0009. Achado registrado sem corrigir: `base_v4` ilegível cai para a chave legada (IDEAS). Depois: v13.5.1 conferida; análise da F10 medida (a busca já alcançava o conteúdo; `Ctrl+N` morto; `P` capturando `Ctrl+P`) e decidida com o autor (1a, 2a, 3a, 4a); entregue como **v13.6** pela wo0010 (DEC-024).
 
-**Próximo passo óbvio:** conferir a v13.5.1 no navegador; depois a próxima frente — C (busca no conteúdo dos blocos, com análise curta) com B (atalhos de teclado) junto.
+**Próximo passo óbvio:** conferir a v13.6 no navegador; depois escolher a próxima frente (F9 `.zip`, a ideia da `base_v4` ilegível, ou as pendências do autor no backlog).

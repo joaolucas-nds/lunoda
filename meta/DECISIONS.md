@@ -506,3 +506,30 @@ O risco principal do projeto fica visível o tempo todo, sem interromper. O limi
 - **Solução:** propriedade nova entra inteira; propriedade que já existe recebe só as opções que faltam, por id. Nome e cor do que já existe não mudam. O aviso da mescla diz quantas opções novas entraram.
 - **Consequência aceita:** duas opções criadas separadamente com o mesmo nome em navegadores diferentes têm ids diferentes e passam a aparecer as duas. Juntar por nome exigiria remapear os ids nas entradas — é o que o import de `.md` faz (DEC-022), porque lá não há id de opção; no JSON há.
 - **Lição:** id fixo de dado padrão é compartilhado entre instalações; mescla «por id» tem de descer até o nível das opções.
+
+---
+
+## DEC-024 — Busca sem acento com trecho e continuidade até o bloco; atalhos sem conflito; arrastar para importar (F10)
+**Data:** 2026-11-06 · **Status:** aceita · origem: `meta/analises/261106-ANALISE-busca-atalhos-arrastar.md` (pontos 1a, 2a, 3a, 4a)
+
+### Contexto
+A busca da tabela já procurava no conteúdo dos blocos, mas `funcao` não achava «função», não dizia onde casou e o termo se perdia ao abrir a entrada; o filtro interno procurava só no subtítulo. Dos atalhos, `Ctrl+N` nunca chegava à página (reservado pelo navegador desde o Chrome 4) e o `P` capturava o `Ctrl+P`. Soltar um arquivo na janela fazia o navegador abrir o arquivo no lugar do app.
+
+### Decisão
+- **Busca:** acento e maiúscula não contam (`foldText`: NFD sem marcas combinantes); cada palavra precisa aparecer, em qualquer ordem, em qualquer campo da entrada (`entryMatches`). Na tabela, o título mostra as palavras destacadas e, quando um bloco casa sozinho, uma linha com o **trecho** destacado e «em N blocos» (`searchHit`/`searchSnippet`, HTML escapado antes do `<mark>`).
+- **Continuidade:** abrir uma entrada pela tabela com a busca ativa já abre o filtro de blocos com o termo (`carrySearchIntoEditor`) — só se algum bloco casar. O filtro de texto passa a se chamar **«Texto»** e procura no subtítulo **e** no conteúdo, sem acento. Dentro da caixa, o `Ctrl+F` do navegador acha a palavra (não há destaque dentro do `textarea`).
+- **Bloco novo com filtro ativo limpa o filtro** e avisa — senão o bloco vazio nascia escondido (já acontecia pelo botão; com o filtro herdado da busca, ficaria comum).
+- **Atalhos:** tecla solta só fora de campo de texto e sem janela aberta — `/` busca, `N` nova entrada (no lugar do `Ctrl+N`), `P` barra lateral (agora sem modificador), `?` lista de atalhos; `Esc` na busca limpa. No editor, inclusive digitando: `Alt+↓/↑` bloco vizinho visível, `Alt+Enter` novo bloco. Nunca `Ctrl+Alt` (AltGr no ABNT2) nem combinação reservada do navegador. Lista em `#shortcutsModal`, aberta pelo `?` ou pelo botão `?` no topo; `title` dos botões cita o atalho.
+- **Arrastar:** arquivo (só `Files`) solto em qualquer lugar da janela segue o mesmo caminho do botão Importar (`importFile`); `.json`/`.md` só, um por vez; o `drop` de arquivo é sempre cancelado.
+- **Desempenho:** o texto dobrado fica numa memória por objeto (`foldMemo`) que **confere a fonte a cada uso** — nunca fica velha, nada a invalidar. Medido no teto (775 entradas, 4,8 MB, Chromium): a busca soma até ~80 ms ao redesenho da tabela, que já custa ~170–200 ms com 775 linhas sem busca nenhuma (custo anterior, não mudado).
+
+### Alternativas consideradas
+- Mostrar todos os blocos e só marcar os que casam (1b) — a marca se perde na rolagem; o filtro tem o Limpar a um clique.
+- Campo «Conteúdo» separado no filtro (2b) — dois campos para o mesmo gesto; o campo único é superconjunto do antigo.
+- `Alt+N` para nova entrada (3b) — funciona, mas o `N` solto segue o padrão do `P`.
+- Destaque dentro do `textarea` (camada espelhada) — frágil e o `Ctrl+F` do navegador já faz.
+- Cache invalidado por evento — estado espalhado por todos os mutadores; a memória que confere a fonte resolve sem isso.
+- Espera entre teclas (debounce) — desnecessária no acervo real; o custo de base da tabela é anterior a esta versão (ver IDEAS).
+
+### Consequências
+Achar um trecho deixa de depender de lembrar a grafia exata, e o caminho busca → entrada → bloco não perde o termo. O filtro interno passa a mostrar também blocos que *citam* o texto digitado. `Ctrl+N` deixa de constar do código; quem usava (não funcionava) usa `N`. O `drop` cancelado protege a edição não salva.
