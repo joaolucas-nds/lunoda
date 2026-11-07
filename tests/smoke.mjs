@@ -440,8 +440,8 @@ if (!html.includes('function backupStatus(')) {
 
 /* ── Busca sem acento, por palavras, e trecho destacado (DEC-024) ── */
 {
-  const BUSCA = ['esc', 'foldText', 'searchTokens', 'foldOf', 'blockFold', 'entryMatches', 'blockMatches',
-                 'searchSnippet', 'searchHit', 'siblingBlockIndex'];
+  const BUSCA = ['esc', 'foldText', 'searchTokens', 'isWordChar', 'isWordStart', 'findWord', 'wordLen',
+                 'foldOf', 'blockFold', 'entryMatches', 'blockMatches', 'searchSnippet', 'searchHit', 'siblingBlockIndex'];
   // foldMemo é uma constante do script (não função): declarada aqui para as funções extraídas
   const b = new Function(`const foldMemo = new WeakMap();\n${BUSCA.map(n => extractFunction(html, n)).join('\n\n')}\nreturn { ${BUSCA.join(', ')} };`)();
   const T = b.searchTokens, J = x => JSON.stringify(x);
@@ -477,6 +477,37 @@ if (!html.includes('function backupStatus(')) {
   check('trecho: acento decomposto fica dentro da marca', b.searchSnippet('cafe\u0301 bom', T('cafe')) === '<mark>cafe\u0301</mark> bom');
   check('trecho: quebras de linha viram espaco', b.searchSnippet('linha1\n\nlinha\tdois', T('dois')) === 'linha1 linha <mark>dois</mark>');
   check('trecho: palavras sobrepostas viram uma marca so', b.searchSnippet('funcionalidade', T('func funcional')) === '<mark>funcional</mark>idade');
+
+  // Começo de palavra e `*` na frente (DEC-025)
+  check('busca: * na frente fica um so; * no fim e * sozinho somem',
+    J(T('co* *versa **cor * ***')) === J(['co', '*versa', '*cor']), J(T('co* *versa **cor * ***')));
+  check('busca: palavra casa no comeco de palavra, nao no meio',
+    b.blockMatches({ content: 'uma conversa' }, T('co')) && !b.blockMatches({ content: 'acordo' }, T('co'))
+    && !b.entryMatches({ title: 'acordo', blocks: [{ content: 'tratado' }] }, T('co')));
+  check('busca: * na frente casa em qualquer parte',
+    b.blockMatches({ content: 'acordo' }, T('*cor')) && b.entryMatches({ title: 'searchSnippet', blocks: [] }, T('*snippet'))
+    && !b.entryMatches({ title: 'searchSnippet', blocks: [] }, T('snippet')));
+  check('busca: comeco de palavra depois de pontuacao e na troca letra/numero',
+    b.blockMatches({ content: 'index.html' }, T('html')) && b.blockMatches({ content: 'Lunoda v13.6' }, T('13 6'))
+    && b.blockMatches({ content: 'pasta_nova' }, T('nova')) && b.blockMatches({ content: '13abc' }, T('abc')));
+  check('busca: palavra que comeca por simbolo casa onde estiver', b.blockMatches({ content: 'index.html' }, T('.html')));
+  check('busca: o comeco de palavra vale tambem com acento', b.blockMatches({ content: 'Ótima ação' }, T('aca otim')));
+  check('trecho: so destaca no comeco de palavra',
+    b.searchSnippet('acordo com', T('co')) === 'acordo <mark>co</mark>m', b.searchSnippet('acordo com', T('co')));
+  check('trecho: com * destaca no meio da palavra',
+    b.searchSnippet('conversa', T('*versa')) === 'con<mark>versa</mark>', b.searchSnippet('conversa', T('*versa')));
+  const caso = 'conversa com ASU: Estou retomando após ' + 'x'.repeat(60) + ' a transferência de contexto';
+  const s4 = b.searchSnippet(caso, T('transferencia de co'));
+  check('trecho: ancora na palavra mais longa, nao na primeira encontrada',
+    s4.startsWith('…') && s4.includes('<mark>transferência</mark>') && !s4.includes('<mark>co</mark>nversa'), s4);
+  const s5 = b.searchSnippet('alvo 1234567 bem feito', T('alvo be'), 10);
+  check('trecho: marca que cruza a borda direita puxa a borda (nunca sai partida)',
+    s5 === '<mark>alvo</mark> 1234567 <mark>be</mark>…', s5);
+  const s6 = b.searchSnippet('bem 1234567 alvo', T('alvo be'), 11);
+  check('trecho: marca que cruza a borda esquerda puxa a borda',
+    s6 === '<mark>be</mark>m 1234567 <mark>alvo</mark>', s6);
+  const s7 = b.searchSnippet('longo alvo ' + 'z'.repeat(30) + ' alvo fim', T('alvo'), 5);
+  check('trecho: empate de tamanho fica com a primeira ocorrencia', s7.includes('ongo <mark>alvo</mark>') && !s7.includes('fim'), s7);
 
   const h = b.searchHit({ blocks: [{ subtitle: 'Claude', content: 'a função' }, { content: 'outra função' }, { content: 'nada' }] }, T('funcao'));
   check('trecho da entrada: conta os blocos e recorta o primeiro (com subtitulo)',

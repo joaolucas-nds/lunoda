@@ -8,7 +8,7 @@
 
 ## Versão Atual
 
-**Lunoda v13.6** — 2026-11-06 — busca sem acento com trecho, atalhos de teclado e arrastar para importar (DEC-024). Arquivo canônico `index.html`. Testes: `smoke` 101/101 e `history` 52/52 (rodada da wo0010).
+**Lunoda v13.7** — 2026-11-07 — busca por começo de palavra, `*` na frente para «em qualquer parte» e trecho ancorado na palavra mais longa (DEC-025). Arquivo canônico `index.html`. Testes: `smoke` 113/113 e `history` 52/52 (rodada da wo0012).
 
 ## ✅ Funcionando
 
@@ -33,13 +33,14 @@
 - Lembrete de backup JSON no topo: em dia / há N dias / amarelo quando nunca ou atrasado; um clique baixa o backup (v13.5).
 - Importar backup JSON: entrada sem blocos ganha um bloco vazio; mesclar traz as opções novas de propriedades existentes (v13.5.1).
 - Busca sem acento e por palavras, com trecho destacado; abrir pela busca leva o termo ao filtro de blocos (v13.6).
+- Busca por começo de palavra (`co` acha «conversa», não «acordo»); `*` na frente casa em qualquer parte; trecho ancorado na palavra mais longa, sem marca partida (v13.7).
 - Atalhos `/` `N` `P` `?` fora de campo; `Alt+↓/↑` e `Alt+Enter` no editor; lista no botão `?` (v13.6).
 - Arrastar `.json`/`.md` para a janela importa (v13.6).
 - Verificação automática: `node tests/smoke.mjs` e `node tests/history.mjs`.
 
 ## 🔧 Em Progresso
 
-- Nada em andamento. **v13.0 a v13.6 conferidas pelo autor** (v13.6 em 2026-11-07 [relatado pelo dono]). A próxima frente não foi decidida — opções e recomendação em `logs/2026-11-07.md`.
+- **v13.7 aguardando a conferência do autor no navegador** (roteiro na conversa de 2026-11-07). v13.0 a v13.6 conferidas pelo autor (v13.6 em 2026-11-07 [relatado pelo dono]).
 
 ## ❌ Quebrado / Com Problema
 
@@ -52,10 +53,10 @@
 - [ ] **Conferir o frontmatter no Obsidian** (nunca testado em navegador) — exportar UMA entrada pelo botão MD do editor, jogar num vault e ver as propriedades como campos; depois desmarcar o checkbox no modal e confirmar que volta ao Markdown simples.
 - [ ] **Conferir o undo/redo no navegador** — excluir blocos em massa e `Ctrl+Z`; `Ctrl+Z` dentro de campo de texto desfaz a digitação, não a estrutura; botões esmaecidos sem histórico; abrir outra entrada zera o histórico.
 - [ ] **Prints para o README** — cabeçalho do editor com Desfazer/Refazer; modal de exportação com o checkbox de frontmatter; propriedades renderizadas no Obsidian.
-- [ ] **Escolher a próxima frente** — opções em `logs/2026-11-07.md` (recomendada: A, refino do trecho da busca). Ponto em aberto da A: palavra da busca casa só no começo de palavra, ou em qualquer parte sem destacar as de 1–2 letras, ou as duas?
+- [ ] **Conferir a v13.7 no navegador** — roteiro na conversa de 2026-11-07: «co» acha «conversa» e não «acordo»; `*cor` acha «acordo»; o trecho de «transferencia de co» mostra «transferência» inteira; a nota da busca na lista do `?`.
 
 ## 💬 Última conversa
 
-**2026-11-07** — v13.6 conferida pelo autor [relatado pelo dono]. Achado do dono num print: com «transferencia de co», o trecho se ancora na primeira palavra («co») e corta a longa («tra…»); reproduzido e registrado no IDEAS, não corrigido. Encerrada a conversa de 3 a 7/11 (v13.0 → v13.6, wo0001 a wo0011) com transferência: brief `../261107-HANDOFF-BRIEF.md`, fora do repositório.
+**2026-11-07 (conversa nova)** — wo0011 conferida e arquivada com o brief. Escolhida a frente A; o autor decidiu a regra da busca (DEC-025): começo de palavra em todas as palavras, `*` na frente para «em qualquer parte», trecho na palavra mais longa sem partir a marca; a C ficou de fora. Entregue a v13.7 (wo0012).
 
-**Próximo passo óbvio:** na conversa nova, escolher a próxima frente (A recomendada) e responder o ponto em aberto da busca.
+**Próximo passo óbvio:** o autor confere a v13.7 pelo roteiro; depois, escolher a próxima frente entre B, C, D e E (`logs/2026-11-07.md`).

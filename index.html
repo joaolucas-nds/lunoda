@@ -718,7 +718,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
       <div class="tb-row">
         <div class="search-wrap">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input class="search-input" type="text" placeholder="Pesquisar…  ( / )" title="Procura no título, na descrição e nos blocos; acento não conta (/ para vir aqui, Esc para limpar)" id="searchInput" oninput="renderTable()">
+          <input class="search-input" type="text" placeholder="Pesquisar…  ( / )" title="Procura no título, na descrição e nos blocos; acento não conta. Cada palavra casa no começo de uma palavra do texto; * na frente procura em qualquer parte (/ para vir aqui, Esc para limpar)" id="searchInput" oninput="renderTable()">
         </div>
         <button class="btn btn-ghost btn-xs" id="dateToggleBtn" onclick="toggleDateRow()" title="Filtrar por data">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -1015,6 +1015,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
       <tr><td><kbd>Esc</kbd></td><td>Fechar a janela ou o editor</td></tr>
     </table>
     <p class="kbd-note">As teclas soltas (<kbd>/</kbd> <kbd>N</kbd> <kbd>P</kbd> <kbd>?</kbd>) não valem enquanto você digita num campo. Para importar, também dá para arrastar um <code>.json</code> ou <code>.md</code> para a janela.</p>
+    <p class="kbd-note">Na busca, cada palavra casa no começo de uma palavra do texto: <code>co</code> acha «conversa», não «acordo». Com <kbd>*</kbd> na frente, casa em qualquer parte: <code>*cor</code> acha «acordo».</p>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeModal('shortcutsModal')">Fechar</button>
     </div>
@@ -1457,9 +1458,11 @@ function toggleSort(col) {
 }
 
 /* ──────────────────────────────
-   BUSCA (v13.6, DEC-024)
+   BUSCA (v13.6, DEC-024; v13.7, DEC-025)
    Acento e maiúscula não contam; cada palavra digitada precisa aparecer,
-   em qualquer ordem. Funções puras (salvo esc), testadas no smoke.
+   em qualquer ordem, no COMEÇO de uma palavra do texto («co» acha «conversa»,
+   não «acordo»); com `*` na frente, em qualquer parte («*cor» acha «acordo»).
+   Funções puras (salvo esc), testadas no smoke.
 ────────────────────────────── */
 
 /* Texto sem acento e em minúsculas, para comparar. */
@@ -1467,10 +1470,47 @@ function foldText(s) {
   return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
-/* Palavras da busca, já sem acento. Busca vazia = lista vazia. */
+/* Palavras da busca, já sem acento. Busca vazia = lista vazia.
+   `*` na frente (um só, mesmo que se digitem vários) = «em qualquer parte»;
+   `*` no fim é aceito e descartado, porque o começo de palavra já é o padrão
+   («co*» = «co»); `*` sozinho não é palavra (DEC-025). */
 function searchTokens(q) {
-  return foldText(q).split(/\s+/).filter(Boolean);
+  return foldText(q).split(/\s+/)
+    .map(w => w.replace(/\*+$/, '').replace(/^\*+/, '*'))
+    .filter(w => w && w !== '*');
 }
+
+/* Letra ou número (o texto já chega dobrado, sem acento). A regex mora numa
+   constante: o extrator do smoke lê «return /…/» como divisão. */
+function isWordChar(c) { const re = /[\p{L}\p{N}]/u; return re.test(c); }
+
+/* A posição p do texto dobrado começa uma palavra? Sim no início do texto;
+   depois de algo que não é letra nem número (espaço, «.», «_», «-»…); na troca
+   entre letra e número («v13» → «13», «13a» → «a»); e quando o próprio
+   caractere não é letra nem número — palavra da busca que começa por símbolo
+   («.html», «#2») casa onde estiver. camelCase NÃO conta: o texto dobrado não
+   tem mais maiúscula; «*snippet» acha «searchSnippet». */
+function isWordStart(t, p) {
+  if (p === 0) return true;
+  const a = t[p - 1], c = t[p];
+  if (!isWordChar(a) || !isWordChar(c)) return true;
+  const num = /\p{N}/u;
+  return num.test(a) !== num.test(c);
+}
+
+/* Primeira posição, a partir de `from`, onde a palavra da busca casa no texto
+   dobrado (-1 se não houver): no começo de uma palavra, ou em qualquer lugar
+   quando ela vem com `*` na frente. */
+function findWord(t, w, from = 0) {
+  const solta = w[0] === '*';
+  const alvo = solta ? w.slice(1) : w;
+  let p = t.indexOf(alvo, from);
+  while (p !== -1 && !solta && !isWordStart(t, p)) p = t.indexOf(alvo, p + 1);
+  return p;
+}
+
+/* Quantos caracteres do texto a palavra da busca cobre (o `*` não conta). */
+function wordLen(w) { return w[0] === '*' ? w.length - 1 : w.length; }
 
 /* Memória do texto dobrado, por objeto (entrada ou bloco). Confere a fonte a
    cada uso — se o texto mudou, recalcula —, então nunca fica velha e não
@@ -1492,20 +1532,23 @@ function blockFold(b) { return foldOf(b, (b.subtitle || '') + '\n' + (b.content 
 function entryMatches(e, tokens) {
   if (!tokens.length) return true;
   const td = foldOf(e, (e.title || '') + '\n' + (e.description || ''));
-  return tokens.every(w => td.includes(w) || (e.blocks || []).some(b => blockFold(b).includes(w)));
+  return tokens.every(w => findWord(td, w) !== -1 || (e.blocks || []).some(b => findWord(blockFold(b), w) !== -1));
 }
 
 /* O bloco casa se cada palavra aparecer no subtítulo ou no conteúdo DELE. */
 function blockMatches(b, tokens) {
   if (!tokens.length) return true;
   const t = blockFold(b);
-  return tokens.every(w => t.includes(w));
+  return tokens.every(w => findWord(t, w) !== -1);
 }
 
-/* Recorta um trecho do texto em volta da primeira palavra encontrada e
-   destaca todas as palavras com <mark>. Devolve HTML já escapado ('' se
-   nada casar). O texto sem acento pode ter outro comprimento que o
-   original, então cada caractere dobrado guarda a posição de origem. */
+/* Recorta um trecho do texto em volta da palavra da busca MAIS LONGA que
+   aparece nele (a mais informativa; empate = a que aparece primeiro no texto)
+   e destaca todas as palavras com <mark>. A janela cresce até o fim de uma
+   marca que cruze a borda: a marca nunca sai partida (DEC-025). Devolve HTML
+   já escapado ('' se nada casar). O texto sem acento pode ter outro
+   comprimento que o original, então cada caractere dobrado guarda a posição
+   de origem. */
 function searchSnippet(text, tokens, raio = 40) {
   const src = String(text || '');
   if (!src || !tokens.length) return '';
@@ -1524,18 +1567,28 @@ function searchSnippet(text, tokens, raio = 40) {
   // Todas as ocorrências de todas as palavras, em posições do original
   const faixas = [];
   tokens.forEach(w => {
-    let p = dob.indexOf(w);
+    const n = wordLen(w);
+    let p = findWord(dob, w);
     while (p !== -1) {
-      let fimF = at(p + w.length - 1) + 1;
+      let fimF = at(p + n - 1) + 1;
       while (fimF < src.length && /[\u0300-\u036f]/.test(src[fimF])) fimF++;   // acento solto fica dentro da marca
-      faixas.push([at(p), fimF]);
-      p = dob.indexOf(w, p + 1);
+      faixas.push([at(p), fimF, n]);
+      p = findWord(dob, w, p + 1);
     }
   });
   if (!faixas.length) return '';
   faixas.sort((a, b) => a[0] - b[0]);
-  const ini = Math.max(0, faixas[0][0] - raio);
-  const fim = Math.min(src.length, faixas[0][1] + raio);
+  // Âncora: a ocorrência da palavra mais longa; com a ordem por posição, o empate fica com a primeira
+  const ancora = faixas.reduce((m, f) => (f[2] > m[2] ? f : m));
+  let ini = Math.max(0, ancora[0] - raio);
+  let fim = Math.min(src.length, ancora[1] + raio);
+  // Marca que cruza a borda puxa a borda até ela («[tra]…» nunca mais). Em ordem
+  // de posição, uma borda que cresceu pode alcançar a marca seguinte.
+  faixas.forEach(([a, b]) => { if (a < fim && b > fim) fim = b; });
+  for (let i = faixas.length - 1; i >= 0; i--) {
+    const [a, b] = faixas[i];
+    if (a < ini && b > ini) ini = a;
+  }
   // Junta faixas que se sobrepõem, só dentro da janela
   const marcas = [];
   faixas.filter(f => f[0] < fim && f[1] > ini).forEach(([a, b]) => {

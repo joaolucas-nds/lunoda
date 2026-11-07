@@ -23,6 +23,16 @@
 
 > Nada aqui altera o `index.html` — são mudanças de documentação e processo.
 
+## [13.7.0] — 2026-11-07
+
+### Modificado
+- **Busca por começo de palavra** (DEC-025): cada palavra casa só onde uma palavra do texto começa — `co` acha «conversa», não «acordo»; `13` acha «v13.6». Vale na tabela e no filtro de blocos.
+- **Trecho da busca** ancorado na palavra mais longa encontrada, e a janela cresce para nunca partir uma marca na borda.
+
+### Adicionado
+- **`*` na frente casa em qualquer parte**: `*cor` acha «acordo». Dica no campo de busca e na lista de atalhos (`?`).
+- `tests/smoke.mjs` cobre o começo de palavra e o trecho (12 asserções novas, 113 no total).
+
 ## [13.6.0] — 2026-11-06
 
 ### Adicionado

@@ -533,3 +533,26 @@ A busca da tabela já procurava no conteúdo dos blocos, mas `funcao` não achav
 
 ### Consequências
 Achar um trecho deixa de depender de lembrar a grafia exata, e o caminho busca → entrada → bloco não perde o termo. O filtro interno passa a mostrar também blocos que *citam* o texto digitado. `Ctrl+N` deixa de constar do código; quem usava (não funcionava) usa `N`. O `drop` cancelado protege a edição não salva.
+
+---
+
+## DEC-025 — Busca por começo de palavra, `*` para «em qualquer parte», trecho na palavra mais longa
+**Data:** 2026-11-07 · **Status:** aceita · origem: conversa de 2026-11-07 (opção A da próxima frente; achado do autor num print da busca «transferencia de co»)
+
+### Contexto
+Na v13.6 (DEC-024) cada palavra da busca casava como **pedaço de qualquer palavra**: «co» acendia em «acordo», «de» em «onde». E o trecho se ancorava na **primeira** palavra encontrada, com raio fixo de 40 caracteres, o que partia a marca da palavra longa na borda: `[co]nversa [co]m ASU: Estou retomando após [tra]…`.
+
+### Decisão
+- **Começo de palavra, em todas as palavras da busca:** cada palavra casa só onde uma palavra do texto começa (`findWord` + `isWordStart`): início do texto, depois de algo que não é letra nem número (espaço, «.», «_», «-»…) e na troca letra↔número («13» acha «v13.6»). Palavra da busca que começa por símbolo («.html») casa onde estiver. Vale para a tabela e para o filtro de blocos (mesmas funções).
+- **`*` na frente = em qualquer parte:** `*cor` acha «acordo». Vários `*` na frente valem um; `*` no fim é aceito e descartado («co*» = «co»); `*` sozinho não é palavra.
+- **Trecho:** a janela se ancora na ocorrência da palavra **mais longa** que aparece no texto (empate: a primeira no texto) e cresce até o fim de qualquer marca que cruze uma borda — a marca nunca sai partida.
+- **Onde se aprende:** dica no `title` do campo de busca e uma nota na lista de atalhos (`?`).
+
+### Alternativas consideradas
+- **Casar em qualquer parte, sem destacar palavras de 1–2 letras** (opção b): o casamento continuaria largo e a marca escondida confundiria — a palavra conta para o filtro sem aparecer.
+- **Só a última palavra como prefixo, as outras inteiras** (padrão da Algolia e do Meilisearch): numa busca que ordena por relevância faz sentido; aqui a tabela não ordena por relevância e o acervo é pequeno, então prefixo em todas é mais prático («transf conv» funciona).
+- **`%` como curinga** (SQL `LIKE`): sintaxe de banco, não de quem usa o app, e aparece em texto real («50%»).
+- **camelCase como começo de palavra** («snippet» acharia «searchSnippet»): o texto dobrado já não tem maiúscula; exigiria mapear de volta ao original. `*snippet` resolve; fica no IDEAS.
+
+### Consequências
+Palavras curtas deixam de acender em tudo, e o trecho mostra a palavra que importa. Buscar o meio de uma palavra passa a pedir `*` — quem buscava «versa» para achar «conversa» agora digita `*versa`. Os `.md`, o JSON e o `localStorage` não mudam.

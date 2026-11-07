@@ -13,10 +13,12 @@ Junta a organização visual estilo Notion (tabela + propriedades) com a exporta
 
 Os dados ficam no `localStorage` do navegador (chave `base_v4`). Nada sai da sua máquina — por isso mesmo, **exporte o JSON de vez em quando**: limpar os dados do navegador apaga o acervo.
 
-## Principais recursos (v13.6)
+## Principais recursos (v13.7)
 
 - **Tabela de entradas** com ordenação e filtros por data e por propriedade.
 - **Busca** no título, na descrição e no conteúdo dos blocos — acento e maiúscula não contam, palavras em qualquer ordem —, com o **trecho** destacado na tabela; ao abrir a entrada, o filtro de blocos já vem com o termo.
+  - Cada palavra casa no **começo de uma palavra** do texto: `co` acha «conversa», não «acordo».
+  - Com `*` na frente, casa **em qualquer parte**: `*cor` acha «acordo».
 - **Editor lateral** com largura ajustável (arraste a borda esquerda) e botão de tela inteira.
 - **Blocos versionados**: sugestão automática de versão; trocar o número para um já ocupado no mesmo subtítulo renumera os vizinhos.
 - **Propriedades por bloco**: o bloco é a fonte de verdade; a entrada é a união das opções dos seus blocos.

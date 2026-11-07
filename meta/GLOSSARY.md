@@ -22,6 +22,7 @@
 - **Prévia do import** — (v13.4) janela que mostra o que um `.md` vai trazer antes de gravar; pergunta o que fazer com entradas que já existem (pular ou cópia).
 - **Lembrete de backup** — (v13.5, DEC-023) indicador no topo, ao lado de «Importar», que diz se há mudanças sem backup JSON e há quantos dias; amarelo quando nunca houve backup ou há 7 dias ou mais; um clique baixa o backup.
 - **Trecho da busca** — (v13.6, DEC-024) linha sob o título, na tabela, com o pedaço do bloco onde a busca casou, as palavras destacadas e «em N blocos».
+- **Começo de palavra** — (v13.7, DEC-025) regra da busca: cada palavra digitada casa só onde uma palavra do texto começa (início, depois de espaço ou pontuação, na troca letra↔número). `*` na frente troca para «em qualquer parte».
 - **Tecla solta** — (v13.6) atalho sem modificador (`/` `N` `P` `?`); só vale fora de campo de texto e sem janela aberta.
 - **Camada de soltar** — (v13.6) aviso «Solte para importar» que cobre a janela enquanto um arquivo é arrastado sobre ela.
 - **Empurrão de versão** — (v13.3, DEC-015, DEC-021) trocar o número de versão de um bloco para um número já ocupado no mesmo subtítulo renumera os vizinhos; só números, não posições.

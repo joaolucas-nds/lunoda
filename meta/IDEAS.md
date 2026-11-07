@@ -58,7 +58,7 @@ Poder arrastar o arquivo (por exemplo o `.json`) para a janela em vez de passar 
 
 ### 2026-11 — Trecho da busca: palavra curta acende em tudo e a longa sai cortada
 Print do autor buscando «transferencia de co»: o «co» acende em «conversa» e «com», e «transferência» aparece cortada como «tra…». Reproduzido com as funções reais: tokens `transferencia`, `de`, `co`; trecho `[co]nversa [co]m ASU: Estou retomando após [tra]…`. Três causas: (1) a janela do trecho se ancora na **primeira** palavra encontrada, não na mais informativa; (2) o raio de 40 caracteres corta a palavra e **parte a marca**; (3) palavra de 1–2 letras casa como pedaço de qualquer palavra. Proposta: ancorar na palavra mais longa, estender a janela até o fim da marca e decidir o tratamento das palavras curtas — (a) casar só no começo de palavra (recomendado); (b) casar em qualquer parte, sem destacar as de 1–2 letras; (c) as duas.
-> Fonte: conversa de 2026-11-07, nota `261107-0845.txt` e print do autor (arquivados em `notas-arquivadas`). **Status:** aberta — opção A da próxima frente (`logs/2026-11-07.md`).
+> Fonte: conversa de 2026-11-07, nota `261107-0845.txt` e print do autor (arquivados em `notas-arquivadas`). **Status:** implementada na v13.7 (DEC-025) — escolhida a (a), começo de palavra em todas as palavras, com `*` na frente para «em qualquer parte»; a (b) foi descartada — ver Concluídas.
 
 ---
 
@@ -125,6 +125,18 @@ Se o texto salvo em `base_v4` não for JSON válido, o `loadDB` segue para as ch
 > **Status:** aberta — medido ao fazer a busca da v13.6; não pesa no acervo real.
 `renderTable` refaz o `innerHTML` de todas as linhas a cada mudança: medido no Chromium, ~170–200 ms com 775 entradas (o teto do `localStorage`), **sem** busca. Se o acervo chegar a centenas de entradas, digitar na busca vai arrastar. Caminhos, do barato ao caro: espera curta entre teclas (debounce); desenhar só as primeiras ~200 linhas com «mostrar mais»; virtualizar a lista. Gatilho: o próprio autor sentir a busca lenta.
 
+### 2026-11-07 — Busca: camelCase como começo de palavra
+> **Status:** aberta — fora da v13.7 de propósito (DEC-025).
+Hoje «snippet» não acha «searchSnippet»: o texto dobrado já não tem maiúscula, então a troca minúscula→maiúscula não conta como começo de palavra. `*snippet` resolve. Fazer exigiria olhar o texto original ao lado do dobrado. Gatilho: o autor sentir falta ao procurar nomes de código colados nas conversas.
+
+### 2026-11-07 — Busca: frase exata entre aspas
+> **Status:** aberta.
+`"de contexto"` casaria só com as duas palavras juntas, nessa ordem. Hoje cada palavra casa sozinha, em qualquer ordem. Barato com `findWord` (procurar a frase dobrada como uma palavra só); a dúvida é se o autor usaria.
+
+### 2026-11-07 — Extrator do smoke lê `return /…/` como divisão
+> **Status:** aberta — contornada na v13.7 (regex numa constante; armadilha no CONTEXT).
+O `extractFunction` decide entre regex e divisão pelo caractere anterior; depois de identificador conta como divisão, e `return` é identificador. Consertar: tratar como regex quando a palavra anterior for `return`, `typeof`, `case`… Pequeno; só vale se doer de novo.
+
 ### 2026-07-19 — Exportar um arquivo por entrada (`.zip`)
 > **Status (2026-11-04):** aberta — único item restante da F9.
 O frontmatter da v12.3 só é lido como metadado num arquivo que contenha **uma** entrada. Para jogar o acervo inteiro num vault do Obsidian, o usuário precisaria exportar entrada por entrada. Um `.zip` com um `.md` por entrada resolveria — mas exige biblioteca de compressão, o que contraria o zero-dependência da DEC-001.
@@ -164,6 +176,7 @@ Pergunta do autor. *Sugestão do assistente:* nesse caso, **desabilitar** a edi�
 
 ## ✅ Concluídas
 
+- **Busca por começo de palavra, `*` para «em qualquer parte», trecho na palavra mais longa** — v13.7 / DEC-025.
 - **Busca sem acento, com trecho e levando o termo ao editor** — v13.6 / DEC-024.
 - **Atalhos de teclado** (`/`, `N`, `?`, `Alt+↓/↑`, `Alt+Enter`) — v13.6 / DEC-024.
 - **Arrastar `.json`/`.md` para importar** — v13.6 / DEC-024.
