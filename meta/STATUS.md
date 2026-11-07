@@ -39,7 +39,7 @@
 
 ## 🔧 Em Progresso
 
-- **v13.6 aplicada pela wo0010 (`d033aed`); falta a conferência no navegador** — roteiro na conversa de 2026-11-06. v13.0 a v13.5.1 já conferidas pelo autor.
+- Nada em andamento. **v13.0 a v13.6 conferidas pelo autor** (v13.6 em 2026-11-07 [relatado pelo dono]). A próxima frente não foi decidida — opções e recomendação em `logs/2026-11-07.md`.
 
 ## ❌ Quebrado / Com Problema
 
@@ -52,10 +52,10 @@
 - [ ] **Conferir o frontmatter no Obsidian** (nunca testado em navegador) — exportar UMA entrada pelo botão MD do editor, jogar num vault e ver as propriedades como campos; depois desmarcar o checkbox no modal e confirmar que volta ao Markdown simples.
 - [ ] **Conferir o undo/redo no navegador** — excluir blocos em massa e `Ctrl+Z`; `Ctrl+Z` dentro de campo de texto desfaz a digitação, não a estrutura; botões esmaecidos sem histórico; abrir outra entrada zera o histórico.
 - [ ] **Prints para o README** — cabeçalho do editor com Desfazer/Refazer; modal de exportação com o checkbox de frontmatter; propriedades renderizadas no Obsidian.
-- [ ] **Conferir a v13.6 no navegador** (roteiro na conversa de 2026-11-06) — em especial `Alt+↓/↑` e `Alt+Enter` no Chrome do Windows, que o Chromium do container não reproduz.
+- [ ] **Escolher a próxima frente** — opções em `logs/2026-11-07.md` (recomendada: A, refino do trecho da busca). Ponto em aberto da A: palavra da busca casa só no começo de palavra, ou em qualquer parte sem destacar as de 1–2 letras, ou as duas?
 
 ## 💬 Última conversa
 
-**2026-11-06** — v13.5 conferida pelo autor. Frente escolhida: testes do núcleo. Entregues 26 asserções no smoke e duas correções que elas acharam (FIX-004: entrada sem blocos; FIX-005: mescla perdia opções), como **v13.5.1** pela wo0009. Achado registrado sem corrigir: `base_v4` ilegível cai para a chave legada (IDEAS). Depois: v13.5.1 conferida; análise da F10 medida (a busca já alcançava o conteúdo; `Ctrl+N` morto; `P` capturando `Ctrl+P`) e decidida com o autor (1a, 2a, 3a, 4a); entregue como **v13.6** pela wo0010 (DEC-024).
+**2026-11-07** — v13.6 conferida pelo autor [relatado pelo dono]. Achado do dono num print: com «transferencia de co», o trecho se ancora na primeira palavra («co») e corta a longa («tra…»); reproduzido e registrado no IDEAS, não corrigido. Encerrada a conversa de 3 a 7/11 (v13.0 → v13.6, wo0001 a wo0011) com transferência: brief `../261107-HANDOFF-BRIEF.md`, fora do repositório.
 
-**Próximo passo óbvio:** conferir a v13.6 no navegador; depois escolher a próxima frente (F9 `.zip`, a ideia da `base_v4` ilegível, ou as pendências do autor no backlog).
+**Próximo passo óbvio:** na conversa nova, escolher a próxima frente (A recomendada) e responder o ponto em aberto da busca.

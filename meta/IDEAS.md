@@ -56,6 +56,10 @@ Algumas coisas não estão nítidas; usar mais UX/UI. Medido pelo assistente: co
 Poder arrastar o arquivo (por exemplo o `.json`) para a janela em vez de passar pelo botão Importar.
 > Fonte: conversa de 2026-11-06. **Status:** implementada na v13.6 (DEC-024) — vale para `.json` e `.md` — ver Concluídas.
 
+### 2026-11 — Trecho da busca: palavra curta acende em tudo e a longa sai cortada
+Print do autor buscando «transferencia de co»: o «co» acende em «conversa» e «com», e «transferência» aparece cortada como «tra…». Reproduzido com as funções reais: tokens `transferencia`, `de`, `co`; trecho `[co]nversa [co]m ASU: Estou retomando após [tra]…`. Três causas: (1) a janela do trecho se ancora na **primeira** palavra encontrada, não na mais informativa; (2) o raio de 40 caracteres corta a palavra e **parte a marca**; (3) palavra de 1–2 letras casa como pedaço de qualquer palavra. Proposta: ancorar na palavra mais longa, estender a janela até o fim da marca e decidir o tratamento das palavras curtas — (a) casar só no começo de palavra (recomendado); (b) casar em qualquer parte, sem destacar as de 1–2 letras; (c) as duas.
+> Fonte: conversa de 2026-11-07, nota `261107-0845.txt` e print do autor (arquivados em `notas-arquivadas`). **Status:** aberta — opção A da próxima frente (`logs/2026-11-07.md`).
+
 ---
 
 ## 🤖 Ideias Ativas — Assistente
@@ -247,3 +251,8 @@ Vale registrar como hábito: **falhou o teste → reproduzir e entender antes de
 O autor pediu as decisões C1, C2 e Q1 «uma de cada vez». O assistente carregou o pedido para as perguntas da F4 parte 2, que eram independentes, e gastou um turno do autor entregando uma pergunta só — contra o princípio «consolida perguntas inevitáveis num único momento». Lição: instrução de ritmo vale para o lote em que foi dada; perguntas independentes vêm juntas, e só se separa quando a resposta de uma muda a outra, dizendo o motivo. Se repetir, vira item no CEREBRO.
 ### 2026-11-03 — Ideia implementada ficou em «Ativas»
 A wo0002 implementou duas ideias do autor e não mudou o status delas no IDEAS; só apareceu na conferência da wo0003. Sugestão ao kit: o checklist da WO que entrega uma ideia inclui «status da ideia no IDEAS → Concluídas».
+
+### 2026-11-07 — Duas falhas de transporte do assistente, pegas só por conferência mecânica
+1. **Escape `\u` virando caractere:** o `\u0300-\u036f` que o assistente escrevia chegava ao arquivo como os próprios caracteres combinantes (duas vezes na v13.6; heredoc com aspas não evitou). O código funcionava — nenhum teste falharia —; foi pego por um pente que compara a contagem de caracteres U+0300–U+036F antes e depois. A WO passou a trazer essa contagem na conferência.
+2. **Âncora com quebra de linha na borda:** na wo0008 (Edição 20) a âncora terminava em `\n` e, dentro do bloco cercado, isso parecia uma linha em branco a mais; o Code fugiu do texto para aplicar. O gerador de WO do chat passou a recusar âncora ou texto novo que comece ou termine em quebra de linha.
+Sugestão ao kit: no template de WO, proibir âncora que comece/termine em quebra de linha e, quando a WO tiver escape `\u`, incluir a contagem de caracteres invisíveis na conferência.
