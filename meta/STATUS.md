@@ -40,7 +40,7 @@
 
 ## 🔧 Em Progresso
 
-- **v13.7 aguardando a conferência do autor no navegador** (roteiro na conversa de 2026-11-07). v13.0 a v13.6 conferidas pelo autor (v13.6 em 2026-11-07 [relatado pelo dono]).
+- Nada em andamento. **v13.0 a v13.7 conferidas pelo autor** (v13.7 em 2026-11-09 [relatado pelo dono]). A próxima frente não foi decidida — opções em `logs/2026-11-07.md` (B, C, D, E).
 
 ## ❌ Quebrado / Com Problema
 
@@ -53,10 +53,10 @@
 - [ ] **Conferir o frontmatter no Obsidian** (nunca testado em navegador) — exportar UMA entrada pelo botão MD do editor, jogar num vault e ver as propriedades como campos; depois desmarcar o checkbox no modal e confirmar que volta ao Markdown simples.
 - [ ] **Conferir o undo/redo no navegador** — excluir blocos em massa e `Ctrl+Z`; `Ctrl+Z` dentro de campo de texto desfaz a digitação, não a estrutura; botões esmaecidos sem histórico; abrir outra entrada zera o histórico.
 - [ ] **Prints para o README** — cabeçalho do editor com Desfazer/Refazer; modal de exportação com o checkbox de frontmatter; propriedades renderizadas no Obsidian.
-- [ ] **Conferir a v13.7 no navegador** — roteiro na conversa de 2026-11-07: «co» acha «conversa» e não «acordo»; `*cor` acha «acordo»; o trecho de «transferencia de co» mostra «transferência» inteira; a nota da busca na lista do `?`.
+- [ ] **Escolher a próxima frente** — B (`.zip`, depende da conferência do frontmatter acima), C (`base_v4` ilegível), D (exportar só os blocos selecionados), E (arrastar blocos); detalhe em `logs/2026-11-07.md`.
 
 ## 💬 Última conversa
 
-**2026-11-07 (conversa nova)** — wo0011 conferida e arquivada com o brief. Escolhida a frente A; o autor decidiu a regra da busca (DEC-025): começo de palavra em todas as palavras, `*` na frente para «em qualquer parte», trecho na palavra mais longa sem partir a marca; a C ficou de fora. Entregue a v13.7 (wo0012).
+**2026-11-09** — wo0012 conferida (`3e88a60` + wrap `6a37cad`; smoke 113/0, history 52/0 no disco) e **roteiro v13.7 todo ok** [relatado pelo dono]. Antes, em 2026-11-07: frente A escolhida e a regra da busca decidida (DEC-025).
 
-**Próximo passo óbvio:** o autor confere a v13.7 pelo roteiro; depois, escolher a próxima frente entre B, C, D e E (`logs/2026-11-07.md`).
+**Próximo passo óbvio:** escolher a próxima frente entre B, C, D e E (`logs/2026-11-07.md`).
