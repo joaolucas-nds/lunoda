@@ -42,7 +42,7 @@
 
 ## 🔧 Em Progresso
 
-- Nada em andamento. **v13.0 a v13.8 conferidas pelo autor** (v13.8 em 2026-11-10 [relatado pelo dono]). A próxima frente não foi decidida — opções na conversa de 2026-11-10 (`logs/2026-11-10.md`).
+- **Pausa decidida pelo autor** (2026-11-10 [relatado pelo dono]): o produto está estável e a ideia é usar e anotar o que incomodar. Nada em andamento. v13.0 a v13.8 conferidas pelo autor (v13.8 em 2026-11-10 [relatado pelo dono]).
 
 ## ❌ Quebrado / Com Problema
 
@@ -54,10 +54,10 @@
 - [ ] **Reexportar os `.md` antigos** — abrir o `index.html`, exportar de novo em Markdown e substituir os arquivos gerados antes da v12.1.
 - [ ] **Conferir o undo/redo no navegador** — excluir blocos em massa e `Ctrl+Z`; `Ctrl+Z` dentro de campo de texto desfaz a digitação, não a estrutura; botões esmaecidos sem histórico; abrir outra entrada zera o histórico.
 - [ ] **Prints para o README** — cabeçalho do editor com Desfazer/Refazer; modal de exportação com o checkbox de frontmatter; barra de seleção de blocos com MD e HTML.
-- [ ] **Escolher a próxima frente** — E (arrastar blocos) ou outro item da F7 (entrada favorita/fixada, cor da entrada, histórico de versões de bloco); opções em `logs/2026-11-10.md`. Obsidian e `.zip` adiados pelo autor (IDEAS, «Adiadas»).
+- [ ] **Ao retomar, escolher a próxima frente** — E (arrastar blocos) ou outro item da F7 (entrada favorita/fixada, cor da entrada, histórico de versões de bloco), ou o que o uso mostrar; opções em `logs/2026-11-10.md`. Obsidian e `.zip` adiados pelo autor (IDEAS, «Adiadas»).
 
 ## 💬 Última conversa
 
-**2026-11-10** — wo0013 conferida (`42cc085`). O autor escolheu as frentes D e C juntas: entregue a v13.8 (wo0014, DEC-026, commit `37cd070`) e **roteiro v13.8 todo ok** [relatado pelo dono]. O autor **adiou o Obsidian e a B** (`.zip`) até precisar ou dominar o Obsidian; o passo a passo da conferência ficou no log do dia.
+**2026-11-10** — wo0013 conferida (`42cc085`). O autor escolheu as frentes D e C juntas: entregue a v13.8 (wo0014, DEC-026, commit `37cd070`) e **roteiro v13.8 todo ok** [relatado pelo dono]. O autor **adiou o Obsidian e a B** (`.zip`) até precisar ou dominar o Obsidian; o passo a passo da conferência ficou no log do dia. Registro na wo0015 (`df8840c`). Depois o autor decidiu **pausar** e encerrar a conversa (7 a 10/11: v13.6 → v13.8, wo0011 a wo0016) com transferência: brief `../261110-HANDOFF-BRIEF.md`, fora do repositório.
 
-**Próximo passo óbvio:** escolher a próxima frente (E ou outro item da F7; `logs/2026-11-10.md`).
+**Próximo passo óbvio:** nenhum de código — pausa. Na conversa nova, fazer o ritual, arquivar o brief e esperar o autor trazer o que o uso mostrou.
