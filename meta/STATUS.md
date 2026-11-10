@@ -60,6 +60,6 @@
 
 ## 💬 Última conversa
 
-**2026-11-10** — wo0013 conferida (`42cc085`). O autor escolheu as frentes D e C juntas: entregue a v13.8 (wo0014, DEC-026). Passo a passo da conferência do frontmatter no Obsidian (desbloqueia a B) entregue no chat.
+**2026-11-10** — wo0013 conferida (`42cc085`). O autor escolheu as frentes D e C juntas: entregue a v13.8 (wo0014, DEC-026, commit `37cd070`). Passo a passo da conferência do frontmatter no Obsidian (desbloqueia a B) entregue no chat.
 
 **Próximo passo óbvio:** o autor confere a v13.8 pelo roteiro; quando puder, confere o frontmatter no Obsidian (passo a passo de 2026-11-10) para destravar a B.
