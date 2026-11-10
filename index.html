@@ -885,6 +885,13 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
         <button class="blk-mass-btn" onclick="openBlockTransferModal('copy')" title="Copiar para outra entrada">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copiar para
         </button>
+        <div class="blk-mass-sep"></div>
+        <button class="blk-mass-btn" onclick="exportSelectedBlocks('md')" title="Exportar só os blocos selecionados em Markdown, com o cabeçalho da entrada">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> MD
+        </button>
+        <button class="blk-mass-btn" onclick="exportSelectedBlocks('html')" title="Exportar só os blocos selecionados em HTML (abrível no navegador, imprimível como PDF)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> HTML
+        </button>
         <div class="blk-mass-sp"></div>
         <button class="blk-mass-btn" onclick="deselectAllBlocks()">✕</button>
       </div>
@@ -1098,11 +1105,34 @@ let btmMode             = 'move'; // 'move' | 'copy'
 /* ──────────────────────────────
    PERSISTENCE & MIGRATION
 ────────────────────────────── */
+/* Chave base_v4 presente mas ilegível (DEC-026): o texto cru vai para uma chave
+   à parte, `base_v4_ilegivel_<data ISO>`, antes que o próximo salvamento o
+   apague. Abrir de novo com o mesmo texto não duplica a cópia. Sem espaço para
+   a cópia (cota), anota que não guardou — o aviso oferece baixar o texto. */
+const UNREADABLE_PREFIX = 'base_v4_ilegivel_';
+let unreadableAtLoad = null;   // { guardado, chave, raw } — lido por warnUnreadableAtLoad
+function keepUnreadable(raw) {
+  let chave = null;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(UNREADABLE_PREFIX) && localStorage.getItem(k) === raw) { chave = k; break; }
+    }
+    if (!chave) {
+      const nova = UNREADABLE_PREFIX + new Date().toISOString();
+      localStorage.setItem(nova, raw);
+      chave = nova;
+    }
+  } catch (_) { chave = null; }   // cota cheia ou armazenamento bloqueado
+  unreadableAtLoad = { guardado: !!chave, chave, raw };
+}
+
 function loadDB() {
   const keys = [STORAGE_KEY, 'base_notas_v3', 'base_notas_v2', 'nexus_db_v4'];
   for (const k of keys) {
+    let raw = null;
     try {
-      const raw = localStorage.getItem(k);
+      raw = localStorage.getItem(k);
       if (!raw) continue;
       let d = JSON.parse(raw);
 
@@ -1150,7 +1180,12 @@ function loadDB() {
       if (!d.entries)    d.entries    = [];
       showToast(k !== STORAGE_KEY ? 'Dados anteriores migrados ✓' : '');
       return d;
-    } catch(e) { /* continue */ }
+    } catch(e) {
+      // base_v4 presente mas ilegível: guarda o texto cru e NÃO cai para as chaves
+      // legadas — abrir o acervo antigo e salvar por cima apagaria o que ainda dá
+      // para recuperar à mão (DEC-026). As legadas só valem quando não há base_v4.
+      if (k === STORAGE_KEY && raw) { keepUnreadable(raw); break; }
+    }
   }
   return {
     properties: [
@@ -3505,6 +3540,62 @@ function exportCurrentJSON() {
 
 function openExportModal() { openModal('exportModal'); }
 
+/* Entrada só com os blocos escolhidos, na ordem da entrada (F7, DEC-026).
+   As propriedades da entrada são recalculadas a partir DESSES blocos — o bloco
+   é a fonte de verdade (DEC-003), e o cabeçalho não pode citar opção de um
+   bloco que ficou de fora. Pura: não mexe na entrada original. */
+function entryWithBlocks(e, ids) {
+  const blocks = (e.blocks || []).filter(b => ids.has(b.id));
+  const pv = {};
+  Object.keys(e.propertyValues || {}).forEach(pid => { pv[pid] = []; });
+  blocks.forEach(b => Object.entries(b.blockProps || {}).forEach(([pid, opts]) => {
+    const alvo = pv[pid] || (pv[pid] = []);
+    (opts || []).forEach(o => { if (!alvo.includes(o)) alvo.push(o); });
+  }));
+  return { ...e, blocks, propertyValues: pv };
+}
+
+/* Exporta só os blocos selecionados da entrada aberta, em Markdown ou HTML
+   (F7, DEC-026). Usa a entrada SALVA, como os outros exports do editor: com
+   mudança pendente, pede para salvar antes. Age em todos os selecionados,
+   inclusive os escondidos pelo filtro, como as outras ações em massa (DEC-016).
+   O .md sai no formato de sempre, com «Total de blocos» = os exportados: a
+   reimportação o lê como uma entrada (DEC-022). */
+function exportSelectedBlocks(fmt) {
+  const e = db.entries.find(x => x.id === currentId);
+  if (!e || isEditorDirty()) { showToast('Salve a entrada primeiro (Ctrl+S)'); return; }
+  const sub = entryWithBlocks(e, selectedBlockIds);
+  const n = sub.blocks.length;
+  if (!n) { showToast('Selecione ao menos um bloco'); return; }
+  const nome = (e.title || 'nota') + '_' + n + (n === 1 ? '-bloco' : '-blocos');
+  if (fmt === 'html') {
+    dl(buildEntryHTML(sub, true), nome + '.html', 'text/html');
+  } else {
+    // Arquivo com uma entrada só: o frontmatter da entrada vale, como no export da entrada
+    const head = mdFrontmatterOn() ? entryFrontmatter(sub) : '';
+    dl(head + entryToMD(sub), nome + '.md', 'text/markdown');
+  }
+  const hid = hiddenSelectedCount();
+  showToast(`${n} bloco${n === 1 ? '' : 's'} exportado${n === 1 ? '' : 's'} (${fmt === 'html' ? 'HTML' : 'MD'})`
+    + (hid > 0 ? ` · inclui ${hid} fora do filtro` : ''));
+}
+
+/* Aviso da chave base_v4 ilegível, logo depois de abrir (DEC-026).
+   OK baixa o texto cru como arquivo — necessário quando não coube a cópia. */
+function warnUnreadableAtLoad() {
+  const u = unreadableAtLoad;
+  if (!u) return;
+  const onde = u.guardado
+    ? 'Uma cópia do texto ficou guardada neste navegador, na chave «' + u.chave + '».'
+    : 'NÃO coube uma cópia no armazenamento do navegador: baixe o texto agora, senão o próximo salvamento o apaga.';
+  if (confirm('OS DADOS SALVOS NÃO PUDERAM SER LIDOS\n\n'
+    + 'O texto da chave base_v4 está corrompido ou incompleto, e o app abriu sem as suas entradas. '
+    + onde + '\n\nOK = baixar o texto como arquivo agora (para recuperar à mão).\n'
+    + 'Antes de criar ou salvar qualquer coisa, importe o seu último backup JSON, se tiver.')) {
+    dl(u.raw, 'lunoda_base_v4_ilegivel_' + dateSlug() + '.txt', 'text/plain');
+  }
+}
+
 /* ── helpers de escape para HTML ── */
 function e2h(s) {
   if (!s) return '';
@@ -4096,6 +4187,7 @@ document.addEventListener('drop', e => {
    INIT
 ────────────────────────────── */
 db = loadDB();
+warnUnreadableAtLoad();
 renderTableHead();
 renderSidebar();
 renderTable();

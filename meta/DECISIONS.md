@@ -556,3 +556,26 @@ Na v13.6 (DEC-024) cada palavra da busca casava como **pedaço de qualquer palav
 
 ### Consequências
 Palavras curtas deixam de acender em tudo, e o trecho mostra a palavra que importa. Buscar o meio de uma palavra passa a pedir `*` — quem buscava «versa» para achar «conversa» agora digita `*versa`. Os `.md`, o JSON e o `localStorage` não mudam.
+
+---
+
+## DEC-026 — Exportar só os blocos selecionados (F7); chave `base_v4` ilegível guardada, sem cair para a legada
+**Data:** 2026-11-10 · **Status:** aceita · origem: conversa de 2026-11-10 (frentes D e C, escolhidas pelo autor); ideia da C no IDEAS (2026-11-06)
+
+### Contexto
+- **D:** para tirar de uma entrada só os trechos que importam, era preciso copiar a entrada inteira, apagar blocos e exportar. A F7 trazia a ideia desde a v12.
+- **C:** se o texto da `base_v4` não abrisse (JSON quebrado), o `loadDB` seguia para as chaves antigas; com alguma presente, abria o acervo **antigo** e o próximo salvamento sobrescrevia a `base_v4` — que talvez desse para recuperar à mão. Sem chave antiga, abria o banco padrão e também sobrescrevia. Medido ao escrever os testes do núcleo (v13.5.1).
+
+### Decisão
+- **D — exportar blocos:** botões **MD** e **HTML** na barra de seleção de blocos (`exportSelectedBlocks`). O arquivo é a entrada só com os blocos escolhidos (`entryWithBlocks`, pura): cabeçalho da entrada (título, descrição, datas, ID), blocos na **ordem da entrada**, propriedades da entrada **recalculadas a partir desses blocos** (DEC-003). Usa a entrada **salva**, como os outros exports do editor — com mudança pendente, pede para salvar. Age em **todos** os selecionados, inclusive os escondidos pelo filtro (DEC-016), e o aviso diz quantos estavam fora do filtro. O `.md` sai no formato de sempre, com «Total de blocos» = os exportados, e com o frontmatter da entrada quando ligado: a reimportação o lê como **uma entrada**, de mesmo ID (pular ou cópia, DEC-022). Nome: `<título>_<n>-blocos.md`/`.html`.
+- **C — chave ilegível:** com `base_v4` presente e ilegível (ou com formato que quebra a migração), o `loadDB` guarda o texto cru em `base_v4_ilegivel_<data ISO>` (`keepUnreadable`) — se já houver uma cópia igual, reusa —, **não** tenta as chaves legadas e abre o banco padrão. Ao abrir, `warnUnreadableAtLoad` mostra um `confirm` que explica, diz onde está a cópia e oferece **baixar o texto** como arquivo. Sem espaço para a cópia (cota), o aviso diz que não guardou e que é preciso baixar antes de salvar. As chaves legadas continuam valendo quando não há `base_v4`.
+
+### Alternativas consideradas
+- **D — exportar o estado do editor sem salvar:** mais cômodo, mas o arquivo poderia trazer o que o acervo não tem; os exports do editor já exigem a entrada salva.
+- **D — manter a numeração original dos blocos** («Bloco 3 de 7»): mudaria o formato do `.md`, que é contrato do leitor (DEC-022); o subtítulo e a versão já identificam o bloco.
+- **D — título com sufixo** («(3 de 7 blocos)»): mudaria o dado; o sufixo vai no nome do arquivo.
+- **C — bloquear todo salvamento até resolver:** protege mais, mas trava o app num estado que o autor não sabe desfazer; a cópia + o download cobrem o caso.
+- **C — uma chave fixa `base_v4_ilegivel`:** uma segunda falha apagaria a primeira cópia; a data no nome evita.
+
+### Consequências
+Exportar um pedaço de conversa passa a ser selecionar e clicar; o arquivo parcial é um `.md` do Lunoda como os outros. Um acervo corrompido deixa de ser sobrescrito em silêncio: o texto fica guardado (ou baixado) para recuperar. A cópia ocupa espaço no `localStorage` até ser apagada à mão — o aviso de 80% da cota continua valendo.

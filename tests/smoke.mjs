@@ -297,6 +297,24 @@ if (presentes.length < OPCIONAIS.length) {
     const cheio2 = fresco(); const D = mk(cheio2, () => 'p' + (++seq), () => 'c1');
     D.applyMdImport(D.planMdImport(r), 'pular');
     check('pular: nada muda no que ja existe', JSON.stringify(cheio2.entries) === JSON.stringify(fresco().entries));
+
+    // Exportar só os blocos selecionados (F7, DEC-026): o .md parcial volta como uma entrada válida
+    const EW = new Function(`${extractFunction(html, 'entryWithBlocks')}\nreturn entryWithBlocks;`)();
+    const JS = x => JSON.stringify(x);
+    const o0 = fresco().entries[0], o0txt = JS(o0);
+    const sub = EW(o0, new Set([o0.blocks[2].id, o0.blocks[0].id]));
+    check('blocos: so os escolhidos, na ordem da entrada (nao na da selecao)',
+      JS(sub.blocks.map(b => b.id)) === JS([o0.blocks[0].id, o0.blocks[2].id]), JS(sub.blocks.map(b => b.id)));
+    check('blocos: a entrada original nao muda', JS(o0) === o0txt);
+    const pv = EW({ propertyValues: { pA: ['o1', 'o2'], pB: ['o3'] },
+      blocks: [{ id: 'x', blockProps: { pA: ['o2'] } }, { id: 'y', blockProps: { pA: ['o1'], pB: ['o3'] } }] }, new Set(['x'])).propertyValues;
+    check('blocos: propriedades da entrada = so as dos blocos exportados', JS(pv) === JS({ pA: ['o2'], pB: [] }), JS(pv));
+    const rs = A.parseLunodaMD(A.entryFrontmatter(sub) + A.entryToMD(sub));
+    const lida = rs.entries[0] || { blocks: [] };
+    check('blocos: o .md parcial volta como uma entrada valida, com os blocos e o conteudo certos',
+      !rs.erro && rs.entries.length === 1 && lida.id === o0.id && JS(lida.blocks.map(b => b.id)) === JS(sub.blocks.map(b => b.id))
+      && lida.blocks.every((b, j) => b.content === (sub.blocks[j].content || '')), `erro ${rs.erro}, lidas ${rs.entries.length}`);
+    check('blocos: nenhum escolhido = entrada sem blocos (o export avisa e nao baixa)', EW(o0, new Set()).blocks.length === 0);
   }
 }
 
@@ -328,15 +346,18 @@ if (!html.includes('function backupStatus(')) {
 // As funções leem globais (db, editBlocks, localStorage, uid…): entram como parâmetros.
 {
   const CORE = ['calcPropertyValues', 'calcPropertyValuesFor', 'calcPropertyValuesForBlocks',
-                'migrateOptionModes', 'loadDB', 'normalizeImportedDB', 'mergeImportedProperties'];
+                'migrateOptionModes', 'keepUnreadable', 'loadDB', 'normalizeImportedDB', 'mergeImportedProperties'];
   const coreSrc = CORE.map(n => extractFunction(html, n)).join('\n\n');
   const J = x => JSON.stringify(x);
   // Ambiente novo a cada chamada: localStorage falso, uid previsível, toasts anotados.
-  const core = (store = {}, dbProps = [], blocks = [], blockProps = {}) => {
+  // `cheio` = setItem estoura a cota (DEC-026). unreadableAtLoad e o prefixo são do script, não funções.
+  const core = (store = {}, dbProps = [], blocks = [], blockProps = {}, cheio = false) => {
     let n = 0; const toasts = [];
-    const ls = { getItem: k => (k in store ? store[k] : null) };
+    const ls = { getItem: k => (k in store ? store[k] : null),
+      setItem: (k, v) => { if (cheio) throw Object.assign(new Error('cota'), { name: 'QuotaExceededError' }); store[k] = String(v); },
+      key: i => Object.keys(store)[i] ?? null, get length() { return Object.keys(store).length; } };
     const api = new Function('db', 'editBlocks', 'editBlockProps', 'localStorage', 'uid', 'randColor',
-      'showToast', 'STORAGE_KEY', `${coreSrc}\nreturn { ${CORE.join(', ')} };`)(
+      'showToast', 'STORAGE_KEY', `const UNREADABLE_PREFIX = 'base_v4_ilegivel_';\nlet unreadableAtLoad = null;\n${coreSrc}\nreturn { ${CORE.join(', ')}, get unreadable() { return unreadableAtLoad; } };`)(
       { properties: dbProps, entries: [] }, blocks, blockProps, ls,
       () => 'u' + (++n), () => 'slate', t => toasts.push(t), 'base_v4');
     api.toasts = toasts; return api;
@@ -403,6 +424,28 @@ if (!html.includes('function backupStatus(')) {
     J(l3.properties.map(p => p.name)) === J(['Cat']) && !('categories' in l3)
     && l3.entries.every(e => e.blocks.length === 1) && c3.toasts.includes('Dados anteriores migrados ✓'),
     J(l3.entries.map(e => e.blocks.length)));
+
+  // Chave base_v4 ilegível (DEC-026): guarda o texto cru e não cai para a legada
+  const quebrado = '{"properties":[{"id":';
+  const copiasDe = s => Object.keys(s).filter(k => k.startsWith('base_v4_ilegivel_'));
+  const sti = { base_v4: quebrado, base_notas_v3: J(legado) };
+  const ci = core(sti); const li = ci.loadDB();
+  check('ilegivel: base_v4 quebrada nao cai para a chave legada (abre o banco padrao)',
+    li.entries.length === 0 && J(li.properties.map(p => p.id)) === J(['p-tags', 'p-ia']) && !ci.toasts.includes('Dados anteriores migrados ✓'),
+    J(li.entries.map(e => e.id)));
+  check('ilegivel: o texto cru fica numa chave a parte, igual, e a base_v4 nao e tocada',
+    copiasDe(sti).length === 1 && sti[copiasDe(sti)[0]] === quebrado && sti.base_v4 === quebrado, J(copiasDe(sti)));
+  check('ilegivel: o aviso sabe que guardou e onde',
+    !!ci.unreadable && ci.unreadable.guardado && ci.unreadable.chave === copiasDe(sti)[0] && ci.unreadable.raw === quebrado);
+  const velha = 'base_v4_ilegivel_2020-01-01T00:00:00.000Z';
+  const std = { base_v4: quebrado, [velha]: quebrado }; const cd = core(std); cd.loadDB();
+  check('ilegivel: abrir de novo com o mesmo texto nao duplica a copia (reusa a que ja existe)',
+    copiasDe(std).length === 1 && cd.unreadable.chave === velha, J(copiasDe(std)));
+  const stc = { base_v4: quebrado }; const cc = core(stc, [], [], {}, true); const lc = cc.loadDB();
+  check('ilegivel: sem espaco para a copia, abre mesmo assim e o aviso diz que nao guardou',
+    lc.entries.length === 0 && !!cc.unreadable && !cc.unreadable.guardado && cc.unreadable.raw === quebrado && copiasDe(stc).length === 0);
+  const cl = core({ base_v4: J({ properties: [], entries: [] }) }); cl.loadDB();
+  check('ilegivel: base_v4 legivel nao gera copia nem aviso', cl.unreadable === null);
 
   // normalizeImportedDB: o caminho de restaurar um backup JSON
   const nz = core().normalizeImportedDB;

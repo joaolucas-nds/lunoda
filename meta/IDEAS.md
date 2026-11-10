@@ -118,7 +118,7 @@ Com os delimitadores da DEC-008, o `.md` exportado passou a ser **parseável**: 
 O `tests/smoke.mjs` cobre só `entryToMD`. Candidatas naturais, por ordem de risco: `calcPropertyValues` (núcleo do modelo), `migrateOptionModes` e `loadDB` (migração de formatos antigos — quebrar ali inutiliza backups), `moveSelectedBlocks` (algoritmo com caso de borda). Todas são puras ou quase.
 
 ### 2026-11-06 — Chave `base_v4` ilegível não deveria cair para a chave legada
-> **Status:** aberta — achado medido ao escrever os testes do núcleo; não corrigido (raro e pede decisão).
+> **Status:** implementada na v13.8 (DEC-026) — a cópia vai para `base_v4_ilegivel_<data ISO>` (sem duplicar), o aviso oferece baixar o texto, e as legadas só valem sem `base_v4` — ver Concluídas.
 Se o texto salvo em `base_v4` não for JSON válido, o `loadDB` segue para as chaves antigas (`base_notas_v3`…): se alguma existir, o app abre com o acervo **antigo**, avisa «Dados anteriores migrados ✓» e o próximo salvamento **sobrescreve** a `base_v4` ilegível — que talvez fosse recuperável à mão. Sem chave antiga, abre o banco padrão e também sobrescreve. Proposta: com `base_v4` presente e ilegível, guardar o texto cru numa chave à parte (`base_v4_ilegivel`), avisar e não migrar. É raro (o `setItem` grava inteiro), por isso fica como ideia.
 
 ### 2026-11-06 — Tabela com centenas de entradas redesenha tudo a cada tecla
@@ -176,6 +176,8 @@ Pergunta do autor. *Sugestão do assistente:* nesse caso, **desabilitar** a edi�
 
 ## ✅ Concluídas
 
+- **Exportar só os blocos selecionados (MD/HTML)** — v13.8 / DEC-026. Item da F7.
+- **Chave `base_v4` ilegível guardada, sem cair para a legada** — v13.8 / DEC-026.
 - **Busca por começo de palavra, `*` para «em qualquer parte», trecho na palavra mais longa** — v13.7 / DEC-025.
 - **Busca sem acento, com trecho e levando o termo ao editor** — v13.6 / DEC-024.
 - **Atalhos de teclado** (`/`, `N`, `?`, `Alt+↓/↑`, `Alt+Enter`) — v13.6 / DEC-024.

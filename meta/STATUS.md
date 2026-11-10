@@ -8,7 +8,7 @@
 
 ## Versão Atual
 
-**Lunoda v13.7** — 2026-11-07 — busca por começo de palavra, `*` na frente para «em qualquer parte» e trecho ancorado na palavra mais longa (DEC-025). Arquivo canônico `index.html`. Testes: `smoke` 113/113 e `history` 52/52 (rodada da wo0012).
+**Lunoda v13.8** — 2026-11-10 — exportar só os blocos selecionados (MD/HTML) e chave `base_v4` ilegível guardada, sem cair para a legada (DEC-026). Arquivo canônico `index.html`. Testes: `smoke` 124/124 e `history` 52/52 (rodada da wo0014).
 
 ## ✅ Funcionando
 
@@ -34,13 +34,15 @@
 - Importar backup JSON: entrada sem blocos ganha um bloco vazio; mesclar traz as opções novas de propriedades existentes (v13.5.1).
 - Busca sem acento e por palavras, com trecho destacado; abrir pela busca leva o termo ao filtro de blocos (v13.6).
 - Busca por começo de palavra (`co` acha «conversa», não «acordo»); `*` na frente casa em qualquer parte; trecho ancorado na palavra mais longa, sem marca partida (v13.7).
+- Exportar só os blocos selecionados em MD ou HTML, com o cabeçalho da entrada (v13.8).
+- `base_v4` ilegível: cópia do texto em `base_v4_ilegivel_…`, sem cair para a chave legada, aviso ao abrir com opção de baixar (v13.8).
 - Atalhos `/` `N` `P` `?` fora de campo; `Alt+↓/↑` e `Alt+Enter` no editor; lista no botão `?` (v13.6).
 - Arrastar `.json`/`.md` para a janela importa (v13.6).
 - Verificação automática: `node tests/smoke.mjs` e `node tests/history.mjs`.
 
 ## 🔧 Em Progresso
 
-- Nada em andamento. **v13.0 a v13.7 conferidas pelo autor** (v13.7 em 2026-11-09 [relatado pelo dono]). A próxima frente não foi decidida — opções em `logs/2026-11-07.md` (B, C, D, E).
+- **v13.8 aguardando a conferência do autor no navegador** (roteiro na conversa de 2026-11-10). v13.0 a v13.7 conferidas pelo autor (v13.7 em 2026-11-09 [relatado pelo dono]).
 
 ## ❌ Quebrado / Com Problema
 
@@ -53,10 +55,11 @@
 - [ ] **Conferir o frontmatter no Obsidian** (nunca testado em navegador) — exportar UMA entrada pelo botão MD do editor, jogar num vault e ver as propriedades como campos; depois desmarcar o checkbox no modal e confirmar que volta ao Markdown simples.
 - [ ] **Conferir o undo/redo no navegador** — excluir blocos em massa e `Ctrl+Z`; `Ctrl+Z` dentro de campo de texto desfaz a digitação, não a estrutura; botões esmaecidos sem histórico; abrir outra entrada zera o histórico.
 - [ ] **Prints para o README** — cabeçalho do editor com Desfazer/Refazer; modal de exportação com o checkbox de frontmatter; propriedades renderizadas no Obsidian.
-- [ ] **Escolher a próxima frente** — B (`.zip`, depende da conferência do frontmatter acima), C (`base_v4` ilegível), D (exportar só os blocos selecionados), E (arrastar blocos); detalhe em `logs/2026-11-07.md`.
+- [ ] **Conferir a v13.8 no navegador** — roteiro na conversa de 2026-11-10: exportar 2 blocos em MD e HTML, pedido de salvar com mudança pendente, reimportar o `.md` parcial, e a chave ilegível numa janela anônima.
+- [ ] **Depois: escolher a próxima frente** — B (`.zip`, depende da conferência do frontmatter acima) ou E (arrastar blocos); detalhe em `logs/2026-11-07.md`.
 
 ## 💬 Última conversa
 
-**2026-11-09** — wo0012 conferida (`3e88a60` + wrap `6a37cad`; smoke 113/0, history 52/0 no disco) e **roteiro v13.7 todo ok** [relatado pelo dono]. Antes, em 2026-11-07: frente A escolhida e a regra da busca decidida (DEC-025).
+**2026-11-10** — wo0013 conferida (`42cc085`). O autor escolheu as frentes D e C juntas: entregue a v13.8 (wo0014, DEC-026). Passo a passo da conferência do frontmatter no Obsidian (desbloqueia a B) entregue no chat.
 
-**Próximo passo óbvio:** escolher a próxima frente entre B, C, D e E (`logs/2026-11-07.md`).
+**Próximo passo óbvio:** o autor confere a v13.8 pelo roteiro; quando puder, confere o frontmatter no Obsidian (passo a passo de 2026-11-10) para destravar a B.

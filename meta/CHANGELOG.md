@@ -23,6 +23,15 @@
 
 > Nada aqui altera o `index.html` — são mudanças de documentação e processo.
 
+## [13.8.0] — 2026-11-10
+
+### Adicionado
+- **Exportar só os blocos selecionados** (DEC-026): botões **MD** e **HTML** na barra de seleção de blocos. O arquivo leva o cabeçalho da entrada, os blocos na ordem da entrada e as propriedades só desses blocos; o `.md` reimporta como uma entrada.
+- `tests/smoke.mjs` cobre a chave ilegível e o export de blocos (11 asserções novas, 124 no total).
+
+### Corrigido
+- **Dados salvos ilegíveis não são mais sobrescritos em silêncio** (DEC-026): se a `base_v4` não abre, o app guarda uma cópia do texto, não abre mais o acervo antigo das chaves legadas e avisa ao abrir, oferecendo baixar o texto.
+
 ## [13.7.0] — 2026-11-07
 
 ### Modificado

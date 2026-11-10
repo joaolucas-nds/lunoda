@@ -40,7 +40,7 @@
 
 ## 🔵 F7 — Melhorias adiadas da v12 *(futuro, sem data)*
 - Drag-and-drop de blocos (alternativa ao mover por botões).
-- Exportar apenas os blocos selecionados (MD/HTML) com header da entrada pai.
+- [x] Exportar apenas os blocos selecionados (MD/HTML) com header da entrada pai — v13.8, DEC-026.
 - Histórico de versões de bloco (snapshots + diff).
 - Entrada favorita/fixada; cor de entrada na tabela.
 

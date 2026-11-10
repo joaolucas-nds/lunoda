@@ -25,6 +25,7 @@
 - **Começo de palavra** — (v13.7, DEC-025) regra da busca: cada palavra digitada casa só onde uma palavra do texto começa (início, depois de espaço ou pontuação, na troca letra↔número). `*` na frente troca para «em qualquer parte».
 - **Tecla solta** — (v13.6) atalho sem modificador (`/` `N` `P` `?`); só vale fora de campo de texto e sem janela aberta.
 - **Camada de soltar** — (v13.6) aviso «Solte para importar» que cobre a janela enquanto um arquivo é arrastado sobre ela.
+- **Cópia da chave ilegível** — (v13.8, DEC-026) `base_v4_ilegivel_<data ISO>`: chave do `localStorage` onde o app guarda o texto cru da `base_v4` quando ele não abre.
 - **Empurrão de versão** — (v13.3, DEC-015, DEC-021) trocar o número de versão de um bloco para um número já ocupado no mesmo subtítulo renumera os vizinhos; só números, não posições.
 - **Herança entre versões** — (ideia v13) propagar/travar uma propriedade em todas as versões de um mesmo subtítulo de bloco.
 

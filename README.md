@@ -13,7 +13,7 @@ Junta a organização visual estilo Notion (tabela + propriedades) com a exporta
 
 Os dados ficam no `localStorage` do navegador (chave `base_v4`). Nada sai da sua máquina — por isso mesmo, **exporte o JSON de vez em quando**: limpar os dados do navegador apaga o acervo.
 
-## Principais recursos (v13.7)
+## Principais recursos (v13.8)
 
 - **Tabela de entradas** com ordenação e filtros por data e por propriedade.
 - **Busca** no título, na descrição e no conteúdo dos blocos — acento e maiúscula não contam, palavras em qualquer ordem —, com o **trecho** destacado na tabela; ao abrir a entrada, o filtro de blocos já vem com o termo.
@@ -28,8 +28,10 @@ Os dados ficam no `localStorage` do navegador (chave `base_v4`). Nada sai da sua
 - **Caixas de texto** que crescem com o conteúdo (Auto) ou com tamanho fixo (P · M · G), por caixa ou para todos os blocos.
 - **Desfazer/Refazer** (`Ctrl+Z` / `Ctrl+Y`) das operações estruturais do editor.
 - **Exportação**: JSON (backup completo), Markdown (bem identificado, com frontmatter YAML opcional para Obsidian), HTML/PDF.
+  - **Só os blocos selecionados**: botões MD e HTML na barra de seleção do editor; o arquivo leva o cabeçalho da entrada.
 - **Importação**: JSON (mesclar ou substituir) e **Markdown exportado pelo app** — com prévia, só mescla, e escolha entre pular ou copiar o que já existe.
 - **Lembrete de backup** no topo: diz se há mudanças sem backup JSON e há quantos dias; um clique baixa o backup.
+- **Dados salvos ilegíveis** não são apagados: o app guarda uma cópia do texto, avisa ao abrir e oferece baixá-lo.
 
 ## Atalhos de teclado
 
