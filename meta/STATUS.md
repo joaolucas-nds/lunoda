@@ -42,7 +42,7 @@
 
 ## 🔧 Em Progresso
 
-- **v13.8 aguardando a conferência do autor no navegador** (roteiro na conversa de 2026-11-10). v13.0 a v13.7 conferidas pelo autor (v13.7 em 2026-11-09 [relatado pelo dono]).
+- Nada em andamento. **v13.0 a v13.8 conferidas pelo autor** (v13.8 em 2026-11-10 [relatado pelo dono]). A próxima frente não foi decidida — opções na conversa de 2026-11-10 (`logs/2026-11-10.md`).
 
 ## ❌ Quebrado / Com Problema
 
@@ -52,14 +52,12 @@
 ## 📋 Backlog (curto prazo — itens acionáveis)
 
 - [ ] **Reexportar os `.md` antigos** — abrir o `index.html`, exportar de novo em Markdown e substituir os arquivos gerados antes da v12.1.
-- [ ] **Conferir o frontmatter no Obsidian** (nunca testado em navegador) — exportar UMA entrada pelo botão MD do editor, jogar num vault e ver as propriedades como campos; depois desmarcar o checkbox no modal e confirmar que volta ao Markdown simples.
 - [ ] **Conferir o undo/redo no navegador** — excluir blocos em massa e `Ctrl+Z`; `Ctrl+Z` dentro de campo de texto desfaz a digitação, não a estrutura; botões esmaecidos sem histórico; abrir outra entrada zera o histórico.
-- [ ] **Prints para o README** — cabeçalho do editor com Desfazer/Refazer; modal de exportação com o checkbox de frontmatter; propriedades renderizadas no Obsidian.
-- [ ] **Conferir a v13.8 no navegador** — roteiro na conversa de 2026-11-10: exportar 2 blocos em MD e HTML, pedido de salvar com mudança pendente, reimportar o `.md` parcial, e a chave ilegível numa janela anônima.
-- [ ] **Depois: escolher a próxima frente** — B (`.zip`, depende da conferência do frontmatter acima) ou E (arrastar blocos); detalhe em `logs/2026-11-07.md`.
+- [ ] **Prints para o README** — cabeçalho do editor com Desfazer/Refazer; modal de exportação com o checkbox de frontmatter; barra de seleção de blocos com MD e HTML.
+- [ ] **Escolher a próxima frente** — E (arrastar blocos) ou outro item da F7 (entrada favorita/fixada, cor da entrada, histórico de versões de bloco); opções em `logs/2026-11-10.md`. Obsidian e `.zip` adiados pelo autor (IDEAS, «Adiadas»).
 
 ## 💬 Última conversa
 
-**2026-11-10** — wo0013 conferida (`42cc085`). O autor escolheu as frentes D e C juntas: entregue a v13.8 (wo0014, DEC-026, commit `37cd070`). Passo a passo da conferência do frontmatter no Obsidian (desbloqueia a B) entregue no chat.
+**2026-11-10** — wo0013 conferida (`42cc085`). O autor escolheu as frentes D e C juntas: entregue a v13.8 (wo0014, DEC-026, commit `37cd070`) e **roteiro v13.8 todo ok** [relatado pelo dono]. O autor **adiou o Obsidian e a B** (`.zip`) até precisar ou dominar o Obsidian; o passo a passo da conferência ficou no log do dia.
 
-**Próximo passo óbvio:** o autor confere a v13.8 pelo roteiro; quando puder, confere o frontmatter no Obsidian (passo a passo de 2026-11-10) para destravar a B.
+**Próximo passo óbvio:** escolher a próxima frente (E ou outro item da F7; `logs/2026-11-10.md`).

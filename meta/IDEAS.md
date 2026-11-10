@@ -138,7 +138,7 @@ Hoje «snippet» não acha «searchSnippet»: o texto dobrado já não tem maiú
 O `extractFunction` decide entre regex e divisão pelo caractere anterior; depois de identificador conta como divisão, e `return` é identificador. Consertar: tratar como regex quando a palavra anterior for `return`, `typeof`, `case`… Pequeno; só vale se doer de novo.
 
 ### 2026-07-19 — Exportar um arquivo por entrada (`.zip`)
-> **Status (2026-11-04):** aberta — único item restante da F9.
+> **Status (2026-11-10):** adiada pelo autor — ver «Adiadas». Observado num print do autor (export «Exportar tudo» num vault de teste): o Obsidian leu o frontmatter do **documento** como Propriedades (`source`, `exported`, `entries`); o de **uma entrada** (`tags`, `ia_utilizada`) não chegou a ser testado. Os comentários `<!-- … -->` aparecem esmaecidos no modo de edição e somem no modo de leitura — é o Obsidian, não defeito do export.
 O frontmatter da v12.3 só é lido como metadado num arquivo que contenha **uma** entrada. Para jogar o acervo inteiro num vault do Obsidian, o usuário precisaria exportar entrada por entrada. Um `.zip` com um `.md` por entrada resolveria — mas exige biblioteca de compressão, o que contraria o zero-dependência da DEC-001.
 Alternativas a avaliar: (a) escrever um zip mínimo à mão (formato *stored*, sem compressão, é simples o bastante); (b) disparar vários downloads em sequência; (c) aceitar a limitação e documentar. A opção (a) é a única que mantém o zero-dependência **e** entrega o resultado.
 
@@ -171,6 +171,7 @@ Pergunta do autor. *Sugestão do assistente:* nesse caso, **desabilitar** a edi�
 - **Migração para IndexedDB** — adiada porque o uso real não se aproxima do teto de ~5 MB — **volta quando** o aviso dos 80% (`warnIfStorageTight()`) disparar em uso real. Plano em ROADMAP, F11.
 - **Esquerdo sem seleção = marcar em todos os blocos da entrada** (opção (c) da C2) — adiada porque, no hábito antigo, o clique que ligava o automático viraria marcação em massa — **volta quando** o autor notar que, mesmo com o quadrado geral da v13.1 (DEC-016), ainda marca todos os blocos com frequência só para aplicar uma propriedade.
 - **Herança entre versões + botão do meio (F5, conflito C3)** — adiada por decisão do autor em 2026-11-04: é a de maior risco e reintroduz estado por nome de bloco (DEC-003) — **volta quando** aparecer um caso concreto em que propagar uma propriedade entre versões à mão custe tempo de verdade.
+- **Obsidian: conferir o frontmatter de uma entrada e o `.zip` com um `.md` por entrada (F9)** — adiada pelo autor em 2026-11-10: ainda não usa o Obsidian o bastante para valer o trabalho — **volta quando** surgir a necessidade de levar o acervo para um vault, ou o autor dominar o Obsidian. O passo a passo da conferência está em `logs/2026-11-10.md`; feita a conferência, o `.zip` *stored* escrito à mão é o caminho (ideia «Exportar um arquivo por entrada»).
 
 ---
 

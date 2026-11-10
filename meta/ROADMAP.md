@@ -55,11 +55,11 @@
 - [x] Testes do núcleo (carga, migração, importação e mescla do backup) e as duas correções que eles acharam — v13.5.1, ver FIX-004 e FIX-005.
 > Fase fechada. O acervo agora está protegido contra os dois modos de perda que existiam: estouro silencioso de armazenamento e exclusão em massa sem volta.
 
-## 🟡 F9 — Interoperabilidade do export *(partes 1 e 2 entregues — v12.3 e v13.4; resta o `.zip`)*
+## 🟡 F9 — Interoperabilidade do export *(partes 1 e 2 entregues — v12.3 e v13.4; o `.zip` está adiado pelo autor)*
 **Objetivo:** o arquivo exportado deixar de ser só legível e passar a ser **importável por outras ferramentas**.
 - [x] Markdown com **YAML frontmatter** — v12.3, ver DEC-011.
 - [x] Seletor "MD simples / MD com frontmatter" na exportação — v12.3.
-- [ ] Exportar uma entrada por arquivo (`.zip`) — o que um vault realmente quer; esbarra no zero-dependência (ver IDEAS).
+- [ ] Exportar uma entrada por arquivo (`.zip`) — o que um vault realmente quer; esbarra no zero-dependência (ver IDEAS). **Adiado pelo autor em 2026-11-10** até ele precisar ou dominar o Obsidian (IDEAS, «Adiadas»).
 - [x] **Reimportar `.md`** — v13.4 (DEC-022): leitor pelos marcadores, linha `DADOS`, prévia, só mesclar.
 > Cumpre o objetivo fundador do projeto ("exportar bem identificado") num nível que hoje só existe para olho humano. A delimitação do conteúdo (v12.1) era o pré-requisito estrutural.
 
